@@ -1,0 +1,18 @@
+Intellectual Property Notice
+------------------------------
+
+desul is licensed under the BSD 3-clause license, spdx identifier BSD-3-Clause,
+unless explicitly noted otherwise in a specific component.
+
+Copyrights and patents in the desul project are retained by contributors.
+No copyright assignment is required to contribute to desul.
+
+
+SPDX usage
+------------
+
+Individual files contain SPDX tags instead of the full license text.
+This enables machine processing of license information based on the SPDX
+License Identifiers that are available here: https://spdx.org/licenses/
+
+
