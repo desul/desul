@@ -1,0 +1,643 @@
+/*
+//@HEADER
+// ************************************************************************
+//
+//                        Kokkos v. 3.0
+//       Copyright (2020) National Technology & Engineering
+//               Solutions of Sandia, LLC (NTESS).
+//
+// Under the terms of Contract DE-NA0003525 with NTESS,
+// the U.S. Government retains certain rights in this software.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+// 1. Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright
+// notice, this list of conditions and the following disclaimer in the
+// documentation and/or other materials provided with the distribution.
+//
+// 3. Neither the name of the Corporation nor the names of the
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY NTESS "AS IS" AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+// PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL NTESS OR THE
+// CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+// EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+// PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+// NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// Questions? Contact Christian R. Trott (crtrott@sandia.gov)
+//
+// ************************************************************************
+//@HEADER
+*/
+
+#ifndef DESUL_ATOMICS_GENERIC_HPP_
+#define DESUL_ATOMICS_GENERIC_HPP_
+
+#include <DESUL_Atomics_Common.hpp>
+#include <DESUL_Atomics_Compare_Exchange.hpp>
+#include <DESUL_Atomics_Lock_Array.hpp>
+#include <DESUL_Atomics_Macros.hpp>
+#include <type_traits>
+// Combination operands to be used in an Compare and Exchange based atomic
+// operation
+namespace desul {
+namespace Impl {
+
+template <class Scalar1, class Scalar2>
+struct MaxOper {
+  DESUL_FORCEINLINE_FUNCTION
+  static Scalar1 apply(const Scalar1& val1, const Scalar2& val2) {
+    return (val1 > val2 ? val1 : val2);
+  }
+};
+
+template <class Scalar1, class Scalar2>
+struct MinOper {
+  DESUL_FORCEINLINE_FUNCTION
+  static Scalar1 apply(const Scalar1& val1, const Scalar2& val2) {
+    return (val1 < val2 ? val1 : val2);
+  }
+};
+
+template <class Scalar1, class Scalar2>
+struct AddOper {
+  DESUL_FORCEINLINE_FUNCTION
+  static Scalar1 apply(const Scalar1& val1, const Scalar2& val2) { return val1 + val2; }
+};
+
+template <class Scalar1, class Scalar2>
+struct SubOper {
+  DESUL_FORCEINLINE_FUNCTION
+  static Scalar1 apply(const Scalar1& val1, const Scalar2& val2) { return val1 - val2; }
+};
+
+template <class Scalar1, class Scalar2>
+struct MulOper {
+  DESUL_FORCEINLINE_FUNCTION
+  static Scalar1 apply(const Scalar1& val1, const Scalar2& val2) { return val1 * val2; }
+};
+
+template <class Scalar1, class Scalar2>
+struct DivOper {
+  DESUL_FORCEINLINE_FUNCTION
+  static Scalar1 apply(const Scalar1& val1, const Scalar2& val2) { return val1 / val2; }
+};
+
+template <class Scalar1, class Scalar2>
+struct ModOper {
+  DESUL_FORCEINLINE_FUNCTION
+  static Scalar1 apply(const Scalar1& val1, const Scalar2& val2) { return val1 % val2; }
+};
+
+template <class Scalar1, class Scalar2>
+struct AndOper {
+  DESUL_FORCEINLINE_FUNCTION
+  static Scalar1 apply(const Scalar1& val1, const Scalar2& val2) { return val1 & val2; }
+};
+
+template <class Scalar1, class Scalar2>
+struct OrOper {
+  DESUL_FORCEINLINE_FUNCTION
+  static Scalar1 apply(const Scalar1& val1, const Scalar2& val2) { return val1 | val2; }
+};
+
+template <class Scalar1, class Scalar2>
+struct XorOper {
+  DESUL_FORCEINLINE_FUNCTION
+  static Scalar1 apply(const Scalar1& val1, const Scalar2& val2) { return val1 ^ val2; }
+};
+
+template <class Scalar1, class Scalar2>
+struct NandOper {
+  DESUL_FORCEINLINE_FUNCTION
+  static Scalar1 apply(const Scalar1& val1, const Scalar2& val2) {
+    return ~(val1 & val2);
+  }
+};
+
+template <class Scalar1, class Scalar2>
+struct LShiftOper {
+  DESUL_FORCEINLINE_FUNCTION
+  static Scalar1 apply(const Scalar1& val1, const Scalar2& val2) {
+    return val1 << val2;
+  }
+};
+
+template <class Scalar1, class Scalar2>
+struct RShiftOper {
+  DESUL_FORCEINLINE_FUNCTION
+  static Scalar1 apply(const Scalar1& val1, const Scalar2& val2) {
+    return val1 >> val2;
+  }
+};
+
+template <class Scalar1, class Scalar2>
+struct StoreOper {
+  DESUL_FORCEINLINE_FUNCTION
+  static Scalar1 apply(const Scalar1&, const Scalar2& val2) { return val2; }
+};
+
+template <class Scalar1, class Scalar2>
+struct LoadOper {
+  DESUL_FORCEINLINE_FUNCTION
+  static Scalar1 apply(const Scalar1& val1, const Scalar2&) { return val1; }
+};
+
+template <class Oper, typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_fetch_oper(const Oper& op,
+                  T* const dest,
+                  typename std::enable_if<sizeof(T) == 4, const T>::type val,
+                  MemoryOrder order,
+                  MemoryScope scope) {
+  union U {
+    int32_t i;
+    T t;
+    DESUL_INLINE_FUNCTION U() {}
+  } oldval, assume, newval;
+
+  oldval.t = *dest;
+
+  do {
+    assume.i = oldval.i;
+    newval.t = op.apply(assume.t, val);
+    oldval.i = desul::atomic_compare_exchange(
+        (int32_t*)dest, assume.i, newval.i, order, scope);
+  } while (assume.i != oldval.i);
+
+  return oldval.t;
+}
+
+template <class Oper, typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_oper_fetch(const Oper& op,
+                  T* const dest,
+                  typename std::enable_if<sizeof(T) == 4, const T>::type val,
+                  MemoryOrder order,
+                  MemoryScope scope) {
+  union U {
+    int32_t i;
+    T t;
+    DESUL_INLINE_FUNCTION U() {}
+  } oldval, assume, newval;
+
+  oldval.t = *dest;
+
+  do {
+    assume.i = oldval.i;
+    newval.t = op.apply(assume.t, val);
+    oldval.i = desul::atomic_compare_exchange(
+        (int32_t*)dest, assume.i, newval.i, order, scope);
+  } while (assume.i != oldval.i);
+
+  return newval.t;
+}
+
+template <class Oper, typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_fetch_oper(const Oper& op,
+                  T* const dest,
+                  typename std::enable_if<sizeof(T) == 8, const T>::type val,
+                  MemoryOrder order,
+                  MemoryScope scope) {
+  union U {
+    int64_t i;
+    T t;
+    DESUL_INLINE_FUNCTION U() {}
+  } oldval, assume, newval;
+
+  oldval.t = *dest;
+
+  do {
+    assume.i = oldval.i;
+    newval.t = op.apply(assume.t, val);
+    oldval.i = desul::atomic_compare_exchange(
+        (int64_t*)dest, assume.i, newval.i, order, scope);
+  } while (assume.i != oldval.i);
+
+  return oldval.t;
+}
+
+template <class Oper, typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_oper_fetch(const Oper& op,
+                  T* const dest,
+                  typename std::enable_if<sizeof(T) == 8, const T>::type val,
+                  MemoryOrder order,
+                  MemoryScope scope) {
+  union U {
+    int64_t i;
+    T t;
+    DESUL_INLINE_FUNCTION U() {}
+  } oldval, assume, newval;
+
+  oldval.t = *dest;
+
+  do {
+    assume.i = oldval.i;
+    newval.t = op.apply(assume.t, val);
+    oldval.i = desul::atomic_compare_exchange(
+        (int64_t*)dest, assume.i, newval.i, order, scope);
+  } while (assume.i != oldval.i);
+
+  return newval.t;
+}
+
+#if defined(DESUL_HAVE_16BYTE_COMPARE_AND_SWAP)
+
+template <class Oper, typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_fetch_oper(const Oper& op,
+                  T* const dest,
+                  typename std::enable_if<sizeof(T) == 16, const T>::type val,
+                  MemoryOrder order,
+                  MemoryScope scope) {
+  union U {
+    Dummy16ByteValue i;
+    T t;
+    DESUL_INLINE_FUNCTION U() {}
+  } oldval, assume, newval;
+
+  oldval.t = *dest;
+
+  do {
+    assume.i = oldval.i;
+    newval.t = op.apply(assume.t, val);
+    oldval.i = desul::atomic_compare_exchange(
+        (Dummy16ByteValue*)dest, assume.i, newval.i, order, scope);
+  } while (assume.i != oldval.i);
+
+  return oldval.t;
+}
+
+template <class Oper, typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_oper_fetch(const Oper& op,
+                  T* const dest,
+                  typename std::enable_if<sizeof(T) == 16, const T>::type val,
+                  MemoryOrder order,
+                  MemoryScope scope) {
+  union U {
+    Dummy16ByteValue i;
+    T t;
+    DESUL_INLINE_FUNCTION U() {}
+  } oldval, assume, newval;
+
+  oldval.t = *dest;
+
+  do {
+    assume.i = oldval.i;
+    newval.t = op.apply(assume.t, val);
+    oldval.i = desul::atomic_compare_exchange(
+        (Dummy16ByteValue*)dest, assume.i, newval.i, order, scope);
+  } while (assume.i != oldval.i);
+
+  return newval.t;
+}
+#endif
+
+template <class Oper, typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_fetch_oper(const Oper& op,
+                  T* const dest,
+                  typename std::enable_if<(sizeof(T) != 4) && (sizeof(T) != 8)
+#if defined(DESUL_HAVE_16BYTE_COMPARE_AND_SWAP)
+                                              && (sizeof(T) != 16)
+#endif
+                                              ,
+                                          const T>::type val,
+                  MemoryOrder order,
+                  MemoryScope scope) {
+#if defined(DESUL_HAVE_FORWARD_PROGRESS)
+  // Acquire a lock for the address
+  while (!Impl::lock_address((void*)dest, scope))
+    ;
+  T return_val = *dest;
+  *dest = op.apply(return_val, val);
+  Impl::unlock_address((void*)dest, scope);
+  return return_val;
+#elif defined(DESUL_HAVE_GPU_LIKE_PROGRESS)
+  // This is a way to avoid dead lock in a warp or wave front
+  T return_val;
+  int done = 0;
+  unsigned int mask = DESUL_IMPL_ACTIVEMASK;
+  unsigned int active = DESUL_IMPL_BALLOT_MASK(mask, 1);
+  unsigned int done_active = 0;
+  while (active != done_active) {
+    if (!done) {
+      if (Impl::lock_address_cuda((void*)dest, scope)) {
+        return_val = *dest;
+        *dest = op.apply(return_val, val);
+        Impl::unlock_address_cuda((void*)dest, scope);
+        done = 1;
+      }
+    }
+    done_active = DESUL_IMPL_BALLOT_MASK(mask, done);
+  }
+  return return_val;
+#else
+  static_assert(false, "Unimplemented lock based attomic\n");
+  return val;
+#endif
+}
+
+template <class Oper, typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_oper_fetch(const Oper& op,
+                  T* const dest,
+                  typename std::enable_if<(sizeof(T) != 4) && (sizeof(T) != 8)
+#if defined(DESUL_HAVE_16BYTE_COMPARE_AND_SWAP)
+                                              && (sizeof(T) != 16)
+#endif
+                                              ,
+                                          const T>::type& val,
+                  MemoryOrder order,
+                  MemoryScope scope) {
+#if defined(DESUL_HAVE_FORWARD_PROGRESS)
+  // Acquire a lock for the address
+  while (!Impl::lock_address((void*)dest, scope))
+    ;
+  T return_val = op.apply(*dest, val);
+  *dest = return_val;
+  Impl::unlock_address((void*)dest, scope);
+  return return_val;
+#elif defined(DESUL_HAVE_GPU_LIKE_PROGRESS)
+  // This is a way to avoid dead lock in a warp or wave front
+  T return_val;
+  int done = 0;
+  int done = 0;
+  unsigned int mask = DESUL_IMPL_ACTIVEMASK;
+  unsigned int active = DESUL_IMPL_BALLOT_MASK(mask, 1);
+  unsigned int done_active = 0;
+  while (active != done_active) {
+    if (!done) {
+      if (Impl::lock_address_cuda((void*)dest, scope)) {
+        return_val = op.apply(*dest, val);
+        *dest = return_val;
+        Impl::unlock_address_cuda((void*)dest, scope);
+        done = 1;
+      }
+    }
+    done_active = DESUL_IMPL_BALLOT_MASK(mask, done);
+  }
+  return return_val;
+#else
+  static_assert(false, "Unimplemented lock based attomic\n");
+  return val;
+#endif
+}
+
+}  // namespace Impl
+}  // namespace desul
+
+namespace desul {
+
+// Fetch_Oper atomics: return value before operation
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_fetch_add(T* const dest, const T val, MemoryOrder order, MemoryScope scope) {
+  return Impl::atomic_fetch_oper(Impl::AddOper<T, const T>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_fetch_sub(T* const dest, const T val, MemoryOrder order, MemoryScope scope) {
+  return Impl::atomic_fetch_oper(Impl::SubOper<T, const T>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_fetch_max(T* const dest, const T val, MemoryOrder order, MemoryScope scope) {
+  return Impl::atomic_fetch_oper(Impl::MaxOper<T, const T>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_fetch_min(T* const dest, const T val, MemoryOrder order, MemoryScope scope) {
+  return Impl::atomic_fetch_oper(Impl::MinOper<T, const T>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_fetch_mul(T* const dest, const T val, MemoryOrder order, MemoryScope scope) {
+  return Impl::atomic_fetch_oper(Impl::MulOper<T, const T>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_fetch_div(T* const dest, const T val, MemoryOrder order, MemoryScope scope) {
+  return Impl::atomic_fetch_oper(Impl::DivOper<T, const T>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_fetch_mod(T* const dest, const T val, MemoryOrder order, MemoryScope scope) {
+  return Impl::atomic_fetch_oper(Impl::ModOper<T, const T>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_fetch_and(T* const dest, const T val, MemoryOrder order, MemoryScope scope) {
+  return Impl::atomic_fetch_oper(Impl::AndOper<T, const T>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_fetch_or(T* const dest, const T val, MemoryOrder order, MemoryScope scope) {
+  return Impl::atomic_fetch_oper(Impl::OrOper<T, const T>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_fetch_xor(T* const dest, const T val, MemoryOrder order, MemoryScope scope) {
+  return Impl::atomic_fetch_oper(Impl::XorOper<T, const T>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_fetch_nand(T* const dest, const T val, MemoryOrder order, MemoryScope scope) {
+  return Impl::atomic_fetch_oper(Impl::NandOper<T, const T>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T atomic_fetch_lshift(T* const dest,
+                                            const unsigned int val,
+                                            MemoryOrder order,
+                                            MemoryScope scope) {
+  return Impl::atomic_fetch_oper(
+      Impl::LShiftOper<T, const unsigned int>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T atomic_fetch_rshift(T* const dest,
+                                            const unsigned int val,
+                                            MemoryOrder order,
+                                            MemoryScope scope) {
+  return Impl::atomic_fetch_oper(
+      Impl::RShiftOper<T, const unsigned int>(), dest, val, order, scope);
+}
+
+// Oper Fetch atomics: return value after operation
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_add_fetch(T* const dest, const T val, MemoryOrder order, MemoryScope scope) {
+  return Impl::atomic_oper_fetch(Impl::AddOper<T, const T>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_sub_fetch(T* const dest, const T val, MemoryOrder order, MemoryScope scope) {
+  return Impl::atomic_oper_fetch(Impl::SubOper<T, const T>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_max_fetch(T* const dest, const T val, MemoryOrder order, MemoryScope scope) {
+  return Impl::atomic_oper_fetch(Impl::MaxOper<T, const T>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_min_fetch(T* const dest, const T val, MemoryOrder order, MemoryScope scope) {
+  return Impl::atomic_oper_fetch(Impl::MinOper<T, const T>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_mul_fetch(T* const dest, const T val, MemoryOrder order, MemoryScope scope) {
+  return Impl::atomic_oper_fetch(Impl::MulOper<T, const T>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_div_fetch(T* const dest, const T val, MemoryOrder order, MemoryScope scope) {
+  return Impl::atomic_oper_fetch(Impl::DivOper<T, const T>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_mod_fetch(T* const dest, const T val, MemoryOrder order, MemoryScope scope) {
+  return Impl::atomic_oper_fetch(Impl::ModOper<T, const T>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_and_fetch(T* const dest, const T val, MemoryOrder order, MemoryScope scope) {
+  return Impl::atomic_oper_fetch(Impl::AndOper<T, const T>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_or_fetch(T* const dest, const T val, MemoryOrder order, MemoryScope scope) {
+  return Impl::atomic_oper_fetch(Impl::OrOper<T, const T>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_xor_fetch(T* const dest, const T val, MemoryOrder order, MemoryScope scope) {
+  return Impl::atomic_oper_fetch(Impl::XorOper<T, const T>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_nand_fetch(T* const dest, const T val, MemoryOrder order, MemoryScope scope) {
+  return Impl::atomic_oper_fetch(Impl::NandOper<T, const T>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T atomic_lshift_fetch(T* const dest,
+                                            const unsigned int val,
+                                            MemoryOrder order,
+                                            MemoryScope scope) {
+  return Impl::atomic_oper_fetch(
+      Impl::LShiftOper<T, const unsigned int>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T atomic_rshift_fetch(T* const dest,
+                                            const unsigned int val,
+                                            MemoryOrder order,
+                                            MemoryScope scope) {
+  return Impl::atomic_oper_fetch(
+      Impl::RShiftOper<T, const unsigned int>(), dest, val, order, scope);
+}
+
+// Other atomics
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T atomic_load(T* const dest,
+                                    MemoryOrder order,
+                                    MemoryScope scope) {
+  return Impl::atomic_fetch_oper(Impl::LoadOper<T, const T>(), dest, T(), order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION void atomic_store(T* const dest,
+                                        const T val,
+                                        MemoryOrder order,
+                                        MemoryScope scope) {
+  (void)Impl::atomic_fetch_oper(Impl::StoreOper<T, const T>(), dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION void atomic_add(T* const dest,
+                                      const T val,
+                                      MemoryOrder order,
+                                      MemoryScope scope) {
+  (void)atomic_fetch_add(dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION void atomic_sub(T* const dest,
+                                      const T val,
+                                      MemoryOrder order,
+                                      MemoryScope scope) {
+  (void)atomic_fetch_add(dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION void atomic_min(T* const dest,
+                                      const T val,
+                                      MemoryOrder order,
+                                      MemoryScope scope) {
+  (void)atomic_fetch_min(dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION void atomic_max(T* const dest,
+                                      const T val,
+                                      MemoryOrder order,
+                                      MemoryScope scope) {
+  (void)atomic_fetch_max(dest, val, order, scope);
+}
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T atomic_fetch_inc(T* const dest,
+                                         MemoryOrder order,
+                                         MemoryScope scope) {
+  return atomic_fetch_add(dest, T(1), order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T atomic_fetch_dec(T* const dest,
+                                         MemoryOrder order,
+                                         MemoryScope scope) {
+  return atomic_fetch_sub(dest, T(1), order, scope);
+}
+
+}  // namespace desul
+
+#include <DESUL_Atomics_GCC.hpp>
+
+#endif
