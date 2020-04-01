@@ -11,7 +11,10 @@ ENDMACRO()
 
 include_directories("include")
 # Add source to this project's executable.
-SET(DESUL_ATOMIC_SOURCES "")
-APPEND_GLOB(DESUL_ATOMIC_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+SET(DESUL_ATOMIC_SOURCES 
+  src/Lock_Array.cpp
+  src/Lock_Array_CUDA.cpp
+)
+# APPEND_GLOB(DESUL_ATOMIC_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 add_library(desul_atomics ${DESUL_ATOMIC_SOURCES})
 # TODO: Add tests and install targets if needed.
