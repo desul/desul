@@ -5,8 +5,8 @@ Source: https://github.com/desul/desul
 
 SPDX-License-Identifier: (BSD-3-Clause)
 */
-#ifndef DESUL_ATOMICS_COMPARE_EXCHANGE_GCC_HPP_
-#define DESUL_ATOMICS_COMPARE_EXCHANGE_GCC_HPP_
+#ifndef DESUL_ATOMICS_COMPARE_EXCHANGE_SERIAL_HPP_
+#define DESUL_ATOMICS_COMPARE_EXCHANGE_SERIAL_HPP_
 
 #ifdef DESUL_HAVE_SERIAL_ATOMICS
 namespace desul {
