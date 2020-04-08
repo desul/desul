@@ -42,7 +42,7 @@
 //@HEADER
 */
 
-#include <TestAtomicOperations.hpp>
+#include "TestAtomicOperations.hpp"
 
 namespace Test {
 TEST(TEST_CATEGORY, atomic_operations_longlong) {

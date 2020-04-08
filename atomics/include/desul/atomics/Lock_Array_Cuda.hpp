@@ -9,7 +9,7 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #ifndef DESUL_ATOMICS_LOCK_ARRAY_CUDA_HPP
 #define DESUL_ATOMICS_LOCK_ARRAY_CUDA_HPP
 
-#include "Macros.hpp"
+#include "desul/atomics/Macros.hpp"
 
 #ifdef DESUL_HAVE_CUDA_ATOMICS
 

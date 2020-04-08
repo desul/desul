@@ -6,7 +6,7 @@ Source: https://github.com/desul/desul
 SPDX-License-Identifier: (BSD-3-Clause)
 */
 
-#include <atomics/Lock_Array.hpp>
+#include <desul/atomics/Lock_Array.hpp>
 #include <cinttypes>
 
 #ifdef DESUL_HAVE_CUDA_ATOMICS

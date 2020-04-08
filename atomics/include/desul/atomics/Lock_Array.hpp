@@ -5,8 +5,8 @@ Source: https://github.com/desul/desul
 
 SPDX-License-Identifier: (BSD-3-Clause)
 */
-#include "Compare_Exchange.hpp"
-#include "Macros.hpp"
+#include "desul/atomics/Compare_Exchange.hpp"
+#include "desul/atomics/Macros.hpp"
 namespace desul {
 namespace Impl {
 void init_lock_arrays();
@@ -19,4 +19,4 @@ bool lock_address(void* ptr, MemoryScopeCore);
 void unlock_address(void* ptr, MemoryScopeCore);
 }  // namespace Impl
 }  // namespace desul
-#include "Lock_Array_Cuda.hpp"
+#include "desul/atomics/Lock_Array_Cuda.hpp"

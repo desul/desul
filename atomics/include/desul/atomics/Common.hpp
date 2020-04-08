@@ -8,7 +8,7 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 #ifndef DESUL_ATOMICS_COMMON_HPP_
 #define DESUL_ATOMICS_COMMON_HPP_
-#include "Macros.hpp"
+#include "desul/atomics/Macros.hpp"
 #include <cstdint>
 namespace desul {
 struct alignas(16) Dummy16ByteValue {

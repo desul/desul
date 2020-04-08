@@ -9,10 +9,10 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #ifndef DESUL_ATOMICS_GENERIC_HPP_
 #define DESUL_ATOMICS_GENERIC_HPP_
 
-#include "Common.hpp"
-#include "Compare_Exchange.hpp"
-#include "Lock_Array.hpp"
-#include "Macros.hpp"
+#include "desul/atomics/Common.hpp"
+#include "desul/atomics/Compare_Exchange.hpp"
+#include "desul/atomics/Lock_Array.hpp"
+#include "desul/atomics/Macros.hpp"
 #include <type_traits>
 // Combination operands to be used in an Compare and Exchange based atomic
 // operation
@@ -282,7 +282,7 @@ atomic_fetch_oper(const Oper& op,
 #endif
                                               ,
                                           const T>::type val,
-                  MemoryOrder order,
+                  MemoryOrder /*order*/,
                   MemoryScope scope) {
 #if defined(DESUL_HAVE_FORWARD_PROGRESS)
   // Acquire a lock for the address
@@ -327,7 +327,7 @@ atomic_oper_fetch(const Oper& op,
 #endif
                                               ,
                                           const T>::type& val,
-                  MemoryOrder order,
+                  MemoryOrder /*order*/,
                   MemoryScope scope) {
 #if defined(DESUL_HAVE_FORWARD_PROGRESS)
   // Acquire a lock for the address
@@ -602,6 +602,6 @@ DESUL_INLINE_FUNCTION T atomic_fetch_dec(T* const dest,
 
 }  // namespace desul
 
-#include <DESUL_Atomics_GCC.hpp>
+#include <desul/atomics/GCC.hpp>
 
 #endif
