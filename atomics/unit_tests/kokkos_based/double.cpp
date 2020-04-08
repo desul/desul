@@ -42,19 +42,29 @@
 //@HEADER
 */
 
-#include <TestAtomicOperations.hpp>
+#include "TestAtomicOperations.hpp"
 
 namespace Test {
-TEST(TEST_CATEGORY, atomic_operations_complexfloat) {
+TEST(TEST_CATEGORY, atomic_operations_double) {
   const int start = 1;  // Avoid zero for division.
   const int end = 11;
   for (int i = start; i < end; ++i) {
     ASSERT_TRUE(
-        (TestAtomicOperations::MulAtomicTest<Kokkos::complex<float>, TEST_EXECSPACE>(
-            start, end - i)));
+        (TestAtomicOperations::AtomicOperationsTestNonIntegralType<double,
+                                                                   TEST_EXECSPACE>(
+            start, end - i, 1)));
     ASSERT_TRUE(
-        (TestAtomicOperations::DivAtomicTest<Kokkos::complex<float>, TEST_EXECSPACE>(
-            start, end - i)));
+        (TestAtomicOperations::AtomicOperationsTestNonIntegralType<double,
+                                                                   TEST_EXECSPACE>(
+            start, end - i, 2)));
+    ASSERT_TRUE(
+        (TestAtomicOperations::AtomicOperationsTestNonIntegralType<double,
+                                                                   TEST_EXECSPACE>(
+            start, end - i, 3)));
+    ASSERT_TRUE(
+        (TestAtomicOperations::AtomicOperationsTestNonIntegralType<double,
+                                                                   TEST_EXECSPACE>(
+            start, end - i, 4)));
   }
 }
 }  // namespace Test

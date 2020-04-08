@@ -7,7 +7,7 @@ SPDX-License-Identifier: (BSD-3-Clause)
 */
 #ifndef DESUL_ATOMICS_COMPARE_EXCHANGE_MSVC_HPP_
 #define DESUL_ATOMICS_COMPARE_EXCHANGE_MSVC_HPP_
-#include "Common.hpp"
+#include "desul/atomics/Common.hpp"
 #include <type_traits>
 #ifdef DESUL_HAVE_MSVC_ATOMICS
 

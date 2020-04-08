@@ -8,7 +8,7 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 #ifndef DESUL_ATOMICS_COMPARE_EXCHANGE_CUDA_HPP_
 #define DESUL_ATOMICS_COMPARE_EXCHANGE_CUDA_HPP_
-#include "Common.hpp"
+#include "desul/atomics/Common.hpp"
 
 #ifdef DESUL_HAVE_CUDA_ATOMICS
 namespace desul {

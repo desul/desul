@@ -43,7 +43,7 @@
 */
 
 #include <gtest/gtest.h>
-#include <DESUL_Atomics.hpp>
+#include <desul/atomics.hpp>
 #include <Kokkos_Core.hpp>
 
 #define TEST_CATEGORY kokkos_default

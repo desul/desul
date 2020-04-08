@@ -45,7 +45,7 @@
 #include <gtest/gtest.h>
 #include <cstdlib>
 
-#include <DESUL_Atomics.hpp>
+#include <desul/atomics.hpp>
 #include <Kokkos_Core.hpp>
 
 
