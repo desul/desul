@@ -10,13 +10,9 @@ MACRO(APPEND_GLOB VAR)
 ENDMACRO()
 
 include_directories("include")
-# Add source to this project's executable.
-SET(DESUL_ATOMIC_SOURCES 
-  src/Lock_Array.cpp
-  src/Lock_Array_CUDA.cpp
-)
 # APPEND_GLOB(DESUL_ATOMIC_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 blt_add_library(NAME desul_atomics 
-                SOURCES ${DESUL_ATOMIC_SOURCES})
+                SOURCES src/Lock_Array.cpp src/Lock_Array_CUDA.cpp
+                DEPENDS_ON cuda)
 # TODO: Add tests and install targets if needed.
 add_subdirectory(unit_tests)
