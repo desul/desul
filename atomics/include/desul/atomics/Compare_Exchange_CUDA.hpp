@@ -18,7 +18,7 @@ namespace desul {
 template <typename T, class MemoryScope>
 __device__ typename std::enable_if<sizeof(T) == 4, T>::type atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrderRelaxed, MemoryScope) {
-  unsigned int return_val = atomicCAS(reinterpret_cast<unsigned int*>(dest),
+  uint32_t return_val = atomicCAS(reinterpret_cast<unsigned int*>(dest),
                                       *(reinterpret_cast<unsigned int*>(&compare)),
                                       *(reinterpret_cast<unsigned int*>(&value)));
   return *(reinterpret_cast<T*>(&return_val));
@@ -26,7 +26,7 @@ __device__ typename std::enable_if<sizeof(T) == 4, T>::type atomic_compare_excha
 template <typename T, class MemoryScope>
 __device__ typename std::enable_if<sizeof(T) == 8, T>::type atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrderRelaxed, MemoryScope) {
-  unsigned int return_val =
+  uint64_t return_val =
       atomicCAS(reinterpret_cast<unsigned long long int*>(dest),
                 *(reinterpret_cast<unsigned long long int*>(&compare)),
                 *(reinterpret_cast<unsigned long long int*>(&value)));
@@ -35,7 +35,7 @@ __device__ typename std::enable_if<sizeof(T) == 8, T>::type atomic_compare_excha
 template <typename T, class MemoryScope>
 __device__ typename std::enable_if<sizeof(T) == 4, T>::type atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrderSeqCst, MemoryScope) {
-  unsigned int return_val = atomicCAS(reinterpret_cast<unsigned int*>(dest),
+  uint32_t return_val = atomicCAS(reinterpret_cast<unsigned int*>(dest),
                                       *(reinterpret_cast<unsigned int*>(&compare)),
                                       *(reinterpret_cast<unsigned int*>(&value)));
   return *(reinterpret_cast<T*>(&return_val));
@@ -43,7 +43,7 @@ __device__ typename std::enable_if<sizeof(T) == 4, T>::type atomic_compare_excha
 template <typename T, class MemoryScope>
 __device__ typename std::enable_if<sizeof(T) == 8, T>::type atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrderSeqCst, MemoryScope) {
-  unsigned int return_val =
+  uint64_t return_val =
       atomicCAS(reinterpret_cast<unsigned long long int*>(dest),
                 *(reinterpret_cast<unsigned long long int*>(&compare)),
                 *(reinterpret_cast<unsigned long long int*>(&value)));
