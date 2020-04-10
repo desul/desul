@@ -124,15 +124,16 @@ inline int eliminate_warning_for_lock_array() { return lock_array_copied; }
     ::desul::Impl::lock_array_copied = 1;                                  \
   }
 
-#ifdef __CUDACC_RDC__
+
+#endif /* defined( __CUDACC__ ) */
+
+#endif /* defined( KOKKOS_ENABLE_CUDA ) */
+
+#if defined(__CUDACC_RDC__) || (!defined(__CUDACC__))
 #define DESUL_ENSURE_CUDA_LOCK_ARRAYS_ON_DEVICE()
 #else
 #define DESUL_ENSURE_CUDA_LOCK_ARRAYS_ON_DEVICE() \
   DESUL_IMPL_COPY_CUDA_LOCK_ARRAYS_TO_DEVICE()
 #endif
-
-#endif /* defined( __CUDACC__ ) */
-
-#endif /* defined( KOKKOS_ENABLE_CUDA ) */
 
 #endif /* #ifndef KOKKOS_CUDA_LOCKS_HPP */
