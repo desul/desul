@@ -83,7 +83,7 @@ __device__ inline bool lock_address_cuda(void* ptr, desul::MemoryScopeDevice) {
   size_t offset = size_t(ptr);
   offset = offset >> 2;
   offset = offset & CUDA_SPACE_ATOMIC_MASK;
-  return (0 == atomicCAS(&desul::Impl::CUDA_SPACE_ATOMIC_LOCKS_DEVICE[offset], 0, 1));
+  return (0 == atomicExch(&desul::Impl::CUDA_SPACE_ATOMIC_LOCKS_DEVICE[offset], 1));
 }
 
 /// \brief Release lock for the address
