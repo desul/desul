@@ -1,22 +1,71 @@
-/* 
+/*
 Copyright (c) 2019, Lawrence Livermore National Security, LLC
 and DESUL project contributors. See the COPYRIGHT file for details.
 Source: https://github.com/desul/desul
 
 SPDX-License-Identifier: (BSD-3-Clause)
 */
+
+#ifndef DESUL_ATOMICS_LOCK_ARRAY_HPP
+#define DESUL_ATOMICS_LOCK_ARRAY_HPP
+
 #include "desul/atomics/Compare_Exchange.hpp"
 #include "desul/atomics/Macros.hpp"
+
+#include "desul/atomics/Lock_Array_Cuda.hpp"
+
+#include <cstdio>
+
 namespace desul {
 namespace Impl {
-void init_lock_arrays();
+struct host_locks__ {
+  static constexpr uint32_t HOST_SPACE_ATOMIC_MASK = 0xFFFF;
+  static constexpr uint32_t HOST_SPACE_ATOMIC_XOR_MASK = 0x5A39;
+  static inline int32_t* get_host_locks_() {
+    static int32_t HOST_SPACE_ATOMIC_LOCKS_DEVICE[HOST_SPACE_ATOMIC_MASK + 1] = {0};
+    return HOST_SPACE_ATOMIC_LOCKS_DEVICE;
+  }
+  static inline int32_t* get_host_lock_(void* ptr) {
+    return &get_host_locks_()[((uint64_t(ptr) >> 2) & HOST_SPACE_ATOMIC_MASK) ^
+                              HOST_SPACE_ATOMIC_XOR_MASK];
+  }
+};
 
-bool lock_address(void* ptr, MemoryScopeNode);
-void unlock_address(void* ptr, MemoryScopeNode);
-bool lock_address(void* ptr, MemoryScopeDevice);
-void unlock_address(void* ptr, MemoryScopeDevice);
-bool lock_address(void* ptr, MemoryScopeCore);
-void unlock_address(void* ptr, MemoryScopeCore);
+inline void init_lock_arrays() {
+  static bool is_initialized = false;
+  if (!is_initialized) {
+    host_locks__::get_host_locks_();
+    is_initialized = true;
+  }
+
+#ifdef DESUL_HAVE_CUDA_ATOMICS
+  init_lock_arrays_cuda();
+#endif
+}
+
+inline void finalize_lock_arrays() {
+#ifdef DESUL_HAVE_CUDA_ATOMICS
+  finalize_lock_arrays_cuda();
+#endif
+}
+template <typename MemoryScope>
+inline bool lock_address(void* ptr, MemoryScope ms) {
+    fprintf(stderr,"locking address: %p\n", ptr);
+  return 0 == atomic_compare_exchange(host_locks__::get_host_lock_(ptr),
+                                      int32_t(0),
+                                      int32_t(1),
+                                      MemoryOrderSeqCst(),
+                                      ms);
+}
+template <typename MemoryScope>
+void unlock_address(void* ptr, MemoryScope ms) {
+  (void)atomic_compare_exchange(host_locks__::get_host_lock_(ptr),
+                                int32_t(1),
+                                int32_t(0),
+                                MemoryOrderSeqCst(),
+                                ms);
+}
 }  // namespace Impl
 }  // namespace desul
-#include "desul/atomics/Lock_Array_Cuda.hpp"
+
+#endif  // DESUL_ATOMICS_LOCK_ARRAY_HPP
