@@ -46,6 +46,7 @@
 
 namespace Test {
 TEST(TEST_CATEGORY, atomic_operations_unsigned) {
+  DESUL_ENSURE_CUDA_LOCK_ARRAYS_ON_DEVICE();
   const int start = 1;  // Avoid zero for division.
   const int end = 11;
   for (int i = start; i < end; ++i) {
