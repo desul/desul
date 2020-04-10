@@ -26,12 +26,16 @@ struct alignas(16) Dummy16ByteValue {
 // MemoryOrder Tags
 
 namespace desul {
-// Memory order relaxed
-struct MemoryOrderRelaxed {};
 // Memory order sequential consistent
 struct MemoryOrderSeqCst {};
 // Memory order acquire release
 struct MemoryOrderAcqRel {};
+// Memory order acquire
+struct MemoryOrderAcquire {};
+// Memory order release
+struct MemoryOrderRelease {};
+// Memory order relaxed
+struct MemoryOrderRelaxed {};
 }  // namespace desul
 
 // Memory Scope Tags
