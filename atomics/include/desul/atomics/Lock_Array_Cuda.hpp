@@ -6,8 +6,8 @@ Source: https://github.com/desul/desul
 SPDX-License-Identifier: (BSD-3-Clause)
 */
 
-#ifndef DESUL_ATOMICS_LOCK_ARRAY_CUDA_HPP
-#define DESUL_ATOMICS_LOCK_ARRAY_CUDA_HPP
+#ifndef DESUL_ATOMICS_LOCK_ARRAY_CUDA_HPP_
+#define DESUL_ATOMICS_LOCK_ARRAY_CUDA_HPP_
 
 #include "desul/atomics/Macros.hpp"
 
@@ -136,4 +136,4 @@ inline int eliminate_warning_for_lock_array() { return lock_array_copied; }
   DESUL_IMPL_COPY_CUDA_LOCK_ARRAYS_TO_DEVICE()
 #endif
 
-#endif /* #ifndef KOKKOS_CUDA_LOCKS_HPP */
+#endif /* #ifndef KOKKOS_CUDA_LOCKS_HPP_ */

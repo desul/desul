@@ -8,7 +8,6 @@ if (NOT BLT_CXX_STD)
 endif()
 
 include(cmake/blt_boilerplate.cmake)
-include(cmake/macros.cmake)
 
 # list of backends to add as dependencies
 if(ENABLE_OPENMP)
@@ -17,11 +16,9 @@ endif()
 if(ENABLE_CUDA OR ENABLE_CLANG_CUDA)
   list(APPEND DESUL_BACKENDS cuda)
 endif()
-if(ENABLE_hip)
+if(ENABLE_HIP)
   list(APPEND DESUL_BACKENDS hip)
 endif()
-
-message(backends ${DESUL_BACKENDS})
 
 MACRO(APPEND_GLOB VAR)
   FILE(GLOB LOCAL_TMP_VAR ${ARGN})

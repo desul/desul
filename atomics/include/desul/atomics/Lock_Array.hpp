@@ -6,15 +6,12 @@ Source: https://github.com/desul/desul
 SPDX-License-Identifier: (BSD-3-Clause)
 */
 
-#ifndef DESUL_ATOMICS_LOCK_ARRAY_HPP
-#define DESUL_ATOMICS_LOCK_ARRAY_HPP
+#ifndef DESUL_ATOMICS_LOCK_ARRAY_HPP_
+#define DESUL_ATOMICS_LOCK_ARRAY_HPP_
 
 #include "desul/atomics/Compare_Exchange.hpp"
-#include "desul/atomics/Macros.hpp"
-
 #include "desul/atomics/Lock_Array_Cuda.hpp"
-
-#include <cstdio>
+#include "desul/atomics/Macros.hpp"
 
 namespace desul {
 namespace Impl {
@@ -50,7 +47,6 @@ inline void finalize_lock_arrays() {
 }
 template <typename MemoryScope>
 inline bool lock_address(void* ptr, MemoryScope ms) {
-    fprintf(stderr,"locking address: %p\n", ptr);
   return 0 == atomic_compare_exchange(host_locks__::get_host_lock_(ptr),
                                       int32_t(0),
                                       int32_t(1),
@@ -68,4 +64,4 @@ void unlock_address(void* ptr, MemoryScope ms) {
 }  // namespace Impl
 }  // namespace desul
 
-#endif  // DESUL_ATOMICS_LOCK_ARRAY_HPP
+#endif  // DESUL_ATOMICS_LOCK_ARRAY_HPP_
