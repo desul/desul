@@ -1,5 +1,7 @@
 ﻿cmake_minimum_required (VERSION 3.10)
 
+project(DESUL CXX)
+
 if (DEFINED BLT_SOURCE_DIR)
     # Support having a shared BLT outside of the repository if given a BLT_SOURCE_DIR
     if (NOT EXISTS ${BLT_SOURCE_DIR}/SetupBLT.cmake)
