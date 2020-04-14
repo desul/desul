@@ -1,5 +1,12 @@
 if(ENABLE_TESTS)
 find_package(Kokkos 3 REQUIRED)
+
+# Make sure that Kokkos was built with the requested backends
+foreach(BACKEND ${DESUL_BACKENDS})
+  string(TOUPPER ${BACKEND} BACKEND)
+  kokkos_check(DEVICES ${BACKEND})
+endforeach()
+
 blt_add_library(NAME kokkos_test_main
                 SOURCES UnitTestMainInit.cpp
                 DEPENDS_ON desul_atomics gtest Kokkos::kokkos ${DESUL_BACKENDS})
