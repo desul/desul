@@ -126,22 +126,27 @@ atomic_fetch_oper(const Oper& op,
                   typename std::enable_if<sizeof(T) == 4, const T>::type val,
                   MemoryOrder order,
                   MemoryScope scope) {
-  union U {
-    int32_t i;
-    T t;
-    DESUL_INLINE_FUNCTION U() {}
-  } oldval, assume, newval;
+  using fixed_width_integer_type = int32_t;
+  static_assert(sizeof(T) == sizeof(fixed_width_integer_type), "");
 
-  oldval.t = *dest;
+  T assume;
+  T newval;
+  T oldval{*dest};
 
   do {
-    assume.i = oldval.i;
-    newval.t = op.apply(assume.t, val);
-    oldval.i = desul::atomic_compare_exchange(
-        (int32_t*)dest, assume.i, newval.i, order, scope);
-  } while (assume.i != oldval.i);
+    assume = oldval;
+    newval = op.apply(assume, val);
+    reinterpret_cast<fixed_width_integer_type&>(oldval) =
+        desul::atomic_compare_exchange(
+            reinterpret_cast<fixed_width_integer_type* const>(dest),
+            reinterpret_cast<fixed_width_integer_type const&>(assume),
+            reinterpret_cast<fixed_width_integer_type const&>(newval),
+            order,
+            scope);
+  } while (reinterpret_cast<fixed_width_integer_type const&>(assume) !=
+           reinterpret_cast<fixed_width_integer_type const&>(oldval));
 
-  return oldval.t;
+  return oldval;
 }
 
 template <class Oper, typename T, class MemoryOrder, class MemoryScope>
@@ -151,22 +156,27 @@ atomic_oper_fetch(const Oper& op,
                   typename std::enable_if<sizeof(T) == 4, const T>::type val,
                   MemoryOrder order,
                   MemoryScope scope) {
-  union U {
-    int32_t i;
-    T t;
-    DESUL_INLINE_FUNCTION U() {}
-  } oldval, assume, newval;
+  using fixed_width_integer_type = int32_t;
+  static_assert(sizeof(T) == sizeof(fixed_width_integer_type), "");
 
-  oldval.t = *dest;
+  T assume;
+  T newval;
+  T oldval{*dest};
 
   do {
-    assume.i = oldval.i;
-    newval.t = op.apply(assume.t, val);
-    oldval.i = desul::atomic_compare_exchange(
-        (int32_t*)dest, assume.i, newval.i, order, scope);
-  } while (assume.i != oldval.i);
+    assume = oldval;
+    newval = op.apply(assume, val);
+    reinterpret_cast<fixed_width_integer_type&>(oldval) =
+        desul::atomic_compare_exchange(
+            reinterpret_cast<fixed_width_integer_type* const>(dest),
+            reinterpret_cast<fixed_width_integer_type const&>(assume),
+            reinterpret_cast<fixed_width_integer_type const&>(newval),
+            order,
+            scope);
+  } while (reinterpret_cast<fixed_width_integer_type const&>(assume) !=
+           reinterpret_cast<fixed_width_integer_type const&>(oldval));
 
-  return newval.t;
+  return newval;
 }
 
 template <class Oper, typename T, class MemoryOrder, class MemoryScope>
@@ -176,22 +186,27 @@ atomic_fetch_oper(const Oper& op,
                   typename std::enable_if<sizeof(T) == 8, const T>::type val,
                   MemoryOrder order,
                   MemoryScope scope) {
-  union U {
-    int64_t i;
-    T t;
-    DESUL_INLINE_FUNCTION U() {}
-  } oldval, assume, newval;
+  using fixed_width_integer_type = int64_t;
+  static_assert(sizeof(T) == sizeof(fixed_width_integer_type), "");
 
-  oldval.t = *dest;
+  T assume;
+  T newval;
+  T oldval{*dest};
 
   do {
-    assume.i = oldval.i;
-    newval.t = op.apply(assume.t, val);
-    oldval.i = desul::atomic_compare_exchange(
-        (int64_t*)dest, assume.i, newval.i, order, scope);
-  } while (assume.i != oldval.i);
+    assume = oldval;
+    newval = op.apply(assume, val);
+    reinterpret_cast<fixed_width_integer_type&>(oldval) =
+        desul::atomic_compare_exchange(
+            reinterpret_cast<fixed_width_integer_type* const>(dest),
+            reinterpret_cast<fixed_width_integer_type const&>(assume),
+            reinterpret_cast<fixed_width_integer_type const&>(newval),
+            order,
+            scope);
+  } while (reinterpret_cast<fixed_width_integer_type const&>(assume) !=
+           reinterpret_cast<fixed_width_integer_type const&>(oldval));
 
-  return oldval.t;
+  return oldval;
 }
 
 template <class Oper, typename T, class MemoryOrder, class MemoryScope>
@@ -201,22 +216,27 @@ atomic_oper_fetch(const Oper& op,
                   typename std::enable_if<sizeof(T) == 8, const T>::type val,
                   MemoryOrder order,
                   MemoryScope scope) {
-  union U {
-    int64_t i;
-    T t;
-    DESUL_INLINE_FUNCTION U() {}
-  } oldval, assume, newval;
+  using fixed_width_integer_type = int64_t;
+  static_assert(sizeof(T) == sizeof(fixed_width_integer_type), "");
 
-  oldval.t = *dest;
+  T assume;
+  T newval;
+  T oldval{*dest};
 
   do {
-    assume.i = oldval.i;
-    newval.t = op.apply(assume.t, val);
-    oldval.i = desul::atomic_compare_exchange(
-        (int64_t*)dest, assume.i, newval.i, order, scope);
-  } while (assume.i != oldval.i);
+    assume = oldval;
+    newval = op.apply(assume, val);
+    reinterpret_cast<fixed_width_integer_type&>(oldval) =
+        desul::atomic_compare_exchange(
+            reinterpret_cast<fixed_width_integer_type* const>(dest),
+            reinterpret_cast<fixed_width_integer_type const&>(assume),
+            reinterpret_cast<fixed_width_integer_type const&>(newval),
+            order,
+            scope);
+  } while (reinterpret_cast<fixed_width_integer_type const&>(assume) !=
+           reinterpret_cast<fixed_width_integer_type const&>(oldval));
 
-  return newval.t;
+  return newval;
 }
 
 #if defined(DESUL_HAVE_16BYTE_COMPARE_AND_SWAP)
@@ -228,22 +248,27 @@ atomic_fetch_oper(const Oper& op,
                   typename std::enable_if<sizeof(T) == 16, const T>::type val,
                   MemoryOrder order,
                   MemoryScope scope) {
-  union U {
-    Dummy16ByteValue i;
-    T t;
-    DESUL_INLINE_FUNCTION U() {}
-  } oldval, assume, newval;
+  using fixed_width_integer_type = Dummy16ByteValue;
+  static_assert(sizeof(T) == sizeof(fixed_width_integer_type), "");
 
-  oldval.t = *dest;
+  T assume;
+  T newval;
+  T oldval{*dest};
 
   do {
-    assume.i = oldval.i;
-    newval.t = op.apply(assume.t, val);
-    oldval.i = desul::atomic_compare_exchange(
-        (Dummy16ByteValue*)dest, assume.i, newval.i, order, scope);
-  } while (assume.i != oldval.i);
+    assume = oldval;
+    newval = op.apply(assume, val);
+    reinterpret_cast<fixed_width_integer_type&>(oldval) =
+        desul::atomic_compare_exchange(
+            reinterpret_cast<fixed_width_integer_type* const>(dest),
+            reinterpret_cast<fixed_width_integer_type const&>(assume),
+            reinterpret_cast<fixed_width_integer_type const&>(newval),
+            order,
+            scope);
+  } while (reinterpret_cast<fixed_width_integer_type const&>(assume) !=
+           reinterpret_cast<fixed_width_integer_type const&>(oldval));
 
-  return oldval.t;
+  return oldval;
 }
 
 template <class Oper, typename T, class MemoryOrder, class MemoryScope>
@@ -253,22 +278,27 @@ atomic_oper_fetch(const Oper& op,
                   typename std::enable_if<sizeof(T) == 16, const T>::type val,
                   MemoryOrder order,
                   MemoryScope scope) {
-  union U {
-    Dummy16ByteValue i;
-    T t;
-    DESUL_INLINE_FUNCTION U() {}
-  } oldval, assume, newval;
+  using fixed_width_integer_type = Dummy16ByteValue;
+  static_assert(sizeof(T) == sizeof(fixed_width_integer_type), "");
 
-  oldval.t = *dest;
+  T assume;
+  T newval;
+  T oldval{*dest};
 
   do {
-    assume.i = oldval.i;
-    newval.t = op.apply(assume.t, val);
-    oldval.i = desul::atomic_compare_exchange(
-        (Dummy16ByteValue*)dest, assume.i, newval.i, order, scope);
-  } while (assume.i != oldval.i);
+    assume = oldval;
+    newval = op.apply(assume, val);
+    reinterpret_cast<fixed_width_integer_type&>(oldval) =
+        desul::atomic_compare_exchange(
+            reinterpret_cast<fixed_width_integer_type* const>(dest),
+            reinterpret_cast<fixed_width_integer_type const&>(assume),
+            reinterpret_cast<fixed_width_integer_type const&>(newval),
+            order,
+            scope);
+  } while (reinterpret_cast<fixed_width_integer_type const&>(assume) !=
+           reinterpret_cast<fixed_width_integer_type const&>(oldval));
 
-  return newval.t;
+  return newval;
 }
 #endif
 
