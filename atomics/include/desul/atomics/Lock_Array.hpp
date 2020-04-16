@@ -18,7 +18,8 @@ namespace Impl {
 struct host_locks__ {
   static constexpr uint32_t HOST_SPACE_ATOMIC_MASK = 0xFFFF;
   static constexpr uint32_t HOST_SPACE_ATOMIC_XOR_MASK = 0x5A39;
-  static inline int32_t* get_host_locks_() {
+  template<typename is_always_void = void>
+  static int32_t* get_host_locks_() {
     static int32_t HOST_SPACE_ATOMIC_LOCKS_DEVICE[HOST_SPACE_ATOMIC_MASK + 1] = {0};
     return HOST_SPACE_ATOMIC_LOCKS_DEVICE;
   }
