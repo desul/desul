@@ -28,6 +28,24 @@ template <>
 struct GCCMemoryOrder<MemoryOrderSeqCst> {
   static constexpr int value = __ATOMIC_SEQ_CST;
 };
+template <>
+struct GCCMemoryOrder<MemoryOrderAcquire> {
+  static constexpr int value = __ATOMIC_ACQUIRE;
+};
+template <>
+struct GCCMemoryOrder<MemoryOrderRelease> {
+  static constexpr int value = __ATOMIC_RELEASE;
+};
+
+template<class MemoryScope>
+void atomic_thread_fence(MemoryOrderAcquire, MemoryScope) {
+  __atomic_thread_fence(__ATOMIC_ACQUIRE);
+}
+
+template<class MemoryScope>
+void atomic_thread_fence(MemoryOrderRelease, MemoryScope) {
+  __atomic_thread_fence(__ATOMIC_RELEASE);
+}
 
 template <typename T, class MemoryScope>
 T atomic_compare_exchange(

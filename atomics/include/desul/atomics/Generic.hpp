@@ -288,8 +288,10 @@ atomic_fetch_oper(const Oper& op,
   // Acquire a lock for the address
   while (!Impl::lock_address((void*)dest, scope))
     ;
+  atomic_thread_fence(MemoryOrderAcquire(),scope);
   T return_val = *dest;
   *dest = op.apply(return_val, val);
+  atomic_thread_fence(MemoryOrderRelease(),scope);
   Impl::unlock_address((void*)dest, scope);
   return return_val;
 #elif defined(DESUL_HAVE_GPU_LIKE_PROGRESS)
@@ -302,8 +304,10 @@ atomic_fetch_oper(const Oper& op,
   while (active != done_active) {
     if (!done) {
       if (Impl::lock_address_cuda((void*)dest, scope)) {
+        atomic_thread_fence(MemoryOrderAcquire(),scope);
         return_val = *dest;
         *dest = op.apply(return_val, val);
+        atomic_thread_fence(MemoryOrderRelease(),scope);
         Impl::unlock_address_cuda((void*)dest, scope);
         done = 1;
       }
@@ -333,14 +337,15 @@ atomic_oper_fetch(const Oper& op,
   // Acquire a lock for the address
   while (!Impl::lock_address((void*)dest, scope))
     ;
+  atomic_thread_fence(MemoryOrderAcquire(),scope);
   T return_val = op.apply(*dest, val);
   *dest = return_val;
+  atomic_thread_fence(MemoryOrderRelease(),scope);
   Impl::unlock_address((void*)dest, scope);
   return return_val;
 #elif defined(DESUL_HAVE_GPU_LIKE_PROGRESS)
   // This is a way to avoid dead lock in a warp or wave front
   T return_val;
-  int done = 0;
   int done = 0;
   unsigned int mask = DESUL_IMPL_ACTIVEMASK;
   unsigned int active = DESUL_IMPL_BALLOT_MASK(mask, 1);
@@ -348,8 +353,10 @@ atomic_oper_fetch(const Oper& op,
   while (active != done_active) {
     if (!done) {
       if (Impl::lock_address_cuda((void*)dest, scope)) {
+        atomic_thread_fence(MemoryOrderAcquire(),scope);
         return_val = op.apply(*dest, val);
         *dest = return_val;
+        atomic_thread_fence(MemoryOrderRelease(),scope);
         Impl::unlock_address_cuda((void*)dest, scope);
         done = 1;
       }
@@ -569,6 +576,22 @@ DESUL_INLINE_FUNCTION void atomic_sub(T* const dest,
                                       MemoryOrder order,
                                       MemoryScope scope) {
   (void)atomic_fetch_add(dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION void atomic_mul(T* const dest,
+                                      const T val,
+                                      MemoryOrder order,
+                                      MemoryScope scope) {
+  (void)atomic_fetch_mul(dest, val, order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION void atomic_div(T* const dest,
+                                      const T val,
+                                      MemoryOrder order,
+                                      MemoryScope scope) {
+  (void)atomic_fetch_div(dest, val, order, scope);
 }
 
 template <typename T, class MemoryOrder, class MemoryScope>
