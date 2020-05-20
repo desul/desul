@@ -50,4 +50,36 @@ struct MemoryScopeDevice {};
 // Core scoped (i.e. a shared Level 1 cache)
 struct MemoryScopeCore {};
 }  // namespace desul
+
+#ifndef __ATOMIC_RELAXED
+#define __ATOMIC_RELAXED 0
+#define __ATOMIC_CONSUME 1
+#define __ATOMIC_ACQUIRE 2
+#define __ATOMIC_RELEASE 3
+#define __ATOMIC_ACQ_REL 4
+#define __ATOMIC_SEQ_CST 5
+#endif
+
+namespace desul {
+template <class MemoryOrderDesul>
+struct GCCMemoryOrder;
+
+template <>
+struct GCCMemoryOrder<MemoryOrderRelaxed> {
+  static constexpr int value = __ATOMIC_RELAXED;
+};
+
+template <>
+struct GCCMemoryOrder<MemoryOrderSeqCst> {
+  static constexpr int value = __ATOMIC_SEQ_CST;
+};
+template <>
+struct GCCMemoryOrder<MemoryOrderAcquire> {
+  static constexpr int value = __ATOMIC_ACQUIRE;
+};
+template <>
+struct GCCMemoryOrder<MemoryOrderRelease> {
+  static constexpr int value = __ATOMIC_RELEASE;
+};
+}
 #endif

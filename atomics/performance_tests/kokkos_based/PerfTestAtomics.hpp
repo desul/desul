@@ -341,28 +341,28 @@ void test_atomic_perf_random_neighs(int N) {
     int K = 20;
     int D = 20;
     double time_random_loc = test_atomic_perf_random_neighborhood(M, K, D, Scalar(), Combiner() , ExecutionSpace(), MemorySpace());
-    printf("RandomNeighTest Time: %e s Throughput: %lf GOPs Config: %s %i %i\n",time_random_loc,1.0e-9*M*K/time_random_loc,typeid(Scalar).name(),M,K);
+    printf("RandomNeighTest Time: %e s Throughput: %lf GOPs Config: %s %i %i %i\n",time_random_loc,1.0e-9*M*K/time_random_loc,typeid(Scalar).name(),M,D,K);
   }
   {
     int M = N;
     int K = 20;
     int D = 2000;
     double time_random_loc = test_atomic_perf_random_neighborhood(M, K, D, Scalar(), Combiner() , ExecutionSpace(), MemorySpace());
-    printf("RandomNeighTest Time: %e s Throughput: %lf GOPs Config: %s %i %i\n",time_random_loc,1.0e-9*M*K/time_random_loc,typeid(Scalar).name(),M,K);
+    printf("RandomNeighTest Time: %e s Throughput: %lf GOPs Config: %s %i %i %i\n",time_random_loc,1.0e-9*M*K/time_random_loc,typeid(Scalar).name(),M,D,K);
   }
   {
     int M = N/10;
     int K = 200;
     int D = 200;
     double time_random_loc = test_atomic_perf_random_neighborhood(M, K, D, Scalar(), Combiner() , ExecutionSpace(), MemorySpace());
-    printf("RandomNeighTest Time: %e s Throughput: %lf GOPs Config: %s %i %i\n",time_random_loc,1.0e-9*M*K/time_random_loc,typeid(Scalar).name(),M,K);
+    printf("RandomNeighTest Time: %e s Throughput: %lf GOPs Config: %s %i %i %i\n",time_random_loc,1.0e-9*M*K/time_random_loc,typeid(Scalar).name(),M,D,K);
   }
   {
     int M = N/10;
     int K = 200;
     int D = 2000;
     double time_random_loc = test_atomic_perf_random_neighborhood(M, K, D, Scalar(), Combiner() , ExecutionSpace(), MemorySpace());
-    printf("RandomNeighTest Time: %e s Throughput: %lf GOPs Config: %s %i %i\n",time_random_loc,1.0e-9*M*K/time_random_loc,typeid(Scalar).name(),M,K);
+    printf("RandomNeighTest Time: %e s Throughput: %lf GOPs Config: %s %i %i %i\n",time_random_loc,1.0e-9*M*K/time_random_loc,typeid(Scalar).name(),M,D,K);
   }
 }
 

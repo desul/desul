@@ -16,27 +16,6 @@ SPDX-License-Identifier: (BSD-3-Clause)
 //#define DESUL_HAVE_16BYTE_COMPARE_AND_SWAP
 #endif
 namespace desul {
-template <class MemoryOrderDesul>
-struct GCCMemoryOrder;
-
-template <>
-struct GCCMemoryOrder<MemoryOrderRelaxed> {
-  static constexpr int value = __ATOMIC_RELAXED;
-};
-
-template <>
-struct GCCMemoryOrder<MemoryOrderSeqCst> {
-  static constexpr int value = __ATOMIC_SEQ_CST;
-};
-template <>
-struct GCCMemoryOrder<MemoryOrderAcquire> {
-  static constexpr int value = __ATOMIC_ACQUIRE;
-};
-template <>
-struct GCCMemoryOrder<MemoryOrderRelease> {
-  static constexpr int value = __ATOMIC_RELEASE;
-};
-
 template<class MemoryScope>
 void atomic_thread_fence(MemoryOrderAcquire, MemoryScope) {
   __atomic_thread_fence(__ATOMIC_ACQUIRE);

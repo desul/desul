@@ -626,5 +626,5 @@ DESUL_INLINE_FUNCTION T atomic_fetch_dec(T* const dest,
 }  // namespace desul
 
 #include <desul/atomics/GCC.hpp>
-
+#include <desul/atomics/CUDA.hpp>
 #endif
