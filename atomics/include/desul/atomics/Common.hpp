@@ -10,6 +10,8 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #define DESUL_ATOMICS_COMMON_HPP_
 #include "desul/atomics/Macros.hpp"
 #include <cstdint>
+#include <atomic>
+
 namespace desul {
 struct alignas(16) Dummy16ByteValue {
   int64_t value1;
@@ -81,5 +83,43 @@ template <>
 struct GCCMemoryOrder<MemoryOrderRelease> {
   static constexpr int value = __ATOMIC_RELEASE;
 };
+
+template <class MemoryOrderDesul>
+struct CXXMemoryOrder;
+
+template <>
+struct CXXMemoryOrder<MemoryOrderRelaxed> {
+  static constexpr std::memory_order value = std::memory_order_relaxed;
+};
+
+template <>
+struct CXXMemoryOrder<MemoryOrderSeqCst> {
+  static constexpr std::memory_order value = std::memory_order_seq_cst;
+};
+template <>
+struct CXXMemoryOrder<MemoryOrderAcquire> {
+  static constexpr std::memory_order value = std::memory_order_acquire;
+};
+template <>
+struct CXXMemoryOrder<MemoryOrderRelease> {
+  static constexpr std::memory_order value = std::memory_order_release;
+};
+}
+
+namespace desul {
+namespace Impl {
+  template<class T>
+  struct numeric_limits_max;
+
+  template<>
+  struct numeric_limits_max<uint32_t> {
+    static constexpr uint32_t value = 0xffffffffu;
+  };
+  template<>
+  struct numeric_limits_max<uint64_t> {
+    static constexpr uint64_t value = 0xfffffffflu;
+  };
+
+}
 }
 #endif

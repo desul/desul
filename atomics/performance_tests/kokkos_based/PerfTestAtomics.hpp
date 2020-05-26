@@ -3,6 +3,10 @@
 #include<Kokkos_Core.hpp>
 #include<cstdlib>
 
+template<class T, class U>
+inline void MY_ASSERT_EQ(T val1, U val2) {
+  ASSERT_EQ(val1,val2);
+}
 template<class T, int N>
 struct compound_type {
   T v[N];
@@ -117,6 +121,26 @@ struct compound_type {
 
 };
 
+template<class T>
+struct tolerance {
+  static constexpr T value = 0;
+};
+
+template<class T, int N>
+struct tolerance<compound_type<T,N>> {
+  static constexpr T value = 0;
+};
+
+template<>
+struct tolerance<double> {
+  static constexpr double value = 1e-14;
+};
+
+template<>
+struct tolerance<float> {
+  static constexpr double value = 1e-6;
+};
+ 
 template<class T, int N>
 KOKKOS_FUNCTION
 T abs(compound_type<T,N> val) {
@@ -202,13 +226,16 @@ double test_atomic_perf_random_location(int N, int K, Scalar, Combiner combiner,
       auto diff = result_device(i)-org_dst_values(i);
       auto sum = result_device(i)+org_dst_values(i);
       using std::abs;
-      if(abs(sum)>0)
-        if(abs(diff)/abs(sum)>1.e-14) { count++; } //printf("%i %i %lf %lf %e\n",i,K,abs(diff),abs(sum),abs(diff)/abs(sum)); }
-      else
-        if(abs(diff)!=0) count++;
+      if(abs(sum)>0) {
+        if(abs(diff)/abs(sum)>tolerance<Scalar>::value) { count++; 
+           if(i%10000==0) printf("%i %i %lf %lf %e %e\n",i,K,double(abs(diff)),double(abs(sum)),double(abs(diff)/abs(sum)),double(tolerance<Scalar>::value)); }
+      } else {
+        if(abs(diff)!=0) { count++;
+           if(i%10000==0) printf("%i %i %lf %lf %e %e\n",i,K,double(abs(diff)),double(abs(sum)),double(abs(diff)/abs(sum)),double(tolerance<Scalar>::value)); }
+      }
   },errors);
   if(0!=errors) printf("PerfRandLoc correctness check failed: %i\n",errors);
-
+  MY_ASSERT_EQ(0,errors);
   return time;
 }
 
@@ -325,12 +352,16 @@ double test_atomic_perf_random_neighborhood(int N, int K, int D, Scalar, Combine
     KOKKOS_LAMBDA(const int i, int& count) {
       auto diff = result_device(i)-org_dst_values(i);
       auto sum = result_device(i)+org_dst_values(i);
-      if(abs(sum)>0)
-        if(abs(diff)/abs(sum)>1.e-14) count++;
-      else
-        if(abs(diff)!=0) count++;
+      if(abs(sum)>0) {
+        if(abs(diff)/abs(sum)>tolerance<Scalar>::value) { count++;
+	if(i%10000==0) printf("%i %i %lf %lf %e %e\n",i,K,double(abs(diff)),double(abs(sum)),double(abs(diff)/abs(sum)),double(tolerance<Scalar>::value)); }
+      } else {
+        if(abs(diff)!=0) { count++;
+           if(i%10000==0) printf("%i %i %lf %lf %e %e\n",i,K,double(abs(diff)),double(abs(sum)),double(abs(diff)/abs(sum)),double(tolerance<Scalar>::value)); }
+      }
   },errors);
   if(0!=errors) printf("PerfRandNeigh correctness check failed: %i\n",errors);
+  MY_ASSERT_EQ(0,errors);
   return time;
 }
 
@@ -366,38 +397,158 @@ void test_atomic_perf_random_neighs(int N) {
   }
 }
 
-struct atomic_add_opp {
+template<class MemoryOrder,class MemoryScope>
+struct atomic_add_op {
   template<class Scalar>
   KOKKOS_INLINE_FUNCTION
   void operator() (Scalar* dest, Scalar upd) const {
     #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
-    desul::atomic_add(dest,upd,desul::MemoryOrderRelaxed(),desul::MemoryScopeDevice());
+    desul::atomic_add(dest,upd,MemoryOrder(),MemoryScope());
     #else
     Kokkos::atomic_add(dest,upd); 
     #endif
   }
 };
 
-struct atomic_max_opp {
+template<class MemoryOrder,class MemoryScope>
+struct atomic_fetch_add_op {
   template<class Scalar>
   KOKKOS_INLINE_FUNCTION
-  void operator() (Scalar* dest, Scalar upd) const { 
+  void operator() (Scalar* dest, Scalar upd) const {
     #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
-    desul::atomic_max(dest,upd,desul::MemoryOrderRelaxed(),desul::MemoryScopeDevice());
+    (void) desul::atomic_fetch_add(dest,upd,MemoryOrder(),MemoryScope());
     #else
-    (void) Kokkos::atomic_fetch_max(dest,upd); 
+    (void) Kokkos::atomic_fetch_add(dest,upd); 
     #endif
   }
 };
 
-struct atomic_mul_opp {
+template<class MemoryOrder,class MemoryScope>
+struct atomic_sub_op {
   template<class Scalar>
   KOKKOS_INLINE_FUNCTION
-  void operator() (Scalar* dest, Scalar upd) const { 
+  void operator() (Scalar* dest, Scalar upd) const {
     #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
-    desul::atomic_mul(dest,upd,desul::MemoryOrderRelaxed(),desul::MemoryScopeDevice());
+    desul::atomic_sub(dest,upd,MemoryOrder(),MemoryScope());
     #else
-    (void) Kokkos::atomic_fetch_mul(dest,upd); 
+    Kokkos::atomic_sub(dest,upd); 
+    #endif
+  }
+};
+
+template<class MemoryOrder,class MemoryScope>
+struct atomic_fetch_sub_op {
+  template<class Scalar>
+  KOKKOS_INLINE_FUNCTION
+  void operator() (Scalar* dest, Scalar upd) const {
+    #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
+    (void) desul::atomic_fetch_sub(dest,upd,MemoryOrder(),MemoryScope());
+    #else
+    (void) Kokkos::atomic_fetch_sub(dest,upd); 
+    #endif
+  }
+};
+
+template<class MemoryOrder,class MemoryScope>
+struct atomic_inc_op {
+  template<class Scalar>
+  KOKKOS_INLINE_FUNCTION
+  void operator() (Scalar* dest, Scalar) const {
+    #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
+    desul::atomic_inc(dest,MemoryOrder(),MemoryScope());
+    #else
+    Kokkos::atomic_inc(dest); 
+    #endif
+  }
+};
+
+template<class MemoryOrder,class MemoryScope>
+struct atomic_fetch_inc_op {
+  template<class Scalar>
+  KOKKOS_INLINE_FUNCTION
+  void operator() (Scalar* dest, Scalar) const {
+    #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
+    (void) desul::atomic_fetch_inc(dest,MemoryOrder(),MemoryScope());
+    #else
+    (void) Kokkos::atomic_fetch_inc(dest); 
+    #endif
+  }
+};
+
+template<class MemoryOrder,class MemoryScope>
+struct atomic_dec_op {
+  template<class Scalar>
+  KOKKOS_INLINE_FUNCTION
+  void operator() (Scalar* dest, Scalar) const {
+    #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
+    desul::atomic_dec(dest,MemoryOrder(),MemoryScope());
+    #else
+    Kokkos::atomic_dec(dest); 
+    #endif
+  }
+};
+
+template<class MemoryOrder,class MemoryScope>
+struct atomic_fetch_dec_op {
+  template<class Scalar>
+  KOKKOS_INLINE_FUNCTION
+  void operator() (Scalar* dest, Scalar) const {
+    #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
+    (void) desul::atomic_fetch_dec(dest,MemoryOrder(),MemoryScope());
+    #else
+    (void) Kokkos::atomic_fetch_dec(dest); 
+    #endif
+  }
+};
+
+template<class MemoryOrder,class MemoryScope>
+struct atomic_min_op {
+  template<class Scalar>
+  KOKKOS_INLINE_FUNCTION
+  void operator() (Scalar* dest, Scalar upd) const {
+    #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
+    desul::atomic_min(dest,upd,MemoryOrder(),MemoryScope());
+    #else
+    Kokkos::atomic_min(dest,upd); 
+    #endif
+  }
+};
+
+template<class MemoryOrder,class MemoryScope>
+struct atomic_fetch_min_op {
+  template<class Scalar>
+  KOKKOS_INLINE_FUNCTION
+  void operator() (Scalar* dest, Scalar upd) const {
+    #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
+    (void) desul::atomic_fetch_min(dest,upd,MemoryOrder(),MemoryScope());
+    #else
+    (void) Kokkos::atomic_fetch_min(dest,upd); 
+    #endif
+  }
+};
+
+template<class MemoryOrder,class MemoryScope>
+struct atomic_max_op {
+  template<class Scalar>
+  KOKKOS_INLINE_FUNCTION
+  void operator() (Scalar* dest, Scalar upd) const {
+    #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
+    desul::atomic_max(dest,upd,MemoryOrder(),MemoryScope());
+    #else
+    Kokkos::atomic_max(dest,upd); 
+    #endif
+  }
+};
+
+template<class MemoryOrder,class MemoryScope>
+struct atomic_fetch_max_op {
+  template<class Scalar>
+  KOKKOS_INLINE_FUNCTION
+  void operator() (Scalar* dest, Scalar upd) const {
+    #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
+    (void) desul::atomic_fetch_max(dest,upd,MemoryOrder(),MemoryScope());
+    #else
+    (void) Kokkos::atomic_fetch_max(dest,upd); 
     #endif
   }
 };

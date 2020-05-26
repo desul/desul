@@ -622,8 +622,22 @@ DESUL_INLINE_FUNCTION T atomic_fetch_dec(T* const dest,
                                          MemoryScope scope) {
   return atomic_fetch_sub(dest, T(1), order, scope);
 }
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION void atomic_inc(T* const dest,
+                                         MemoryOrder order,
+                                         MemoryScope scope) {
+  return atomic_add(dest, T(1), order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION void atomic_dec(T* const dest,
+                                         MemoryOrder order,
+                                         MemoryScope scope) {
+  return atomic_sub(dest, T(1), order, scope);
+}
 
 }  // namespace desul
+
 
 #include <desul/atomics/GCC.hpp>
 #include <desul/atomics/CUDA.hpp>

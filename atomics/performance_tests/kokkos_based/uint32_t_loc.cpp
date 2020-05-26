@@ -43,14 +43,44 @@
 */
 
 #include "PerfTestAtomics.hpp"
+#define MEMORY_SPACE CudaSpace
+#define EXECUTION_SPACE DefaultExecutionSpace
+#define SCALAR uint32_t
+#define SCALAR_NAME uint32_t
+#define MEMORY_OP atomic_add_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_add_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_sub_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_sub_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_inc_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_inc_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_dec_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_dec_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_min_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_min_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_max_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_max_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
 
-namespace Test {
-TEST(atomic, kokkos_perf_random_loc_add_double) {
-  DESUL_ENSURE_CUDA_LOCK_ARRAYS_ON_DEVICE();
-  test_atomic_perf_random_loc<double,atomic_add_opp,Kokkos::DefaultExecutionSpace,Kokkos::DefaultExecutionSpace::memory_space>(10000000);
-}
-TEST(atomic, kokkos_perf_random_neigh_add_double) {
-  DESUL_ENSURE_CUDA_LOCK_ARRAYS_ON_DEVICE();
-  test_atomic_perf_random_neighs<double,atomic_add_opp,Kokkos::DefaultExecutionSpace,Kokkos::DefaultExecutionSpace::memory_space>(1000000);
-}
-}  // namespace Test

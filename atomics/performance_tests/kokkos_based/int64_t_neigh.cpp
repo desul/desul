@@ -42,19 +42,59 @@
 //@HEADER
 */
 
-#include "TestAtomicOperations.hpp"
+#include "PerfTestAtomics.hpp"
+#define MEMORY_SPACE CudaSpace
+#define EXECUTION_SPACE DefaultExecutionSpace
+#define SCALAR int64_t
+#define SCALAR_NAME int64_t
+#define MEMORY_OP atomic_add_op
+#include "PerfTestAtomicsNeigh_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_add_op
+#include "PerfTestAtomicsNeigh_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_sub_op
+#include "PerfTestAtomicsNeigh_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_sub_op
+#include "PerfTestAtomicsNeigh_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_inc_op
+#include "PerfTestAtomicsNeigh_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_inc_op
+#include "PerfTestAtomicsNeigh_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_dec_op
+#include "PerfTestAtomicsNeigh_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_dec_op
+#include "PerfTestAtomicsNeigh_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_min_op
+#include "PerfTestAtomicsNeigh_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_min_op
+#include "PerfTestAtomicsNeigh_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_max_op
+#include "PerfTestAtomicsNeigh_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_max_op
+#include "PerfTestAtomicsNeigh_Scope.inc"
+#undef MEMORY_OP
 
+/*
+#define MEMORY_ORDER desul::MemoryOrderRelaxed
+#define MEMORY_SCOPE desul::MemoryScopeDevice
 namespace Test {
-TEST(TEST_CATEGORY, atomic_operations_double) {
+TEST(atomic, kokkos_perf_random_loc_add_int64_t) {
   DESUL_ENSURE_CUDA_LOCK_ARRAYS_ON_DEVICE();
-  const int start = 2;  // Avoid zero for division.
-  const int end = 11;
-  for(int test = 1; test<7; test++)
-  for (int i = start; i < end; ++i) {
-    ASSERT_TRUE(
-        (TestAtomicOperations::AtomicOperationsTestNonIntegralType<double,
-                                                                   TEST_EXECSPACE>(
-            start, end - i, test)));
-  }
+  test_atomic_perf_random_loc<int64_t,atomic_add_opp,Kokkos::DefaultExecutionSpace,Kokkos::DefaultExecutionSpace::memory_space>(10000000);
 }
-}  // namespace Test
+TEST(atomic, kokkos_perf_random_neigh_add_int64_t) {
+  DESUL_ENSURE_CUDA_LOCK_ARRAYS_ON_DEVICE();
+  test_atomic_perf_random_neighs<int64_t,atomic_add_opp,Kokkos::DefaultExecutionSpace,Kokkos::DefaultExecutionSpace::memory_space>(1000000);
+}
+
+}  // namespace Test*/

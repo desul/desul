@@ -40,6 +40,27 @@ T atomic_compare_exchange(
       dest, &compare, value, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
   return compare;
 }
+template <typename T, class MemoryScope>
+T atomic_compare_exchange(
+    T* dest, T compare, T value, MemoryOrderAcquire, MemoryScope) {
+  (void)__atomic_compare_exchange_n(
+      dest, &compare, value, false, __ATOMIC_ACQUIRE, __ATOMIC_ACQUIRE);
+  return compare;
+}
+template <typename T, class MemoryScope>
+T atomic_compare_exchange(
+    T* dest, T compare, T value, MemoryOrderRelease, MemoryScope) {
+  (void)__atomic_compare_exchange_n(
+      dest, &compare, value, false, __ATOMIC_RELEASE, __ATOMIC_RELAXED);
+  return compare;
+}
+template <typename T, class MemoryScope>
+T atomic_compare_exchange(
+    T* dest, T compare, T value, MemoryOrderAcqRel, MemoryScope) {
+  (void)__atomic_compare_exchange_n(
+      dest, &compare, value, false, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE);
+  return compare;
+}
 }  // namespace desul
 #endif
 #endif

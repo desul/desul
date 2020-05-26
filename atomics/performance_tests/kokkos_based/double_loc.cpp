@@ -6,7 +6,7 @@
 //       Copyright (2020) National Technology & Engineering
 //               Solutions of Sandia, LLC (NTESS).
 //
-// Under the terms of Contract DE-NA0003333 with NTESS,
+// Under the terms of Contract DE-NA0003525 with NTESS,
 // the U.S. Government retains certain rights in this software.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -16,7 +16,7 @@
 // 1. Redistributions of source code must retain the above copyright
 // notice, this list of conditions and the following disclaimer.
 //
-// 3. Redistributions in binary form must reproduce the above copyright
+// 2. Redistributions in binary form must reproduce the above copyright
 // notice, this list of conditions and the following disclaimer in the
 // documentation and/or other materials provided with the distribution.
 //
@@ -43,30 +43,44 @@
 */
 
 #include "PerfTestAtomics.hpp"
+#define MEMORY_SPACE CudaSpace
+#define EXECUTION_SPACE DefaultExecutionSpace
+#define SCALAR double
+#define SCALAR_NAME double
+#define MEMORY_OP atomic_add_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_add_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_sub_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_sub_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_inc_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_inc_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_dec_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_dec_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_min_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_min_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_max_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_max_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
 
-namespace Test {
-TEST(atomic, kokkos_perf_random_loc_add_compound_int64_t) {
-  DESUL_ENSURE_CUDA_LOCK_ARRAYS_ON_DEVICE();
-  test_atomic_perf_random_loc<compound_type<int64_t,3>,atomic_add_opp,Kokkos::DefaultExecutionSpace,Kokkos::DefaultExecutionSpace::memory_space>(1000000);
-}
-TEST(atomic, kokkos_perf_random_neigh_add_compound_int64_t) {
-  DESUL_ENSURE_CUDA_LOCK_ARRAYS_ON_DEVICE();
-  test_atomic_perf_random_neighs<compound_type<int64_t,3>,atomic_add_opp,Kokkos::DefaultExecutionSpace,Kokkos::DefaultExecutionSpace::memory_space>(100000);
-}
-TEST(atomic, kokkos_perf_random_loc_mul_compound_int64_t) {
-  DESUL_ENSURE_CUDA_LOCK_ARRAYS_ON_DEVICE();
-  test_atomic_perf_random_loc<compound_type<int64_t,3>,atomic_mul_opp,Kokkos::DefaultExecutionSpace,Kokkos::DefaultExecutionSpace::memory_space>(1000000);
-}
-TEST(atomic, kokkos_perf_random_neigh_mul_compound_int64_t) {
-  DESUL_ENSURE_CUDA_LOCK_ARRAYS_ON_DEVICE();
-  test_atomic_perf_random_neighs<compound_type<int64_t,3>,atomic_mul_opp,Kokkos::DefaultExecutionSpace,Kokkos::DefaultExecutionSpace::memory_space>(100000);
-}
-TEST(atomic, kokkos_perf_random_loc_max_compound_int64_t) {
-  DESUL_ENSURE_CUDA_LOCK_ARRAYS_ON_DEVICE();
-  test_atomic_perf_random_loc<compound_type<int64_t,3>,atomic_max_opp,Kokkos::DefaultExecutionSpace,Kokkos::DefaultExecutionSpace::memory_space>(1000000);
-}
-TEST(atomic, kokkos_perf_random_neigh_max_compound_int64_t) {
-  DESUL_ENSURE_CUDA_LOCK_ARRAYS_ON_DEVICE();
-  test_atomic_perf_random_neighs<compound_type<int64_t,3>,atomic_max_opp,Kokkos::DefaultExecutionSpace,Kokkos::DefaultExecutionSpace::memory_space>(100000);
-}
-}  // namespace Test
