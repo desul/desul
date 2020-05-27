@@ -22,13 +22,20 @@ __device__ void atomic_thread_fence(MemoryOrderRelease, MemoryScopeDevice) {
 __device__ void atomic_thread_fence(MemoryOrderRelease, MemoryScopeCore) {
   __threadfence_block();
 }
+__device__ void atomic_thread_fence(MemoryOrderRelease, MemoryScopeNode) {
+  __threadfence_system();
+}
 __device__ void atomic_thread_fence(MemoryOrderAcquire, MemoryScopeDevice) {
   __threadfence();
 }
 __device__ void atomic_thread_fence(MemoryOrderAcquire, MemoryScopeCore) {
   __threadfence_block();
 }
+__device__ void atomic_thread_fence(MemoryOrderAcquire, MemoryScopeNode) {
+  __threadfence_system();
+}
 
+/*
 template <typename T, class MemoryScope>
 __device__ typename std::enable_if<sizeof(T) == 4, T>::type atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrderRelaxed, MemoryScope) {
@@ -123,8 +130,32 @@ __device__ typename std::enable_if<sizeof(T) == 8, T>::type atomic_compare_excha
                 *(reinterpret_cast<unsigned long long int*>(&compare)),
                 *(reinterpret_cast<unsigned long long int*>(&value)));
   return *(reinterpret_cast<T*>(&return_val));
-}
+}*/
 #endif
+
 }  // namespace desul
 #endif
+
+#include <desul/atomics/cuda/CUDA_asm_exchange.hpp>
+namespace desul {
+
+#if defined(__CUDA_ARCH__) || !defined(__NVCC__)
+template <typename T, class MemoryScope>
+__device__ typename std::enable_if<sizeof(T) == 4, T>::type atomic_compare_exchange(
+    T* const dest, T compare, T value, MemoryOrderSeqCst, MemoryScope) {
+  atomic_thread_fence(MemoryOrderAcquire(),MemoryScope());
+  T return_val = atomic_compare_exchange(dest,compare,value,MemoryOrderRelaxed(),MemoryScope());
+  atomic_thread_fence(MemoryOrderRelease(),MemoryScope());
+  return return_val;
+}
+template <typename T, class MemoryScope>
+__device__ typename std::enable_if<sizeof(T) == 8, T>::type atomic_compare_exchange(
+    T* const dest, T compare, T value, MemoryOrderSeqCst, MemoryScope) {
+  atomic_thread_fence(MemoryOrderAcquire(),MemoryScope());
+  T return_val = atomic_compare_exchange(dest,compare,value,MemoryOrderRelaxed(),MemoryScope());
+  atomic_thread_fence(MemoryOrderRelease(),MemoryScope());
+  return return_val;
+}
+#endif
+}
 #endif

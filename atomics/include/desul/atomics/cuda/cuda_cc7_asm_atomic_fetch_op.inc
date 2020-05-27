@@ -7,49 +7,49 @@
 #define __DESUL_IMPL_CUDA_ASM_ATOMIC_FETCH_AND() \
 template<class ctype> \
 inline __device__ typename std::enable_if<sizeof(ctype)==4, ctype>::type atomic_fetch_and(ctype* dest, ctype value, __DESUL_IMPL_CUDA_ASM_MEMORY_ORDER, __DESUL_IMPL_CUDA_ASM_MEMORY_SCOPE) { \
-  uint32_t asm_value = *(reinterpret_cast<uint32_t*>(&value)); \
+  uint32_t asm_value = reinterpret_cast<uint32_t&>(value); \
   uint32_t asm_result = 0u; \
   asm volatile("atom.and" __DESUL_IMPL_CUDA_ASM_MEMORY_ORDER_ASM __DESUL_IMPL_CUDA_ASM_MEMORY_SCOPE_ASM ".b32" " %0,[%1],%2;" : "=r"(asm_result) : "l"(dest),"r"(asm_value) : "memory"); \
-  return *(reinterpret_cast<ctype*>(&asm_result)); \
+  return reinterpret_cast<ctype&>(asm_result); \
 } \
 template<class ctype> \
 inline __device__ typename std::enable_if<sizeof(ctype)==8, ctype>::type atomic_fetch_and(ctype* dest, ctype value, __DESUL_IMPL_CUDA_ASM_MEMORY_ORDER, __DESUL_IMPL_CUDA_ASM_MEMORY_SCOPE) { \
-  uint64_t asm_value = *(reinterpret_cast<uint32_t*>(&value)); \
+  uint64_t asm_value = reinterpret_cast<uint64_t&>(value); \
   uint64_t asm_result = 0u; \
   asm volatile("atom.and" __DESUL_IMPL_CUDA_ASM_MEMORY_ORDER_ASM __DESUL_IMPL_CUDA_ASM_MEMORY_SCOPE_ASM ".b64" " %0,[%1],%2;" : "=l"(asm_result) : "l"(dest),"l"(asm_value) : "memory"); \
-  return *(reinterpret_cast<ctype*>(&asm_result)); \
+  return reinterpret_cast<ctype&>(asm_result); \
 }
 
 #define __DESUL_IMPL_CUDA_ASM_ATOMIC_FETCH_OR() \
 template<class ctype> \
 inline __device__ typename std::enable_if<sizeof(ctype)==4, ctype>::type atomic_fetch_or(ctype* dest, ctype value, __DESUL_IMPL_CUDA_ASM_MEMORY_ORDER, __DESUL_IMPL_CUDA_ASM_MEMORY_SCOPE) { \
-  uint32_t asm_value = *(reinterpret_cast<uint32_t*>(&value)); \
+  uint32_t asm_value = reinterpret_cast<uint32_t&>(value); \
   uint32_t asm_result = 0u; \
   asm volatile("atom.or" __DESUL_IMPL_CUDA_ASM_MEMORY_ORDER_ASM __DESUL_IMPL_CUDA_ASM_MEMORY_SCOPE_ASM ".b32" " %0,[%1],%2;" : "=r"(asm_result) : "l"(dest),"r"(asm_value) : "memory"); \
-  return *(reinterpret_cast<ctype*>(&asm_result)); \
+  return reinterpret_cast<ctype&>(asm_result); \
 } \
 template<class ctype> \
 inline __device__ typename std::enable_if<sizeof(ctype)==8, ctype>::type atomic_fetch_or(ctype* dest, ctype value, __DESUL_IMPL_CUDA_ASM_MEMORY_ORDER, __DESUL_IMPL_CUDA_ASM_MEMORY_SCOPE) { \
-  uint64_t asm_value = *(reinterpret_cast<uint32_t*>(&value)); \
+  uint64_t asm_value = reinterpret_cast<uint64_t&>(value); \
   uint64_t asm_result = 0u; \
   asm volatile("atom.or" __DESUL_IMPL_CUDA_ASM_MEMORY_ORDER_ASM __DESUL_IMPL_CUDA_ASM_MEMORY_SCOPE_ASM ".b64" " %0,[%1],%2;" : "=l"(asm_result) : "l"(dest),"l"(asm_value) : "memory"); \
-  return *(reinterpret_cast<ctype*>(&asm_result)); \
+  return reinterpret_cast<ctype&>(asm_result); \
 }
 
 #define __DESUL_IMPL_CUDA_ASM_ATOMIC_FETCH_XOR() \
 template<class ctype> \
 inline __device__ typename std::enable_if<sizeof(ctype)==4, ctype>::type atomic_fetch_xor(ctype* dest, ctype value, __DESUL_IMPL_CUDA_ASM_MEMORY_ORDER, __DESUL_IMPL_CUDA_ASM_MEMORY_SCOPE) { \
-  uint32_t asm_value = *(reinterpret_cast<uint32_t*>(&value)); \
+  uint32_t asm_value = reinterpret_cast<uint32_t&>(value); \
   uint32_t asm_result = 0u; \
   asm volatile("atom.xor" __DESUL_IMPL_CUDA_ASM_MEMORY_ORDER_ASM __DESUL_IMPL_CUDA_ASM_MEMORY_SCOPE_ASM ".b32" " %0,[%1],%2;" : "=r"(asm_result) : "l"(dest),"r"(asm_value) : "memory"); \
-  return *(reinterpret_cast<ctype*>(&asm_result)); \
+  return reinterpret_cast<ctype&>(asm_result); \
 } \
 template<class ctype> \
 inline __device__ typename std::enable_if<sizeof(ctype)==8, ctype>::type atomic_fetch_xor(ctype* dest, ctype value, __DESUL_IMPL_CUDA_ASM_MEMORY_ORDER, __DESUL_IMPL_CUDA_ASM_MEMORY_SCOPE) { \
-  uint64_t asm_value = *(reinterpret_cast<uint32_t*>(&value)); \
+  uint64_t asm_value = reinterpret_cast<uint64_t&>(value); \
   uint64_t asm_result = 0u; \
   asm volatile("atom.xor" __DESUL_IMPL_CUDA_ASM_MEMORY_ORDER_ASM __DESUL_IMPL_CUDA_ASM_MEMORY_SCOPE_ASM ".b64" " %0,[%1],%2;" : "=l"(asm_result) : "l"(dest),"l"(asm_value) : "memory"); \
-  return *(reinterpret_cast<ctype*>(&asm_result)); \
+  return reinterpret_cast<ctype&>(asm_result); \
 }
 
 // Fetch atomics
