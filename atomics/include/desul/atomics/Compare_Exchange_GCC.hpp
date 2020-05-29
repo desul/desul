@@ -16,37 +16,22 @@ SPDX-License-Identifier: (BSD-3-Clause)
 //#define DESUL_HAVE_16BYTE_COMPARE_AND_SWAP
 #endif
 namespace desul {
-template<class MemoryScope>
-void atomic_thread_fence(MemoryOrderAcquire, MemoryScope) {
-  __atomic_thread_fence(__ATOMIC_ACQUIRE);
+
+template<class MemoryOrder, class MemoryScope>
+void atomic_thread_fence(MemoryOrder, MemoryScope) {
+  __atomic_thread_fence(GCCMemoryOrder<MemoryOrder>::value);
 }
 
-template<class MemoryScope>
-void atomic_thread_fence(MemoryOrderRelease, MemoryScope) {
-  __atomic_thread_fence(__ATOMIC_RELEASE);
+// Failure mode for atomic_compare_exchange_n cannot be RELEASE nor ACQREL so
+// Those two get handled separatly.
+template <typename T, class MemoryOrder, class MemoryScope>
+T atomic_compare_exchange(
+    T* dest, T compare, T value, MemoryOrder, MemoryScope) {
+  (void)__atomic_compare_exchange_n(
+      dest, &compare, value, false, GCCMemoryOrder<MemoryOrder>::value, GCCMemoryOrder<MemoryOrder>::value);
+  return compare;
 }
 
-template <typename T, class MemoryScope>
-T atomic_compare_exchange(
-    T* dest, T compare, T value, MemoryOrderRelaxed, MemoryScope) {
-  (void)__atomic_compare_exchange_n(
-      dest, &compare, value, false, __ATOMIC_RELAXED, __ATOMIC_RELAXED);
-  return compare;
-}
-template <typename T, class MemoryScope>
-T atomic_compare_exchange(
-    T* dest, T compare, T value, MemoryOrderSeqCst, MemoryScope) {
-  (void)__atomic_compare_exchange_n(
-      dest, &compare, value, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
-  return compare;
-}
-template <typename T, class MemoryScope>
-T atomic_compare_exchange(
-    T* dest, T compare, T value, MemoryOrderAcquire, MemoryScope) {
-  (void)__atomic_compare_exchange_n(
-      dest, &compare, value, false, __ATOMIC_ACQUIRE, __ATOMIC_ACQUIRE);
-  return compare;
-}
 template <typename T, class MemoryScope>
 T atomic_compare_exchange(
     T* dest, T compare, T value, MemoryOrderRelease, MemoryScope) {
@@ -54,6 +39,7 @@ T atomic_compare_exchange(
       dest, &compare, value, false, __ATOMIC_RELEASE, __ATOMIC_RELAXED);
   return compare;
 }
+
 template <typename T, class MemoryScope>
 T atomic_compare_exchange(
     T* dest, T compare, T value, MemoryOrderAcqRel, MemoryScope) {

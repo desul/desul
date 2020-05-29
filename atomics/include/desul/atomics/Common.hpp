@@ -106,6 +106,8 @@ struct CXXMemoryOrder<MemoryOrderRelease> {
 };
 }
 
+// We should in principle use std::numeric_limits, but that requires constexpr function support on device
+// Currently that is still considered experimetal on CUDA and sometimes not reliable.
 namespace desul {
 namespace Impl {
   template<class T>

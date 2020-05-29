@@ -286,8 +286,8 @@ atomic_fetch_oper(const Oper& op,
                   MemoryScope scope) {
 #if defined(DESUL_HAVE_FORWARD_PROGRESS)
   // Acquire a lock for the address
-  while (!Impl::lock_address((void*)dest, scope))
-    ;
+  while (!Impl::lock_address((void*)dest, scope)) {}
+
   atomic_thread_fence(MemoryOrderAcquire(),scope);
   T return_val = *dest;
   *dest = op.apply(return_val, val);
@@ -335,8 +335,8 @@ atomic_oper_fetch(const Oper& op,
                   MemoryScope scope) {
 #if defined(DESUL_HAVE_FORWARD_PROGRESS)
   // Acquire a lock for the address
-  while (!Impl::lock_address((void*)dest, scope))
-    ;
+  while (!Impl::lock_address((void*)dest, scope)) {}
+
   atomic_thread_fence(MemoryOrderAcquire(),scope);
   T return_val = op.apply(*dest, val);
   *dest = return_val;
