@@ -233,6 +233,152 @@ bool MinAtomicTest(T i0, T i1) {
   return passed;
 }
 
+
+//---------------------------------------------------
+//--------------atomic_add---------------------
+//---------------------------------------------------
+
+template <class T, class DEVICE_TYPE>
+struct AddFunctor {
+  typedef DEVICE_TYPE execution_space;
+  typedef Kokkos::View<T, execution_space> type;
+
+  type data;
+  T i0;
+
+  KOKKOS_INLINE_FUNCTION
+  void operator()(int) const {
+    desul::atomic_fetch_add(
+        &data(), T(2), desul::MemoryOrderRelaxed(), desul::MemoryScopeDevice());
+  }
+
+  AddFunctor(T _i0) : i0(_i0) {}
+};
+
+template <class T, class execution_space>
+T AddAtomic(T i0) {
+  struct InitFunctor<T, execution_space> f_init(i0);
+  typename InitFunctor<T, execution_space>::type data("Data");
+  typename InitFunctor<T, execution_space>::h_type h_data("HData");
+
+  f_init.data = data;
+  Kokkos::parallel_for(1, f_init);
+  execution_space().fence();
+
+  struct AddFunctor<T, execution_space> f(i0);
+
+  f.data = data;
+  Kokkos::parallel_for(1, f);
+  execution_space().fence();
+
+  Kokkos::deep_copy(h_data, data);
+  T val = h_data();
+
+  return val;
+}
+
+template <class T>
+T AddAtomicCheck(T i0) {
+  T* data = new T[1];
+  data[0] = 0;
+
+  *data = i0 + 2;
+
+  T val = *data;
+  delete[] data;
+
+  return val;
+}
+
+template <class T, class DeviceType>
+bool AddAtomicTest(T i0) {
+  T res = AddAtomic<T, DeviceType>(i0);
+  T resSerial = AddAtomicCheck<T>(i0);
+
+  bool passed = true;
+
+  if (resSerial != res) {
+    passed = false;
+
+    std::cout << "Loop<" << typeid(T).name() << ">( test = AddAtomicTest"
+              << " FAILED : " << resSerial << " != " << res << std::endl;
+  }
+
+  return passed;
+}
+
+//---------------------------------------------------
+//--------------atomic_sub---------------------
+//---------------------------------------------------
+
+template <class T, class DEVICE_TYPE>
+struct SubFunctor {
+  typedef DEVICE_TYPE execution_space;
+  typedef Kokkos::View<T, execution_space> type;
+
+  type data;
+  T i0;
+
+  KOKKOS_INLINE_FUNCTION
+  void operator()(int) const {
+    desul::atomic_fetch_sub(
+        &data(), T(2), desul::MemoryOrderRelaxed(), desul::MemoryScopeDevice());
+  }
+
+  SubFunctor(T _i0) : i0(_i0) {}
+};
+
+template <class T, class execution_space>
+T SubAtomic(T i0) {
+  struct InitFunctor<T, execution_space> f_init(i0);
+  typename InitFunctor<T, execution_space>::type data("Data");
+  typename InitFunctor<T, execution_space>::h_type h_data("HData");
+
+  f_init.data = data;
+  Kokkos::parallel_for(1, f_init);
+  execution_space().fence();
+
+  struct SubFunctor<T, execution_space> f(i0);
+
+  f.data = data;
+  Kokkos::parallel_for(1, f);
+  execution_space().fence();
+
+  Kokkos::deep_copy(h_data, data);
+  T val = h_data();
+
+  return val;
+}
+
+template <class T>
+T SubAtomicCheck(T i0) {
+  T* data = new T[1];
+  data[0] = 0;
+
+  *data = i0 - 2;
+
+  T val = *data;
+  delete[] data;
+
+  return val;
+}
+
+template <class T, class DeviceType>
+bool SubAtomicTest(T i0) {
+  T res = SubAtomic<T, DeviceType>(i0);
+  T resSerial = SubAtomicCheck<T>(i0);
+
+  bool passed = true;
+
+  if (resSerial != res) {
+    passed = false;
+
+    std::cout << "Loop<" << typeid(T).name() << ">( test = SubAtomicTest"
+              << " FAILED : " << resSerial << " != " << res << std::endl;
+  }
+
+  return passed;
+}
 //---------------------------------------------------
 //--------------atomic_increment---------------------
 //---------------------------------------------------
@@ -1004,6 +1150,10 @@ bool AtomicOperationsTestIntegralType(int i0, int i1, int test) {
       return IncAtomicTest<T, DeviceType>((T)i0);
     case 12:
       return DecAtomicTest<T, DeviceType>((T)i0);
+    case 13: 
+      return AddAtomicTest<T, DeviceType>((T)i0);
+    case 14: 
+      return SubAtomicTest<T, DeviceType>((T)i0);
   }
 
   return 0;
@@ -1020,6 +1170,10 @@ bool AtomicOperationsTestNonIntegralType(int i0, int i1, int test) {
       return MulAtomicTest<T, DeviceType>((T)i0, (T)i1);
     case 4:
       return DivAtomicTest<T, DeviceType>((T)i0, (T)i1);
+    case 5: 
+      return AddAtomicTest<T, DeviceType>((T)i0);
+    case 6: 
+      return SubAtomicTest<T, DeviceType>((T)i0);
   }
 
   return 0;

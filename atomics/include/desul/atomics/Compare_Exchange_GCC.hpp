@@ -16,31 +16,35 @@ SPDX-License-Identifier: (BSD-3-Clause)
 //#define DESUL_HAVE_16BYTE_COMPARE_AND_SWAP
 #endif
 namespace desul {
-template <class MemoryOrderDesul>
-struct GCCMemoryOrder;
 
-template <>
-struct GCCMemoryOrder<MemoryOrderRelaxed> {
-  static constexpr int value = __ATOMIC_RELAXED;
-};
+template<class MemoryOrder, class MemoryScope>
+void atomic_thread_fence(MemoryOrder, MemoryScope) {
+  __atomic_thread_fence(GCCMemoryOrder<MemoryOrder>::value);
+}
 
-template <>
-struct GCCMemoryOrder<MemoryOrderSeqCst> {
-  static constexpr int value = __ATOMIC_SEQ_CST;
-};
-
-template <typename T, class MemoryScope>
+// Failure mode for atomic_compare_exchange_n cannot be RELEASE nor ACQREL so
+// Those two get handled separatly.
+template <typename T, class MemoryOrder, class MemoryScope>
 T atomic_compare_exchange(
-    T* dest, T compare, T value, MemoryOrderRelaxed, MemoryScope) {
+    T* dest, T compare, T value, MemoryOrder, MemoryScope) {
   (void)__atomic_compare_exchange_n(
-      dest, &compare, value, false, __ATOMIC_RELAXED, __ATOMIC_RELAXED);
+      dest, &compare, value, false, GCCMemoryOrder<MemoryOrder>::value, GCCMemoryOrder<MemoryOrder>::value);
   return compare;
 }
+
 template <typename T, class MemoryScope>
 T atomic_compare_exchange(
-    T* dest, T compare, T value, MemoryOrderSeqCst, MemoryScope) {
+    T* dest, T compare, T value, MemoryOrderRelease, MemoryScope) {
   (void)__atomic_compare_exchange_n(
-      dest, &compare, value, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+      dest, &compare, value, false, __ATOMIC_RELEASE, __ATOMIC_RELAXED);
+  return compare;
+}
+
+template <typename T, class MemoryScope>
+T atomic_compare_exchange(
+    T* dest, T compare, T value, MemoryOrderAcqRel, MemoryScope) {
+  (void)__atomic_compare_exchange_n(
+      dest, &compare, value, false, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE);
   return compare;
 }
 }  // namespace desul

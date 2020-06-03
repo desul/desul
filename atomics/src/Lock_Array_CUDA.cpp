@@ -14,6 +14,7 @@ SPDX-License-Identifier: (BSD-3-Clause)
 namespace desul {
 namespace Impl {
 __device__ __constant__ int32_t* CUDA_SPACE_ATOMIC_LOCKS_DEVICE = nullptr;
+__device__ __constant__ int32_t* CUDA_SPACE_ATOMIC_LOCKS_NODE = nullptr;
 }
 }  // namespace desul
 #endif
@@ -26,6 +27,7 @@ __global__ void init_lock_arrays_cuda_kernel() {
   unsigned i = blockIdx.x * blockDim.x + threadIdx.x;
   if (i < CUDA_SPACE_ATOMIC_MASK + 1) {
     Impl::CUDA_SPACE_ATOMIC_LOCKS_DEVICE[i] = 0;
+    Impl::CUDA_SPACE_ATOMIC_LOCKS_NODE[i] = 0;
   }
 }
 
@@ -34,10 +36,13 @@ __global__ void init_lock_arrays_cuda_kernel() {
 namespace Impl {
 
 int32_t* CUDA_SPACE_ATOMIC_LOCKS_DEVICE_h = nullptr;
+int32_t* CUDA_SPACE_ATOMIC_LOCKS_NODE_h = nullptr;
 
 void init_lock_arrays_cuda() {
   if (CUDA_SPACE_ATOMIC_LOCKS_DEVICE_h != nullptr) return;
-  auto error_malloc = cudaMalloc(&CUDA_SPACE_ATOMIC_LOCKS_DEVICE_h,
+  auto error_malloc1 = cudaMalloc(&CUDA_SPACE_ATOMIC_LOCKS_DEVICE_h,
+                                 sizeof(int32_t) * (CUDA_SPACE_ATOMIC_MASK + 1));
+  auto error_malloc2 = cudaMallocHost(&CUDA_SPACE_ATOMIC_LOCKS_NODE_h,
                                  sizeof(int32_t) * (CUDA_SPACE_ATOMIC_MASK + 1));
   auto error_sync1 = cudaDeviceSynchronize();
   DESUL_IMPL_COPY_CUDA_LOCK_ARRAYS_TO_DEVICE();
@@ -48,7 +53,9 @@ void init_lock_arrays_cuda() {
 void finalize_lock_arrays_cuda() {
   if (CUDA_SPACE_ATOMIC_LOCKS_DEVICE_h == nullptr) return;
   cudaFree(CUDA_SPACE_ATOMIC_LOCKS_DEVICE_h);
+  cudaFreeHost(CUDA_SPACE_ATOMIC_LOCKS_NODE_h);
   CUDA_SPACE_ATOMIC_LOCKS_DEVICE_h = nullptr;
+  CUDA_SPACE_ATOMIC_LOCKS_NODE_h = nullptr;
 #ifdef __CUDACC_RDC__
   DESUL_IMPL_COPY_CUDA_LOCK_ARRAYS_TO_DEVICE();
 #endif

@@ -16,3 +16,4 @@ blt_add_library(NAME desul_atomics
                 DEPENDS_ON cuda)
 # TODO: Add tests and install targets if needed.
 add_subdirectory(unit_tests)
+add_subdirectory(perf_tests)

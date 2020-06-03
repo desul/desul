@@ -26,6 +26,7 @@ namespace Impl {
 /// \brief This global variable in Host space is the central definition
 ///        of these arrays.
 extern int32_t* CUDA_SPACE_ATOMIC_LOCKS_DEVICE_h;
+extern int32_t* CUDA_SPACE_ATOMIC_LOCKS_NODE_h;
 
 /// \brief After this call, the g_host_cuda_lock_arrays variable has
 ///        valid, initialized arrays.
@@ -72,6 +73,12 @@ __device__
 #endif
     int32_t* CUDA_SPACE_ATOMIC_LOCKS_DEVICE;
 
+__device__
+#ifdef __CUDACC_RDC__
+    __constant__ extern
+#endif
+    int32_t* CUDA_SPACE_ATOMIC_LOCKS_NODE;
+
 #define CUDA_SPACE_ATOMIC_MASK 0x1FFFF
 
 /// \brief Acquire a lock for the address
@@ -85,6 +92,12 @@ __device__ inline bool lock_address_cuda(void* ptr, desul::MemoryScopeDevice) {
   offset = offset & CUDA_SPACE_ATOMIC_MASK;
   return (0 == atomicExch(&desul::Impl::CUDA_SPACE_ATOMIC_LOCKS_DEVICE[offset], 1));
 }
+__device__ inline bool lock_address_cuda(void* ptr, desul::MemoryScopeNode) {
+  size_t offset = size_t(ptr);
+  offset = offset >> 2;
+  offset = offset & CUDA_SPACE_ATOMIC_MASK;
+  return (0 == atomicExch(&desul::Impl::CUDA_SPACE_ATOMIC_LOCKS_NODE[offset], 1));
+}
 
 /// \brief Release lock for the address
 ///
@@ -97,6 +110,12 @@ __device__ inline void unlock_address_cuda(void* ptr, desul::MemoryScopeDevice) 
   offset = offset >> 2;
   offset = offset & CUDA_SPACE_ATOMIC_MASK;
   atomicExch(&desul::Impl::CUDA_SPACE_ATOMIC_LOCKS_DEVICE[offset], 0);
+}
+__device__ inline void unlock_address_cuda(void* ptr, desul::MemoryScopeNode) {
+  size_t offset = size_t(ptr);
+  offset = offset >> 2;
+  offset = offset & CUDA_SPACE_ATOMIC_MASK;
+  atomicExch(&desul::Impl::CUDA_SPACE_ATOMIC_LOCKS_NODE[offset], 0);
 }
 
 }  // namespace Impl
@@ -119,6 +138,9 @@ inline int eliminate_warning_for_lock_array() { return lock_array_copied; }
     if (::desul::Impl::lock_array_copied == 0) {                           \
       cudaMemcpyToSymbol(::desul::Impl::CUDA_SPACE_ATOMIC_LOCKS_DEVICE,    \
                          &::desul::Impl::CUDA_SPACE_ATOMIC_LOCKS_DEVICE_h, \
+                         sizeof(int32_t*));                                \
+      cudaMemcpyToSymbol(::desul::Impl::CUDA_SPACE_ATOMIC_LOCKS_NODE,    \
+                         &::desul::Impl::CUDA_SPACE_ATOMIC_LOCKS_NODE_h, \
                          sizeof(int32_t*));                                \
     }                                                                      \
     ::desul::Impl::lock_array_copied = 1;                                  \

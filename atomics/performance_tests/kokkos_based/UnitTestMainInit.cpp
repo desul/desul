@@ -42,19 +42,24 @@
 //@HEADER
 */
 
-#include "TestAtomicOperations.hpp"
+#include <gtest/gtest.h>
+#include <cstdlib>
 
-namespace Test {
-TEST(TEST_CATEGORY, atomic_operations_double) {
+#include <desul/atomics.hpp>
+#include <Kokkos_Core.hpp>
+
+
+int main(int argc, char *argv[]) {
+  Kokkos::initialize(argc, argv);
+  desul::Impl::init_lock_arrays();
+
+#ifdef DESUL_HAVE_CUDA_ATOMICS
   DESUL_ENSURE_CUDA_LOCK_ARRAYS_ON_DEVICE();
-  const int start = 2;  // Avoid zero for division.
-  const int end = 11;
-  for(int test = 1; test<7; test++)
-  for (int i = start; i < end; ++i) {
-    ASSERT_TRUE(
-        (TestAtomicOperations::AtomicOperationsTestNonIntegralType<double,
-                                                                   TEST_EXECSPACE>(
-            start, end - i, test)));
-  }
+#endif
+
+  ::testing::InitGoogleTest(&argc, argv);
+
+  int result = RUN_ALL_TESTS();
+  Kokkos::finalize();
+  return result;
 }
-}  // namespace Test

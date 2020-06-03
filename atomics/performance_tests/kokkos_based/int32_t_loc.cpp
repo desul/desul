@@ -42,19 +42,45 @@
 //@HEADER
 */
 
-#include "TestAtomicOperations.hpp"
+#include "PerfTestAtomics.hpp"
+#define MEMORY_SPACE CudaSpace
+#define EXECUTION_SPACE DefaultExecutionSpace
+#define SCALAR int32_t
+#define SCALAR_NAME int32_t
+#define MEMORY_OP atomic_add_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_add_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_sub_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_sub_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_inc_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_inc_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_dec_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_dec_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_min_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_min_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_max_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
+#define MEMORY_OP atomic_fetch_max_op
+#include "PerfTestAtomicsLoc_Scope.inc"
+#undef MEMORY_OP
 
-namespace Test {
-TEST(TEST_CATEGORY, atomic_operations_double) {
-  DESUL_ENSURE_CUDA_LOCK_ARRAYS_ON_DEVICE();
-  const int start = 2;  // Avoid zero for division.
-  const int end = 11;
-  for(int test = 1; test<7; test++)
-  for (int i = start; i < end; ++i) {
-    ASSERT_TRUE(
-        (TestAtomicOperations::AtomicOperationsTestNonIntegralType<double,
-                                                                   TEST_EXECSPACE>(
-            start, end - i, test)));
-  }
-}
-}  // namespace Test

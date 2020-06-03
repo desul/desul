@@ -10,6 +10,14 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 #ifdef DESUL_HAVE_SERIAL_ATOMICS
 namespace desul {
+template<class MemoryScope>
+void atomic_thread_fence(MemoryOrderAcquire, MemoryScope) {
+}
+
+template<class MemoryScope>
+void atomic_thread_fence(MemoryOrderRelease, MemoryScope) {
+}
+
 template <typename T, class MemoryScope>
 T atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrderRelaxed, MemoryScope) {
