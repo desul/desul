@@ -478,7 +478,7 @@ struct atomic_inc_op {
     #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
     desul::atomic_inc(dest,MemoryOrder(),MemoryScope());
     #else
-    Kokkos::atomic_inc(dest); 
+    Kokkos::atomic_increment(dest);
     #endif
   }
 };
@@ -491,7 +491,7 @@ struct atomic_fetch_inc_op {
     #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
     (void) desul::atomic_fetch_inc(dest,MemoryOrder(),MemoryScope());
     #else
-    (void) Kokkos::atomic_fetch_inc(dest); 
+    Kokkos::atomic_increment(dest);
     #endif
   }
 };
@@ -504,7 +504,7 @@ struct atomic_dec_op {
     #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
     desul::atomic_dec(dest,MemoryOrder(),MemoryScope());
     #else
-    Kokkos::atomic_dec(dest); 
+    Kokkos::atomic_decrement(dest);
     #endif
   }
 };
@@ -517,7 +517,7 @@ struct atomic_fetch_dec_op {
     #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
     (void) desul::atomic_fetch_dec(dest,MemoryOrder(),MemoryScope());
     #else
-    (void) Kokkos::atomic_fetch_dec(dest); 
+    Kokkos::atomic_decrement(dest);
     #endif
   }
 };
@@ -530,7 +530,7 @@ struct atomic_min_op {
     #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
     desul::atomic_min(dest,upd,MemoryOrder(),MemoryScope());
     #else
-    Kokkos::atomic_min(dest,upd); 
+    (void) Kokkos::atomic_fetch_min(dest,upd);
     #endif
   }
 };
@@ -543,7 +543,7 @@ struct atomic_fetch_min_op {
     #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
     (void) desul::atomic_fetch_min(dest,upd,MemoryOrder(),MemoryScope());
     #else
-    (void) Kokkos::atomic_fetch_min(dest,upd); 
+    (void) Kokkos::atomic_fetch_min(dest,upd);
     #endif
   }
 };
@@ -556,7 +556,7 @@ struct atomic_max_op {
     #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
     desul::atomic_max(dest,upd,MemoryOrder(),MemoryScope());
     #else
-    Kokkos::atomic_max(dest,upd); 
+    (void) Kokkos::atomic_fetch_max(dest,upd);
     #endif
   }
 };
@@ -569,7 +569,7 @@ struct atomic_fetch_max_op {
     #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
     (void) desul::atomic_fetch_max(dest,upd,MemoryOrder(),MemoryScope());
     #else
-    (void) Kokkos::atomic_fetch_max(dest,upd); 
+    (void) Kokkos::atomic_fetch_max(dest,upd);
     #endif
   }
 };
