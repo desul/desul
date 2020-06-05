@@ -9,10 +9,8 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #define DESUL_ATOMICS_CUDA_HPP_
 
 #ifdef DESUL_HAVE_CUDA_ATOMICS
-#if defined(__CUDA_ARCH__) || !defined(__NVCC__)
-#if (__CUDA_ARCH__>=700) || !defined(__NVCC__)
+#if (defined(__CUDA_ARCH__) && (__CUDA_ARCH__>=700)) || !defined(__NVCC__)
 #include <desul/atomics/cuda/CUDA_asm.hpp>
-#endif
 #endif
 
 #if defined(__CUDA_ARCH__) && (__CUDA_ARCH__<700)
