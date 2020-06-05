@@ -575,7 +575,7 @@ DESUL_INLINE_FUNCTION void atomic_sub(T* const dest,
                                       const T val,
                                       MemoryOrder order,
                                       MemoryScope scope) {
-  (void)atomic_fetch_add(dest, val, order, scope);
+  (void)atomic_fetch_sub(dest, val, order, scope);
 }
 
 template <typename T, class MemoryOrder, class MemoryScope>
