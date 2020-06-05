@@ -11,6 +11,7 @@ ENDMACRO()
 
 # APPEND_GLOB(DESUL_ATOMIC_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 blt_add_library(NAME desul_atomics
+                HEADERS include/desul/atomics.hpp
                 SOURCES src/Lock_Array_CUDA.cpp
                 INCLUDES include
                 DEPENDS_ON cuda)
