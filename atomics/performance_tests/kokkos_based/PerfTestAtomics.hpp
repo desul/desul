@@ -140,14 +140,31 @@ template<>
 struct tolerance<float> {
   static constexpr double value = 1e-6;
 };
- 
+
+// On some compilers abs(unsigned) doesn't work (ambiguous) need wrapper for that 
+template<class T>
+KOKKOS_INLINE_FUNCTION
+typename std::enable_if<std::is_unsigned<T>::value,T>::type my_abs(T val) {
+  return val;
+}
+
+template<class T>
+KOKKOS_INLINE_FUNCTION
+typename std::enable_if<!std::is_unsigned<T>::value,T>::type my_abs(T val) {
+  using std::abs;
+  return abs(val);
+}
+
 template<class T, int N>
-KOKKOS_FUNCTION
-T abs(compound_type<T,N> val) {
+KOKKOS_INLINE_FUNCTION
+T my_abs(compound_type<T,N> val) {
   T sum = 0;
-  for(int i=0; i<N; i++) sum += abs(val[i]);
+  for(int i=0; i<N; i++) sum += my_abs(val[i]);
   return sum;
 }
+
+
+
 // This test will fill an index array with N equi-distributed random numbers in the interval 0-K-1
 // and then combine values from a larger array of length N into an smaller array of length K
 // DeviceType is a Kokkos concept that combines both execution space and memory space.
@@ -226,12 +243,16 @@ double test_atomic_perf_random_location(int N, int K, Scalar, Combiner combiner,
       auto diff = result_device(i)-org_dst_values(i);
       auto sum = result_device(i)+org_dst_values(i);
       using std::abs;
-      if(abs(sum)>0) {
-        if(abs(diff)/abs(sum)>tolerance<Scalar>::value) { count++; 
-           if(i%10000==0) printf("%i %i %lf %lf %e %e\n",i,K,double(abs(diff)),double(abs(sum)),double(abs(diff)/abs(sum)),double(tolerance<Scalar>::value)); }
+      if(my_abs(sum)>0) {
+        if(my_abs(diff)/my_abs(sum)>tolerance<Scalar>::value) {
+           count++;
+           if(i%10000==0) printf("%i %i %lf %lf %e %e\n",i,K,double(my_abs(diff)),double(my_abs(sum)),double(my_abs(diff)/my_abs(sum)),double(tolerance<Scalar>::value));
+        }
       } else {
-        if(abs(diff)!=0) { count++;
-           if(i%10000==0) printf("%i %i %lf %lf %e %e\n",i,K,double(abs(diff)),double(abs(sum)),double(abs(diff)/abs(sum)),double(tolerance<Scalar>::value)); }
+        if(my_abs(diff)!=0) {
+          count++;
+          if(i%10000==0) printf("%i %i %lf %lf %e %e\n",i,K,double(my_abs(diff)),double(my_abs(sum)),double(my_abs(diff)/my_abs(sum)),double(tolerance<Scalar>::value));
+        }
       }
   },errors);
   if(0!=errors) printf("PerfRandLoc correctness check failed: %i\n",errors);
@@ -352,12 +373,12 @@ double test_atomic_perf_random_neighborhood(int N, int K, int D, Scalar, Combine
     KOKKOS_LAMBDA(const int i, int& count) {
       auto diff = result_device(i)-org_dst_values(i);
       auto sum = result_device(i)+org_dst_values(i);
-      if(abs(sum)>0) {
-        if(abs(diff)/abs(sum)>tolerance<Scalar>::value) { count++;
-	if(i%10000==0) printf("%i %i %lf %lf %e %e\n",i,K,double(abs(diff)),double(abs(sum)),double(abs(diff)/abs(sum)),double(tolerance<Scalar>::value)); }
+      if(my_abs(sum)>0) {
+        if(my_abs(diff)/my_abs(sum)>tolerance<Scalar>::value) { count++;
+	if(i%10000==0) printf("%i %i %lf %lf %e %e\n",i,K,double(my_abs(diff)),double(my_abs(sum)),double(my_abs(diff))/double(my_abs(sum)),double(tolerance<Scalar>::value)); }
       } else {
-        if(abs(diff)!=0) { count++;
-           if(i%10000==0) printf("%i %i %lf %lf %e %e\n",i,K,double(abs(diff)),double(abs(sum)),double(abs(diff)/abs(sum)),double(tolerance<Scalar>::value)); }
+        if(my_abs(diff)!=0) { count++;
+           if(i%10000==0) printf("%i %i %lf %lf %e %e\n",i,K,double(my_abs(diff)),double(my_abs(sum)),double(my_abs(diff)/my_abs(sum)),double(tolerance<Scalar>::value)); }
       }
   },errors);
   if(0!=errors) printf("PerfRandNeigh correctness check failed: %i\n",errors);
@@ -457,7 +478,7 @@ struct atomic_inc_op {
     #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
     desul::atomic_inc(dest,MemoryOrder(),MemoryScope());
     #else
-    Kokkos::atomic_inc(dest); 
+    Kokkos::atomic_increment(dest);
     #endif
   }
 };
@@ -470,7 +491,7 @@ struct atomic_fetch_inc_op {
     #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
     (void) desul::atomic_fetch_inc(dest,MemoryOrder(),MemoryScope());
     #else
-    (void) Kokkos::atomic_fetch_inc(dest); 
+    Kokkos::atomic_increment(dest);
     #endif
   }
 };
@@ -483,7 +504,7 @@ struct atomic_dec_op {
     #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
     desul::atomic_dec(dest,MemoryOrder(),MemoryScope());
     #else
-    Kokkos::atomic_dec(dest); 
+    Kokkos::atomic_decrement(dest);
     #endif
   }
 };
@@ -496,7 +517,7 @@ struct atomic_fetch_dec_op {
     #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
     (void) desul::atomic_fetch_dec(dest,MemoryOrder(),MemoryScope());
     #else
-    (void) Kokkos::atomic_fetch_dec(dest); 
+    Kokkos::atomic_decrement(dest);
     #endif
   }
 };
@@ -509,7 +530,7 @@ struct atomic_min_op {
     #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
     desul::atomic_min(dest,upd,MemoryOrder(),MemoryScope());
     #else
-    Kokkos::atomic_min(dest,upd); 
+    (void) Kokkos::atomic_fetch_min(dest,upd);
     #endif
   }
 };
@@ -522,7 +543,7 @@ struct atomic_fetch_min_op {
     #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
     (void) desul::atomic_fetch_min(dest,upd,MemoryOrder(),MemoryScope());
     #else
-    (void) Kokkos::atomic_fetch_min(dest,upd); 
+    (void) Kokkos::atomic_fetch_min(dest,upd);
     #endif
   }
 };
@@ -535,7 +556,7 @@ struct atomic_max_op {
     #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
     desul::atomic_max(dest,upd,MemoryOrder(),MemoryScope());
     #else
-    Kokkos::atomic_max(dest,upd); 
+    (void) Kokkos::atomic_fetch_max(dest,upd);
     #endif
   }
 };
@@ -548,7 +569,7 @@ struct atomic_fetch_max_op {
     #ifndef DESUL_IMPL_TESTS_USE_KOKKOS_ATOMICS 
     (void) desul::atomic_fetch_max(dest,upd,MemoryOrder(),MemoryScope());
     #else
-    (void) Kokkos::atomic_fetch_max(dest,upd); 
+    (void) Kokkos::atomic_fetch_max(dest,upd);
     #endif
   }
 };
