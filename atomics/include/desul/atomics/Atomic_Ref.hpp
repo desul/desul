@@ -32,12 +32,16 @@ namespace Impl {
 //   * is_always_lock_free
 //   * required_alignment
 
-template <typename T, bool = std::is_integral<T>{}, bool = std::is_floating_point<T>{}>
+template <typename T,
+          typename MemoryOrder,
+          typename MemoryScope,
+          bool = std::is_integral<T>{},
+          bool = std::is_floating_point<T>{}>
 struct _atomic_ref;
 
 // base class for non-integral, non-floating-point, non-pointer types
-template <typename T>
-struct _atomic_ref<T, false, false> {
+template <typename T, typename MemoryOrder, typename MemoryScope>
+struct _atomic_ref<T, MemoryOrder, MemoryScope, false, false> {
   static_assert(std::is_trivially_copyable<T>{}, "");
 
  private:
@@ -60,25 +64,27 @@ struct _atomic_ref<T, false, false> {
 
   operator T() const noexcept { return this->load(); }
 
-  template <typename MemoryOrder = MemoryOrderSeqCst>
-  DESUL_FUNCTION void store(T desired, MemoryOrder order) const noexcept {
-    atomic_store(_ptr, desired, order);
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION void store(T desired,
+                            _MemoryOrder order = _MemoryOrder()) const noexcept {
+    atomic_store(_ptr, desired, order, MemoryScope());
   }
 
-  template <typename MemoryOrder = MemoryOrderSeqCst>
-  DESUL_FUNCTION T load(MemoryOrder order) const noexcept {
-    return atomic_load(_ptr, order);
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION T load(_MemoryOrder order = _MemoryOrder()) const noexcept {
+    return atomic_load(_ptr, order, MemoryScope());
   }
 
-  template <typename MemoryOrder = MemoryOrderSeqCst>
-  DESUL_FUNCTION T exchange(T desired, MemoryOrder order) const noexcept {
-    return atomic_load(_ptr, desired, order);
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION T exchange(T desired,
+                            _MemoryOrder order = _MemoryOrder()) const noexcept {
+    return atomic_load(_ptr, desired, order, MemoryScope());
   }
 };
 
 // base class for atomic_ref<integral-type>
-template <typename T>
-struct _atomic_ref<T, true, false> {
+template <typename T, typename MemoryOrder, typename MemoryScope>
+struct _atomic_ref<T, MemoryOrder, MemoryScope, true, false> {
   static_assert(std::is_integral<T>{}, "");
 
  private:
@@ -102,86 +108,89 @@ struct _atomic_ref<T, true, false> {
 
   operator T() const noexcept { return this->load(); }
 
-  template <typename MemoryOrder = MemoryOrderSeqCst>
-  DESUL_FUNCTION void store(T desired, MemoryOrder order) const noexcept {
-    atomic_store(_ptr, desired, order);
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION void store(T desired,
+                            _MemoryOrder order = _MemoryOrder()) const noexcept {
+    atomic_store(_ptr, desired, order, MemoryScope());
   }
 
-  template <typename MemoryOrder = MemoryOrderSeqCst>
-  DESUL_FUNCTION T load(MemoryOrder order) const noexcept {
-    return atomic_load(_ptr, order);
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION T load(_MemoryOrder order = _MemoryOrder()) const noexcept {
+    return atomic_load(_ptr, order, MemoryScope());
   }
 
-  template <typename MemoryOrder = MemoryOrderSeqCst>
-  DESUL_FUNCTION T exchange(T desired, MemoryOrder order) const noexcept {
-    return atomic_load(_ptr, desired, order);
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION T exchange(T desired,
+                            _MemoryOrder order = _MemoryOrder()) const noexcept {
+    return atomic_load(_ptr, desired, order, MemoryScope());
   }
 
-  template <typename MemoryOrder = MemoryOrderSeqCst>
-  DESUL_FUNCTION value_type fetch_add(value_type arg,
-                                      MemoryOrder order) const noexcept {
-    return atomic_fetch_add(_ptr, arg, order);
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION value_type
+  fetch_add(value_type arg, _MemoryOrder order = _MemoryOrder()) const noexcept {
+    return atomic_fetch_add(_ptr, arg, order, MemoryScope());
   }
 
-  template <typename MemoryOrder = MemoryOrderSeqCst>
-  DESUL_FUNCTION value_type fetch_sub(value_type arg,
-                                      MemoryOrder order) const noexcept {
-    return atomic_fetch_sub(_ptr, arg, order);
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION value_type
+  fetch_sub(value_type arg, _MemoryOrder order = _MemoryOrder()) const noexcept {
+    return atomic_fetch_sub(_ptr, arg, order, MemoryScope());
   }
 
-  template <typename MemoryOrder = MemoryOrderSeqCst>
-  DESUL_FUNCTION value_type fetch_and(value_type arg,
-                                      MemoryOrder order) const noexcept {
-    return atomic_fetch_and(_ptr, arg, order);
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION value_type
+  fetch_and(value_type arg, _MemoryOrder order = _MemoryOrder()) const noexcept {
+    return atomic_fetch_and(_ptr, arg, order, MemoryScope());
   }
 
-  template <typename MemoryOrder = MemoryOrderSeqCst>
-  DESUL_FUNCTION value_type fetch_or(value_type arg, MemoryOrder order) const noexcept {
-    return atomic_fetch_or(_ptr, arg, order);
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION value_type
+  fetch_or(value_type arg, _MemoryOrder order = _MemoryOrder()) const noexcept {
+    return atomic_fetch_or(_ptr, arg, order, MemoryScope());
   }
 
-  template <typename MemoryOrder = MemoryOrderSeqCst>
-  DESUL_FUNCTION value_type fetch_xor(value_type arg,
-                                      MemoryOrder order) const noexcept {
-    return atomic_fetch_xor(_ptr, arg, order);
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION value_type
+  fetch_xor(value_type arg, _MemoryOrder order = _MemoryOrder()) const noexcept {
+    return atomic_fetch_xor(_ptr, arg, order, MemoryScope());
   }
 
   DESUL_FUNCTION value_type operator++() const noexcept {
-    return atomic_add_fetch(_ptr, value_type(1));
+    return atomic_add_fetch(_ptr, value_type(1), MemoryOrder(), MemoryScope());
   }
 
   DESUL_FUNCTION value_type operator++(int) const noexcept { return fetch_add(1); }
 
   DESUL_FUNCTION value_type operator--() const noexcept {
-    return atomic_sub_fetch(_ptr, value_type(1));
+    return atomic_sub_fetch(_ptr, value_type(1), MemoryOrder(), MemoryScope());
   }
 
   DESUL_FUNCTION value_type operator--(int) const noexcept { return fetch_sub(1); }
 
   DESUL_FUNCTION value_type operator+=(value_type arg) const noexcept {
-    atomic_add_fetch(_ptr, arg);
+    atomic_add_fetch(_ptr, arg, MemoryOrder(), MemoryScope());
   }
 
   DESUL_FUNCTION value_type operator-=(value_type arg) const noexcept {
-    atomic_sub_fetch(_ptr, arg);
+    atomic_sub_fetch(_ptr, arg, MemoryOrder(), MemoryScope());
   }
 
   DESUL_FUNCTION value_type operator&=(value_type arg) const noexcept {
-    atomic_and_fetch(_ptr, arg);
+    atomic_and_fetch(_ptr, arg, MemoryOrder(), MemoryScope());
   }
 
   DESUL_FUNCTION value_type operator|=(value_type arg) const noexcept {
-    atomic_or_fetch(_ptr, arg);
+    atomic_or_fetch(_ptr, arg, MemoryOrder(), MemoryScope());
   }
 
   DESUL_FUNCTION value_type operator^=(value_type arg) const noexcept {
-    atomic_xor_fetch(_ptr, arg);
+    atomic_xor_fetch(_ptr, arg, MemoryOrder(), MemoryScope());
   }
 };
 
 // base class for atomic_ref<floating-point-type>
-template <typename T>
-struct _atomic_ref<T, false, true> {
+template <typename T, typename MemoryOrder, typename MemoryScope>
+struct _atomic_ref<T, MemoryOrder, MemoryScope, false, true> {
   static_assert(std::is_floating_point<T>{}, "");
 
  private:
@@ -205,45 +214,47 @@ struct _atomic_ref<T, false, true> {
 
   operator T() const noexcept { return this->load(); }
 
-  template <typename MemoryOrder = MemoryOrderSeqCst>
-  DESUL_FUNCTION void store(T desired, MemoryOrder order) const noexcept {
-    atomic_store(_ptr, desired, order);
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION void store(T desired,
+                            _MemoryOrder order = _MemoryOrder()) const noexcept {
+    atomic_store(_ptr, desired, order, MemoryScope());
   }
 
-  template <typename MemoryOrder = MemoryOrderSeqCst>
-  DESUL_FUNCTION T load(MemoryOrder order) const noexcept {
-    return atomic_load(_ptr, order);
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION T load(_MemoryOrder order = _MemoryOrder()) const noexcept {
+    return atomic_load(_ptr, order, MemoryScope());
   }
 
-  template <typename MemoryOrder = MemoryOrderSeqCst>
-  DESUL_FUNCTION T exchange(T desired, MemoryOrder order) const noexcept {
-    return atomic_load(_ptr, desired, order);
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION T exchange(T desired,
+                            _MemoryOrder order = _MemoryOrder()) const noexcept {
+    return atomic_load(_ptr, desired, order, MemoryScope());
   }
 
-  template <typename MemoryOrder = MemoryOrderSeqCst>
-  DESUL_FUNCTION value_type fetch_add(value_type arg,
-                                      MemoryOrder order) const noexcept {
-    return atomic_fetch_add(_ptr, arg, order);
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION value_type
+  fetch_add(value_type arg, _MemoryOrder order = _MemoryOrder()) const noexcept {
+    return atomic_fetch_add(_ptr, arg, order, MemoryScope());
   }
 
-  template <typename MemoryOrder = MemoryOrderSeqCst>
-  DESUL_FUNCTION value_type fetch_sub(value_type arg,
-                                      MemoryOrder order) const noexcept {
-    return atomic_fetch_sub(_ptr, arg, order);
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION value_type
+  fetch_sub(value_type arg, _MemoryOrder order = _MemoryOrder()) const noexcept {
+    return atomic_fetch_sub(_ptr, arg, order, MemoryScope());
   }
 
   DESUL_FUNCTION value_type operator+=(value_type arg) const noexcept {
-    atomic_add_fetch(_ptr, arg);
+    atomic_add_fetch(_ptr, arg, MemoryOrder(), MemoryScope());
   }
 
   DESUL_FUNCTION value_type operator-=(value_type arg) const noexcept {
-    atomic_sub_fetch(_ptr, arg);
+    atomic_sub_fetch(_ptr, arg, MemoryOrder(), MemoryScope());
   }
 };
 
 // base class for atomic_ref<pointer-type>
-template <typename T>
-struct _atomic_ref<T*, false, false> {
+template <typename T, typename MemoryOrder, typename MemoryScope>
+struct _atomic_ref<T*, MemoryOrder, MemoryScope, false, false> {
  private:
   T** _ptr;
 
@@ -265,51 +276,53 @@ struct _atomic_ref<T*, false, false> {
 
   operator T*() const noexcept { return this->load(); }
 
-  template <typename MemoryOrder = MemoryOrderSeqCst>
-  DESUL_FUNCTION void store(T* desired, MemoryOrder order) const noexcept {
-    atomic_store(_ptr, desired, order);
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION void store(T* desired,
+                            _MemoryOrder order = _MemoryOrder()) const noexcept {
+    atomic_store(_ptr, desired, order, MemoryScope());
   }
 
-  template <typename MemoryOrder = MemoryOrderSeqCst>
-  DESUL_FUNCTION T* load(MemoryOrder order) const noexcept {
-    return atomic_load(_ptr, order);
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION T* load(_MemoryOrder order = _MemoryOrder()) const noexcept {
+    return atomic_load(_ptr, order, MemoryScope());
   }
 
-  template <typename MemoryOrder = MemoryOrderSeqCst>
-  DESUL_FUNCTION T* exchange(T* desired, MemoryOrder order) const noexcept {
-    return atomic_load(_ptr, desired, order);
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION T* exchange(T* desired,
+                             _MemoryOrder order = _MemoryOrder()) const noexcept {
+    return atomic_load(_ptr, desired, order, MemoryScope());
   }
 
-  template <typename MemoryOrder = MemoryOrderSeqCst>
-  DESUL_FUNCTION value_type fetch_add(difference_type d,
-                                      MemoryOrder order) const noexcept {
-    return atomic_fetch_add(_ptr, _type_size(d), order);
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION value_type
+  fetch_add(difference_type d, _MemoryOrder order = _MemoryOrder()) const noexcept {
+    return atomic_fetch_add(_ptr, _type_size(d), order, MemoryScope());
   }
 
-  template <typename MemoryOrder = MemoryOrderSeqCst>
-  DESUL_FUNCTION value_type fetch_sub(difference_type d,
-                                      MemoryOrder order) const noexcept {
-    return atomic_fetch_sub(_ptr, _type_size(d), order);
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION value_type
+  fetch_sub(difference_type d, _MemoryOrder order = _MemoryOrder()) const noexcept {
+    return atomic_fetch_sub(_ptr, _type_size(d), order, MemoryScope());
   }
 
   DESUL_FUNCTION value_type operator++() const noexcept {
-    return atomic_add_fetch(_ptr, _type_size(1));
+    return atomic_add_fetch(_ptr, _type_size(1), MemoryOrder(), MemoryScope());
   }
 
   DESUL_FUNCTION value_type operator++(int) const noexcept { return fetch_add(1); }
 
   DESUL_FUNCTION value_type operator--() const noexcept {
-    return atomic_sub_fetch(_ptr, _type_size(1));
+    return atomic_sub_fetch(_ptr, _type_size(1), MemoryOrder(), MemoryScope());
   }
 
   DESUL_FUNCTION value_type operator--(int) const noexcept { return fetch_sub(1); }
 
   DESUL_FUNCTION value_type operator+=(difference_type d) const noexcept {
-    atomic_add_fetch(_ptr, _type_size(d));
+    atomic_add_fetch(_ptr, _type_size(d), MemoryOrder(), MemoryScope());
   }
 
   DESUL_FUNCTION value_type operator-=(difference_type d) const noexcept {
-    atomic_sub_fetch(_ptr, _type_size(d));
+    atomic_sub_fetch(_ptr, _type_size(d), MemoryOrder(), MemoryScope());
   }
 
  private:
@@ -321,15 +334,16 @@ struct _atomic_ref<T*, false, false> {
 
 }  // namespace Impl
 
-template <typename T>
-struct atomic_ref : Impl::_atomic_ref<T> {
-  explicit atomic_ref(T& obj) noexcept : Impl::_atomic_ref<T>(obj) {}
+template <typename T, typename MemoryOrder, typename MemoryScope>
+struct atomic_ref : Impl::_atomic_ref<T, MemoryOrder, MemoryScope> {
+  explicit atomic_ref(T& obj) noexcept
+      : Impl::_atomic_ref<T, MemoryOrder, MemoryScope>(obj) {}
 
   atomic_ref& operator=(atomic_ref const&) = delete;
 
   atomic_ref(atomic_ref const&) = default;
 
-  using Impl::_atomic_ref<T>::operator=;
+  using Impl::_atomic_ref<T, MemoryOrder, MemoryScope>::operator=;
 };
 
 }  // namespace desul
