@@ -30,7 +30,6 @@ namespace Impl {
 //   * notify_all
 // * constants
 //   * is_always_lock_free
-//   * required_alignment
 
 template <typename T,
           typename MemoryOrder,
@@ -47,8 +46,17 @@ struct basic_atomic_ref<T, MemoryOrder, MemoryScope, false, false> {
  private:
   T* _ptr;
 
+  // 1/2/4/8/16-byte types must be aligned to at least their size
+  static constexpr int _min_alignment = (sizeof(T) & (sizeof(T) - 1)) || sizeof(T) > 16
+                                            ? 0
+                                            : sizeof(T);
+
  public:
   using value_type = T;
+
+  static constexpr std::size_t required_alignment = _min_alignment > alignof(T)
+                                                        ? _min_alignment
+                                                        : alignof(T);
 
   basic_atomic_ref() = delete;
   basic_atomic_ref& operator=(basic_atomic_ref const&) = delete;
@@ -93,6 +101,9 @@ struct basic_atomic_ref<T, MemoryOrder, MemoryScope, true, false> {
  public:
   using value_type = T;
   using difference_type = value_type;
+
+  static constexpr std::size_t required_alignment = sizeof(T) > alignof(T) ? sizeof(T)
+                                                                           : alignof(T);
 
   basic_atomic_ref() = delete;
   basic_atomic_ref& operator=(basic_atomic_ref const&) = delete;
@@ -200,6 +211,8 @@ struct basic_atomic_ref<T, MemoryOrder, MemoryScope, false, true> {
   using value_type = T;
   using difference_type = value_type;
 
+  static constexpr std::size_t required_alignment = alignof(T);
+
   basic_atomic_ref() = delete;
   basic_atomic_ref& operator=(basic_atomic_ref const&) = delete;
 
@@ -261,6 +274,8 @@ struct basic_atomic_ref<T*, MemoryOrder, MemoryScope, false, false> {
  public:
   using value_type = T*;
   using difference_type = std::ptrdiff_t;
+
+  static constexpr std::size_t required_alignment = alignof(T*);
 
   basic_atomic_ref() = delete;
   basic_atomic_ref& operator=(basic_atomic_ref const&) = delete;
