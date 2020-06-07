@@ -37,11 +37,11 @@ template <typename T,
           typename MemoryScope,
           bool = std::is_integral<T>{},
           bool = std::is_floating_point<T>{}>
-struct _atomic_ref;
+struct basic_atomic_ref;
 
 // base class for non-integral, non-floating-point, non-pointer types
 template <typename T, typename MemoryOrder, typename MemoryScope>
-struct _atomic_ref<T, MemoryOrder, MemoryScope, false, false> {
+struct basic_atomic_ref<T, MemoryOrder, MemoryScope, false, false> {
   static_assert(std::is_trivially_copyable<T>{}, "");
 
  private:
@@ -50,12 +50,12 @@ struct _atomic_ref<T, MemoryOrder, MemoryScope, false, false> {
  public:
   using value_type = T;
 
-  _atomic_ref() = delete;
-  _atomic_ref& operator=(_atomic_ref const&) = delete;
+  basic_atomic_ref() = delete;
+  basic_atomic_ref& operator=(basic_atomic_ref const&) = delete;
 
-  _atomic_ref(_atomic_ref const&) = default;
+  basic_atomic_ref(basic_atomic_ref const&) = default;
 
-  explicit _atomic_ref(T& obj) : _ptr(std::addressof(obj)) {}
+  explicit basic_atomic_ref(T& obj) : _ptr(std::addressof(obj)) {}
 
   T operator=(T desired) const noexcept {
     this->store(desired);
@@ -84,7 +84,7 @@ struct _atomic_ref<T, MemoryOrder, MemoryScope, false, false> {
 
 // base class for atomic_ref<integral-type>
 template <typename T, typename MemoryOrder, typename MemoryScope>
-struct _atomic_ref<T, MemoryOrder, MemoryScope, true, false> {
+struct basic_atomic_ref<T, MemoryOrder, MemoryScope, true, false> {
   static_assert(std::is_integral<T>{}, "");
 
  private:
@@ -94,12 +94,12 @@ struct _atomic_ref<T, MemoryOrder, MemoryScope, true, false> {
   using value_type = T;
   using difference_type = value_type;
 
-  _atomic_ref() = delete;
-  _atomic_ref& operator=(_atomic_ref const&) = delete;
+  basic_atomic_ref() = delete;
+  basic_atomic_ref& operator=(basic_atomic_ref const&) = delete;
 
-  explicit _atomic_ref(T& obj) : _ptr(&obj) {}
+  explicit basic_atomic_ref(T& obj) : _ptr(&obj) {}
 
-  _atomic_ref(_atomic_ref const&) = default;
+  basic_atomic_ref(basic_atomic_ref const&) = default;
 
   T operator=(T desired) const noexcept {
     this->store(desired);
@@ -190,7 +190,7 @@ struct _atomic_ref<T, MemoryOrder, MemoryScope, true, false> {
 
 // base class for atomic_ref<floating-point-type>
 template <typename T, typename MemoryOrder, typename MemoryScope>
-struct _atomic_ref<T, MemoryOrder, MemoryScope, false, true> {
+struct basic_atomic_ref<T, MemoryOrder, MemoryScope, false, true> {
   static_assert(std::is_floating_point<T>{}, "");
 
  private:
@@ -200,12 +200,12 @@ struct _atomic_ref<T, MemoryOrder, MemoryScope, false, true> {
   using value_type = T;
   using difference_type = value_type;
 
-  _atomic_ref() = delete;
-  _atomic_ref& operator=(_atomic_ref const&) = delete;
+  basic_atomic_ref() = delete;
+  basic_atomic_ref& operator=(basic_atomic_ref const&) = delete;
 
-  explicit _atomic_ref(T& obj) : _ptr(&obj) {}
+  explicit basic_atomic_ref(T& obj) : _ptr(&obj) {}
 
-  _atomic_ref(_atomic_ref const&) = default;
+  basic_atomic_ref(basic_atomic_ref const&) = default;
 
   T operator=(T desired) const noexcept {
     this->store(desired);
@@ -254,7 +254,7 @@ struct _atomic_ref<T, MemoryOrder, MemoryScope, false, true> {
 
 // base class for atomic_ref<pointer-type>
 template <typename T, typename MemoryOrder, typename MemoryScope>
-struct _atomic_ref<T*, MemoryOrder, MemoryScope, false, false> {
+struct basic_atomic_ref<T*, MemoryOrder, MemoryScope, false, false> {
  private:
   T** _ptr;
 
@@ -262,12 +262,12 @@ struct _atomic_ref<T*, MemoryOrder, MemoryScope, false, false> {
   using value_type = T*;
   using difference_type = std::ptrdiff_t;
 
-  _atomic_ref() = delete;
-  _atomic_ref& operator=(_atomic_ref const&) = delete;
+  basic_atomic_ref() = delete;
+  basic_atomic_ref& operator=(basic_atomic_ref const&) = delete;
 
-  explicit _atomic_ref(T*& arg) : _ptr(std::addressof(arg)) {}
+  explicit basic_atomic_ref(T*& arg) : _ptr(std::addressof(arg)) {}
 
-  _atomic_ref(_atomic_ref const&) = default;
+  basic_atomic_ref(basic_atomic_ref const&) = default;
 
   T* operator=(T* desired) const noexcept {
     this->store(desired);
@@ -335,15 +335,15 @@ struct _atomic_ref<T*, MemoryOrder, MemoryScope, false, false> {
 }  // namespace Impl
 
 template <typename T, typename MemoryOrder, typename MemoryScope>
-struct atomic_ref : Impl::_atomic_ref<T, MemoryOrder, MemoryScope> {
+struct atomic_ref : Impl::basic_atomic_ref<T, MemoryOrder, MemoryScope> {
   explicit atomic_ref(T& obj) noexcept
-      : Impl::_atomic_ref<T, MemoryOrder, MemoryScope>(obj) {}
+      : Impl::basic_atomic_ref<T, MemoryOrder, MemoryScope>(obj) {}
 
   atomic_ref& operator=(atomic_ref const&) = delete;
 
   atomic_ref(atomic_ref const&) = default;
 
-  using Impl::_atomic_ref<T, MemoryOrder, MemoryScope>::operator=;
+  using Impl::basic_atomic_ref<T, MemoryOrder, MemoryScope>::operator=;
 };
 
 }  // namespace desul
