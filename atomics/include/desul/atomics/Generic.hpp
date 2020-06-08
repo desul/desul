@@ -119,6 +119,14 @@ struct LoadOper {
   static Scalar1 apply(const Scalar1& val1, const Scalar2&) { return val1; }
 };
 
+constexpr bool atomic_always_lock_free(std::size_t size) {
+  return size == 4 || size == 8
+#if defined(DESUL_HAVE_16BYTE_COMPARE_AND_SWAP)
+         || size == 16
+#endif
+      ;
+}
+
 template <class Oper, typename T, class MemoryOrder, class MemoryScope>
 DESUL_INLINE_FUNCTION T
 atomic_fetch_oper(const Oper& op,
