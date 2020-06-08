@@ -127,6 +127,15 @@ constexpr bool atomic_always_lock_free(std::size_t size) {
       ;
 }
 
+template <std::size_t Size, std::size_t Align>
+DESUL_INLINE_FUNCTION bool atomic_is_lock_free() noexcept {
+  return Size == 4 || Size == 8
+#if defined(DESUL_HAVE_16BYTE_COMPARE_AND_SWAP)
+         || Size == 16
+#endif
+      ;
+}
+
 template <class Oper, typename T, class MemoryOrder, class MemoryScope>
 DESUL_INLINE_FUNCTION T
 atomic_fetch_oper(const Oper& op,
