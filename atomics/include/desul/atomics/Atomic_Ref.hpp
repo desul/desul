@@ -28,8 +28,6 @@ namespace Impl {
 //   * wait
 //   * notify_one
 //   * notify_all
-// * constants
-//   * is_always_lock_free
 
 template <typename T,
           typename MemoryOrder,
@@ -53,6 +51,8 @@ struct basic_atomic_ref<T, MemoryOrder, MemoryScope, false, false> {
 
  public:
   using value_type = T;
+
+  static constexpr bool is_always_lock_free = atomic_always_lock_free(sizeof(T));
 
   static constexpr std::size_t required_alignment = _min_alignment > alignof(T)
                                                         ? _min_alignment
@@ -101,6 +101,8 @@ struct basic_atomic_ref<T, MemoryOrder, MemoryScope, true, false> {
  public:
   using value_type = T;
   using difference_type = value_type;
+
+  static constexpr bool is_always_lock_free = atomic_always_lock_free(sizeof(T));
 
   static constexpr std::size_t required_alignment = sizeof(T) > alignof(T) ? sizeof(T)
                                                                            : alignof(T);
@@ -211,6 +213,8 @@ struct basic_atomic_ref<T, MemoryOrder, MemoryScope, false, true> {
   using value_type = T;
   using difference_type = value_type;
 
+  static constexpr bool is_always_lock_free = atomic_always_lock_free(sizeof(T));
+
   static constexpr std::size_t required_alignment = alignof(T);
 
   basic_atomic_ref() = delete;
@@ -274,6 +278,8 @@ struct basic_atomic_ref<T*, MemoryOrder, MemoryScope, false, false> {
  public:
   using value_type = T*;
   using difference_type = std::ptrdiff_t;
+
+  static constexpr bool is_always_lock_free = atomic_always_lock_free(sizeof(T));
 
   static constexpr std::size_t required_alignment = alignof(T*);
 
