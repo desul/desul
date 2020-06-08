@@ -22,7 +22,6 @@ namespace Impl {
 
 // TODO current implementation is missing the following:
 // * member functions
-//   * is_lock_free
 //   * compare_exchange_weak
 //   * compare_exchange_strong
 //   * wait
@@ -88,6 +87,10 @@ struct basic_atomic_ref<T, MemoryOrder, MemoryScope, false, false> {
                             _MemoryOrder order = _MemoryOrder()) const noexcept {
     return atomic_load(_ptr, desired, order, MemoryScope());
   }
+
+  DESUL_FUNCTION bool is_lock_free() const noexcept {
+    return atomic_is_lock_free<sizeof(T), required_alignment>();
+  }
 };
 
 // base class for atomic_ref<integral-type>
@@ -136,6 +139,10 @@ struct basic_atomic_ref<T, MemoryOrder, MemoryScope, true, false> {
   DESUL_FUNCTION T exchange(T desired,
                             _MemoryOrder order = _MemoryOrder()) const noexcept {
     return atomic_load(_ptr, desired, order, MemoryScope());
+  }
+
+  DESUL_FUNCTION bool is_lock_free() const noexcept {
+    return atomic_is_lock_free<sizeof(T), required_alignment>();
   }
 
   template <typename _MemoryOrder = MemoryOrder>
@@ -248,6 +255,10 @@ struct basic_atomic_ref<T, MemoryOrder, MemoryScope, false, true> {
     return atomic_load(_ptr, desired, order, MemoryScope());
   }
 
+  DESUL_FUNCTION bool is_lock_free() const noexcept {
+    return atomic_is_lock_free<sizeof(T), required_alignment>();
+  }
+
   template <typename _MemoryOrder = MemoryOrder>
   DESUL_FUNCTION value_type
   fetch_add(value_type arg, _MemoryOrder order = _MemoryOrder()) const noexcept {
@@ -312,6 +323,10 @@ struct basic_atomic_ref<T*, MemoryOrder, MemoryScope, false, false> {
   DESUL_FUNCTION T* exchange(T* desired,
                              _MemoryOrder order = _MemoryOrder()) const noexcept {
     return atomic_load(_ptr, desired, order, MemoryScope());
+  }
+
+  DESUL_FUNCTION bool is_lock_free() const noexcept {
+    return atomic_is_lock_free<sizeof(T*), required_alignment>();
   }
 
   template <typename _MemoryOrder = MemoryOrder>
