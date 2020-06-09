@@ -22,8 +22,6 @@ namespace Impl {
 
 // TODO current implementation is missing the following:
 // * member functions
-//   * compare_exchange_weak
-//   * compare_exchange_strong
 //   * wait
 //   * notify_one
 //   * notify_all
@@ -91,6 +89,37 @@ struct basic_atomic_ref<T, MemoryOrder, MemoryScope, false, false> {
   DESUL_FUNCTION bool is_lock_free() const noexcept {
     return atomic_is_lock_free<sizeof(T), required_alignment>();
   }
+
+  template <typename SuccessMemoryOrder, typename FailureMemoryOrder>
+  DESUL_FUNCTION bool compare_exchange_weak(T& expected,
+                                            T desired,
+                                            SuccessMemoryOrder success,
+                                            FailureMemoryOrder failure) const noexcept {
+    return atomic_compare_exchange_weak(
+        _ptr, expected, desired, success, failure, MemoryScope());
+  }
+
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION bool compare_exchange_weak(
+      T& expected, T desired, _MemoryOrder order = _MemoryOrder()) const noexcept {
+    compare_exchange_weak(expected, desired, order, order, MemoryScope());
+  }
+
+  template <typename SuccessMemoryOrder, typename FailureMemoryOrder>
+  DESUL_FUNCTION bool compare_exchange_strong(
+      T& expected,
+      T desired,
+      SuccessMemoryOrder success,
+      FailureMemoryOrder failure) const noexcept {
+    return atomic_compare_exchange_strong(
+        _ptr, expected, desired, success, failure, MemoryScope());
+  }
+
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION bool compare_exchange_strong(
+      T& expected, T desired, _MemoryOrder order = _MemoryOrder()) const noexcept {
+    compare_exchange_strong(expected, desired, order, order, MemoryScope());
+  }
 };
 
 // base class for atomic_ref<integral-type>
@@ -143,6 +172,37 @@ struct basic_atomic_ref<T, MemoryOrder, MemoryScope, true, false> {
 
   DESUL_FUNCTION bool is_lock_free() const noexcept {
     return atomic_is_lock_free<sizeof(T), required_alignment>();
+  }
+
+  template <typename SuccessMemoryOrder, typename FailureMemoryOrder>
+  DESUL_FUNCTION bool compare_exchange_weak(T& expected,
+                                            T desired,
+                                            SuccessMemoryOrder success,
+                                            FailureMemoryOrder failure) const noexcept {
+    return atomic_compare_exchange_weak(
+        _ptr, expected, desired, success, failure, MemoryScope());
+  }
+
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION bool compare_exchange_weak(
+      T& expected, T desired, _MemoryOrder order = _MemoryOrder()) const noexcept {
+    compare_exchange_weak(expected, desired, order, order, MemoryScope());
+  }
+
+  template <typename SuccessMemoryOrder, typename FailureMemoryOrder>
+  DESUL_FUNCTION bool compare_exchange_strong(
+      T& expected,
+      T desired,
+      SuccessMemoryOrder success,
+      FailureMemoryOrder failure) const noexcept {
+    return atomic_compare_exchange_strong(
+        _ptr, expected, desired, success, failure, MemoryScope());
+  }
+
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION bool compare_exchange_strong(
+      T& expected, T desired, _MemoryOrder order = _MemoryOrder()) const noexcept {
+    compare_exchange_strong(expected, desired, order, order, MemoryScope());
   }
 
   template <typename _MemoryOrder = MemoryOrder>
@@ -259,6 +319,37 @@ struct basic_atomic_ref<T, MemoryOrder, MemoryScope, false, true> {
     return atomic_is_lock_free<sizeof(T), required_alignment>();
   }
 
+  template <typename SuccessMemoryOrder, typename FailureMemoryOrder>
+  DESUL_FUNCTION bool compare_exchange_weak(T& expected,
+                                            T desired,
+                                            SuccessMemoryOrder success,
+                                            FailureMemoryOrder failure) const noexcept {
+    return atomic_compare_exchange_weak(
+        _ptr, expected, desired, success, failure, MemoryScope());
+  }
+
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION bool compare_exchange_weak(
+      T& expected, T desired, _MemoryOrder order = _MemoryOrder()) const noexcept {
+    compare_exchange_weak(expected, desired, order, order, MemoryScope());
+  }
+
+  template <typename SuccessMemoryOrder, typename FailureMemoryOrder>
+  DESUL_FUNCTION bool compare_exchange_strong(
+      T& expected,
+      T desired,
+      SuccessMemoryOrder success,
+      FailureMemoryOrder failure) const noexcept {
+    return atomic_compare_exchange_strong(
+        _ptr, expected, desired, success, failure, MemoryScope());
+  }
+
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION bool compare_exchange_strong(
+      T& expected, T desired, _MemoryOrder order = _MemoryOrder()) const noexcept {
+    compare_exchange_strong(expected, desired, order, order, MemoryScope());
+  }
+
   template <typename _MemoryOrder = MemoryOrder>
   DESUL_FUNCTION value_type
   fetch_add(value_type arg, _MemoryOrder order = _MemoryOrder()) const noexcept {
@@ -327,6 +418,37 @@ struct basic_atomic_ref<T*, MemoryOrder, MemoryScope, false, false> {
 
   DESUL_FUNCTION bool is_lock_free() const noexcept {
     return atomic_is_lock_free<sizeof(T*), required_alignment>();
+  }
+
+  template <typename SuccessMemoryOrder, typename FailureMemoryOrder>
+  DESUL_FUNCTION bool compare_exchange_weak(T*& expected,
+                                            T* desired,
+                                            SuccessMemoryOrder success,
+                                            FailureMemoryOrder failure) const noexcept {
+    return atomic_compare_exchange_weak(
+        _ptr, expected, desired, success, failure, MemoryScope());
+  }
+
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION bool compare_exchange_weak(
+      T*& expected, T* desired, _MemoryOrder order = _MemoryOrder()) const noexcept {
+    compare_exchange_weak(expected, desired, order, order, MemoryScope());
+  }
+
+  template <typename SuccessMemoryOrder, typename FailureMemoryOrder>
+  DESUL_FUNCTION bool compare_exchange_strong(
+      T*& expected,
+      T* desired,
+      SuccessMemoryOrder success,
+      FailureMemoryOrder failure) const noexcept {
+    return atomic_compare_exchange_strong(
+        _ptr, expected, desired, success, failure, MemoryScope());
+  }
+
+  template <typename _MemoryOrder = MemoryOrder>
+  DESUL_FUNCTION bool compare_exchange_strong(
+      T*& expected, T* desired, _MemoryOrder order = _MemoryOrder()) const noexcept {
+    compare_exchange_strong(expected, desired, order, order, MemoryScope());
   }
 
   template <typename _MemoryOrder = MemoryOrder>
