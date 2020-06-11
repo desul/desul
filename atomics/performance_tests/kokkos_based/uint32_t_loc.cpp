@@ -43,7 +43,7 @@
 */
 
 #include "PerfTestAtomics.hpp"
-#define MEMORY_SPACE CudaSpace
+#define MEMORY_SPACE DefaultExecutionSpace::memory_space
 #define EXECUTION_SPACE DefaultExecutionSpace
 #define SCALAR uint32_t
 #define SCALAR_NAME uint32_t
