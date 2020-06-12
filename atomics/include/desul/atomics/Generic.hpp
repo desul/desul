@@ -653,6 +653,21 @@ DESUL_INLINE_FUNCTION void atomic_dec(T* const dest,
   return atomic_sub(dest, T(1), order, scope);
 }
 
+namespace Impl {
+template <typename MemoryOrder>
+struct CmpExchFailureOrder {
+  using memory_order = std::conditional_t<
+      std::is_same<MemoryOrder, MemoryOrderAcqRel>{},
+      MemoryOrderAcquire,
+      std::conditional_t<std::is_same<MemoryOrder, MemoryOrderRelease>{},
+                         MemoryOrderRelaxed,
+                         MemoryOrder>>;
+};
+template <typename MemoryOrder>
+using cmpexch_failure_memory_order =
+    typename CmpExchFailureOrder<MemoryOrder>::memory_order;
+}  // namespace Impl
+
 template <typename T,
           class SuccessMemoryOrder,
           class FailureMemoryOrder,
