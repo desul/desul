@@ -119,6 +119,23 @@ struct LoadOper {
   static Scalar1 apply(const Scalar1& val1, const Scalar2&) { return val1; }
 };
 
+constexpr bool atomic_always_lock_free(std::size_t size) {
+  return size == 4 || size == 8
+#if defined(DESUL_HAVE_16BYTE_COMPARE_AND_SWAP)
+         || size == 16
+#endif
+      ;
+}
+
+template <std::size_t Size, std::size_t Align>
+DESUL_INLINE_FUNCTION bool atomic_is_lock_free() noexcept {
+  return Size == 4 || Size == 8
+#if defined(DESUL_HAVE_16BYTE_COMPARE_AND_SWAP)
+         || Size == 16
+#endif
+      ;
+}
+
 template <class Oper, typename T, class MemoryOrder, class MemoryScope>
 DESUL_INLINE_FUNCTION T
 atomic_fetch_oper(const Oper& op,
@@ -636,8 +653,41 @@ DESUL_INLINE_FUNCTION void atomic_dec(T* const dest,
   return atomic_sub(dest, T(1), order, scope);
 }
 
-}  // namespace desul
+// FIXME
+template <typename T,
+          class SuccessMemoryOrder,
+          class FailureMemoryOrder,
+          class MemoryScope>
+DESUL_INLINE_FUNCTION bool atomic_compare_exchange_strong(T* const dest,
+                                                          T& expected,
+                                                          T desired,
+                                                          SuccessMemoryOrder success,
+                                                          FailureMemoryOrder failure,
+                                                          MemoryScope scope) {
+  T const old = atomic_compare_exchange(dest, expected, desired, success, scope);
+  if (old != expected) {
+    expected = old;
+    return false;
+  } else {
+    return true;
+  }
+}
 
+template <typename T,
+          class SuccessMemoryOrder,
+          class FailureMemoryOrder,
+          class MemoryScope>
+DESUL_INLINE_FUNCTION bool atomic_compare_exchange_weak(T* const dest,
+                                                        T& expected,
+                                                        T desired,
+                                                        SuccessMemoryOrder success,
+                                                        FailureMemoryOrder failure,
+                                                        MemoryScope scope) {
+  return atomic_compare_exchange_strong(
+      dest, expected, desired, success, failure, scope);
+}
+
+}  // namespace desul
 
 #include <desul/atomics/GCC.hpp>
 #include <desul/atomics/CUDA.hpp>
