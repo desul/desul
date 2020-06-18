@@ -104,6 +104,21 @@ template <>
 struct CXXMemoryOrder<MemoryOrderRelease> {
   static constexpr std::memory_order value = std::memory_order_release;
 };
+namespace Impl {
+template <typename MemoryOrder>
+struct CmpExchFailureOrder {
+  using memory_order = std::conditional_t<
+      std::is_same<MemoryOrder, MemoryOrderAcqRel>{},
+      MemoryOrderAcquire,
+      std::conditional_t<std::is_same<MemoryOrder, MemoryOrderRelease>{},
+                         MemoryOrderRelaxed,
+                         MemoryOrder>>;
+};
+template <typename MemoryOrder>
+using cmpexch_failure_memory_order =
+    typename CmpExchFailureOrder<MemoryOrder>::memory_order;
+}  // namespace Impl
+
 }
 
 // We should in principle use std::numeric_limits, but that requires constexpr function support on device
