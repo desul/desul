@@ -653,6 +653,7 @@ DESUL_INLINE_FUNCTION void atomic_dec(T* const dest,
   return atomic_sub(dest, T(1), order, scope);
 }
 
+// FIXME
 template <typename T,
           class SuccessMemoryOrder,
           class FailureMemoryOrder,
@@ -665,7 +666,7 @@ DESUL_INLINE_FUNCTION bool atomic_compare_exchange_strong(T* const dest,
                                                           MemoryScope scope) {
   T const old = atomic_compare_exchange(dest, expected, desired, success, scope);
   if (old != expected) {
-    atomic_store(&expected, old, failure, scope);
+    expected = old;
     return false;
   } else {
     return true;
