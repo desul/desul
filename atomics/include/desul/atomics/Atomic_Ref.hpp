@@ -525,13 +525,13 @@ struct basic_atomic_ref<T*, MemoryOrder, MemoryScope, false, false> {
 }  // namespace Impl
 
 template <typename T, typename MemoryOrder, typename MemoryScope>
-struct atomic_ref : Impl::basic_atomic_ref<T, MemoryOrder, MemoryScope> {
-  explicit atomic_ref(T& obj) noexcept
+struct scoped_atomic_ref : Impl::basic_atomic_ref<T, MemoryOrder, MemoryScope> {
+  explicit scoped_atomic_ref(T& obj) noexcept
       : Impl::basic_atomic_ref<T, MemoryOrder, MemoryScope>(obj) {}
 
-  atomic_ref& operator=(atomic_ref const&) = delete;
+  scoped_atomic_ref& operator=(scoped_atomic_ref const&) = delete;
 
-  atomic_ref(atomic_ref const&) = default;
+  scoped_atomic_ref(scoped_atomic_ref const&) = default;
 
   using Impl::basic_atomic_ref<T, MemoryOrder, MemoryScope>::operator=;
 };
