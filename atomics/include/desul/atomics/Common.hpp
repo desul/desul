@@ -72,16 +72,23 @@ struct GCCMemoryOrder<MemoryOrderRelaxed> {
 };
 
 template <>
-struct GCCMemoryOrder<MemoryOrderSeqCst> {
-  static constexpr int value = __ATOMIC_SEQ_CST;
-};
-template <>
 struct GCCMemoryOrder<MemoryOrderAcquire> {
   static constexpr int value = __ATOMIC_ACQUIRE;
 };
+
 template <>
 struct GCCMemoryOrder<MemoryOrderRelease> {
   static constexpr int value = __ATOMIC_RELEASE;
+};
+
+template <>
+struct GCCMemoryOrder<MemoryOrderAcqRel> {
+  static constexpr int value = __ATOMIC_ACQ_REL;
+};
+
+template <>
+struct GCCMemoryOrder<MemoryOrderSeqCst> {
+  static constexpr int value = __ATOMIC_SEQ_CST;
 };
 
 template <class MemoryOrderDesul>
@@ -93,17 +100,25 @@ struct CXXMemoryOrder<MemoryOrderRelaxed> {
 };
 
 template <>
-struct CXXMemoryOrder<MemoryOrderSeqCst> {
-  static constexpr std::memory_order value = std::memory_order_seq_cst;
-};
-template <>
 struct CXXMemoryOrder<MemoryOrderAcquire> {
   static constexpr std::memory_order value = std::memory_order_acquire;
 };
+
 template <>
 struct CXXMemoryOrder<MemoryOrderRelease> {
   static constexpr std::memory_order value = std::memory_order_release;
 };
+
+template <>
+struct CXXMemoryOrder<MemoryOrderAcqRel> {
+  static constexpr std::memory_order value = std::memory_order_acq_rel;
+};
+
+template <>
+struct CXXMemoryOrder<MemoryOrderSeqCst> {
+  static constexpr std::memory_order value = std::memory_order_seq_cst;
+};
+
 namespace Impl {
 template <typename MemoryOrder>
 struct CmpExchFailureOrder {
