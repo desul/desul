@@ -9,6 +9,7 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #ifndef DESUL_ATOMICS_COMPARE_EXCHANGE_CUDA_HPP_
 #define DESUL_ATOMICS_COMPARE_EXCHANGE_CUDA_HPP_
 #include "desul/atomics/Common.hpp"
+#include "desul/atomics/Lock_Array_Cuda.hpp"
 
 #ifdef DESUL_HAVE_CUDA_ATOMICS
 namespace desul {
@@ -21,10 +22,22 @@ __device__ void atomic_thread_fence(MemoryOrderRelease, MemoryScopeDevice) {
 __device__ void atomic_thread_fence(MemoryOrderAcquire, MemoryScopeDevice) {
   __threadfence();
 }
+__device__ void atomic_thread_fence(MemoryOrderAcqRel, MemoryScopeDevice) {
+  __threadfence();
+}
+__device__ void atomic_thread_fence(MemoryOrderSeqCst, MemoryScopeDevice) {
+  __threadfence();
+}
 __device__ void atomic_thread_fence(MemoryOrderRelease, MemoryScopeCore) {
   __threadfence_block();
 }
 __device__ void atomic_thread_fence(MemoryOrderAcquire, MemoryScopeCore) {
+  __threadfence_block();
+}
+__device__ void atomic_thread_fence(MemoryOrderAcqRel, MemoryScopeCore) {
+  __threadfence_block();
+}
+__device__ void atomic_thread_fence(MemoryOrderSeqCst, MemoryScopeCore) {
   __threadfence_block();
 }
 #if (__CUDA_ARCH__>=600) || !defined(__NVCC__)
@@ -32,6 +45,12 @@ __device__ void atomic_thread_fence(MemoryOrderRelease, MemoryScopeNode) {
   __threadfence_system();
 }
 __device__ void atomic_thread_fence(MemoryOrderAcquire, MemoryScopeNode) {
+  __threadfence_system();
+}
+__device__ void atomic_thread_fence(MemoryOrderAcqRel, MemoryScopeNode) {
+  __threadfence_system();
+}
+__device__ void atomic_thread_fence(MemoryOrderSeqCst, MemoryScopeNode) {
   __threadfence_system();
 }
 #endif
@@ -160,5 +179,66 @@ __device__ typename std::enable_if<sizeof(T) == 8, T>::type atomic_compare_excha
 }
 }
 #endif
+
+#if defined(__CUDA_ARCH__) || !defined(__NVCC__)
+namespace desul {
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION 
+__device__ typename std::enable_if<(sizeof(T) != 8) && (sizeof(T) != 4), T>::type atomic_compare_exchange(
+    T* const dest, T compare, T value, MemoryOrder, MemoryScope scope) {
+  // This is a way to avoid dead lock in a warp or wave front
+  T return_val;
+  int done = 0;
+  unsigned int mask = DESUL_IMPL_ACTIVEMASK;
+  unsigned int active = DESUL_IMPL_BALLOT_MASK(mask, 1);
+  unsigned int done_active = 0;
+  while (active != done_active) {
+    if (!done) {
+      if (Impl::lock_address_cuda((void*)dest, scope)) {
+        if(std::is_same<MemoryOrder,MemoryOrderSeqCst>::value) atomic_thread_fence(MemoryOrderRelease(),scope);
+        atomic_thread_fence(MemoryOrderAcquire(),scope);
+        return_val = *dest;
+        if(return_val == compare) {
+          *dest = value;
+          atomic_thread_fence(MemoryOrderRelease(),scope);
+        }
+        Impl::unlock_address_cuda((void*)dest, scope);
+        done = 1;
+      }
+    }
+    done_active = DESUL_IMPL_BALLOT_MASK(mask, done);
+  }
+  return return_val;
+}
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION 
+__device__ typename std::enable_if<(sizeof(T) != 8) && (sizeof(T) != 4), T>::type atomic_exchange(
+    T* const dest, T value, MemoryOrder, MemoryScope scope) {
+  // This is a way to avoid dead lock in a warp or wave front
+  T return_val;
+  int done = 0;
+  unsigned int mask = DESUL_IMPL_ACTIVEMASK;
+  unsigned int active = DESUL_IMPL_BALLOT_MASK(mask, 1);
+  unsigned int done_active = 0;
+  while (active != done_active) {
+    if (!done) {
+      if (Impl::lock_address_cuda((void*)dest, scope)) {
+        if(std::is_same<MemoryOrder,MemoryOrderSeqCst>::value) atomic_thread_fence(MemoryOrderRelease(),scope);
+        atomic_thread_fence(MemoryOrderAcquire(),scope);
+        return_val = *dest;
+        *dest = value;
+        atomic_thread_fence(MemoryOrderRelease(),scope);
+        Impl::unlock_address_cuda((void*)dest, scope);
+        done = 1;
+      }
+    }
+    done_active = DESUL_IMPL_BALLOT_MASK(mask, done);
+  }
+  return return_val;
+}
+}
+#endif
+
+
 #endif
 #endif

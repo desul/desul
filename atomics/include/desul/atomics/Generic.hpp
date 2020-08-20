@@ -565,10 +565,10 @@ DESUL_INLINE_FUNCTION T atomic_rshift_fetch(T* const dest,
 // Other atomics
 
 template <typename T, class MemoryOrder, class MemoryScope>
-DESUL_INLINE_FUNCTION T atomic_load(T* const dest,
+DESUL_INLINE_FUNCTION T atomic_load(const T* const dest,
                                     MemoryOrder order,
                                     MemoryScope scope) {
-  return Impl::atomic_fetch_oper(Impl::LoadOper<T, const T>(), dest, T(), order, scope);
+  return Impl::atomic_fetch_oper(Impl::LoadOper<T, const T>(), const_cast<T*>(dest), T(), order, scope);
 }
 
 template <typename T, class MemoryOrder, class MemoryScope>
@@ -626,6 +626,19 @@ DESUL_INLINE_FUNCTION void atomic_max(T* const dest,
                                       MemoryScope scope) {
   (void)atomic_fetch_max(dest, val, order, scope);
 }
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_inc_fetch(T* const dest, MemoryOrder order, MemoryScope scope) {
+  return atomic_add_fetch(dest, T(1), order, scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope>
+DESUL_INLINE_FUNCTION T
+atomic_dec_fetch(T* const dest, MemoryOrder order, MemoryScope scope) {
+  return atomic_sub_fetch(dest, T(1), order, scope);
+}
+
 template <typename T, class MemoryOrder, class MemoryScope>
 DESUL_INLINE_FUNCTION T atomic_fetch_inc(T* const dest,
                                          MemoryOrder order,
