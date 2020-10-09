@@ -155,7 +155,9 @@ struct atomic_compare_exchange_type<16> {
 };
 
 template<class T>
-using dont_deduce_this_parameter_t = T;
+struct dont_deduce_this_parameter { using type = T; };
+template<class T>
+using dont_deduce_this_parameter_t = typename dont_deduce_this_parameter<T>::type;
 
 template <class Oper, typename T, class MemoryOrder, class MemoryScope,
   // equivalent to:
