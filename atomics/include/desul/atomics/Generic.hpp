@@ -25,6 +25,10 @@ struct MaxOper {
   static Scalar1 apply(const Scalar1& val1, const Scalar2& val2) {
     return (val1 > val2 ? val1 : val2);
   }
+  DESUL_FORCEINLINE_FUNCTION
+  static constexpr bool check_early_exit(Scalar1 const& val1, Scalar2 const& val2) {
+    return val1 > val2;
+  }
 };
 
 template <class Scalar1, class Scalar2>
@@ -33,7 +37,34 @@ struct MinOper {
   static Scalar1 apply(const Scalar1& val1, const Scalar2& val2) {
     return (val1 < val2 ? val1 : val2);
   }
+  DESUL_FORCEINLINE_FUNCTION
+  static constexpr bool check_early_exit(Scalar1 const& val1, Scalar2 const& val2) {
+    return val1 < val2;
+  }
 };
+
+template <typename Op, typename Scalar1, typename Scalar2, typename = bool>
+struct may_exit_early : std::false_type {};
+
+template <typename Op, typename Scalar1, typename Scalar2>
+struct may_exit_early<Op,
+                      Scalar1,
+                      Scalar2,
+                      decltype(Op::check_early_exit(std::declval<Scalar1 const&>(),
+                                                    std::declval<Scalar2 const&>()))>
+    : std::true_type {};
+
+template <typename Op, typename Scalar1, typename Scalar2>
+constexpr typename std::enable_if<may_exit_early<Op, Scalar1, Scalar2>{}, bool>::type
+check_early_exit(Op const&, Scalar1 const& val1, Scalar2 const& val2) {
+  return Op::check_early_exit(val1, val2);
+}
+
+template <typename Op, typename Scalar1, typename Scalar2>
+constexpr typename std::enable_if<!may_exit_early<Op, Scalar1, Scalar2>{}, bool>::type
+check_early_exit(Op const&, Scalar1 const&, Scalar2 const&) {
+  return false;
+}
 
 template <class Scalar1, class Scalar2>
 struct AddOper {
@@ -175,6 +206,7 @@ atomic_fetch_oper(const Oper& op,
   cas_t assume = oldval;
 
   do {
+    if (Impl::check_early_exit(op, reinterpret_cast<T&>(oldval), val)) return reinterpret_cast<T&>(oldval);
     assume = oldval;
     T newval = op.apply(reinterpret_cast<T&>(assume), val);
     oldval = desul::atomic_compare_exchange(
@@ -200,6 +232,7 @@ atomic_oper_fetch(const Oper& op,
   T newval = val;
   cas_t assume = oldval;
   do {
+    if (Impl::check_early_exit(op, reinterpret_cast<T&>(oldval), val)) return reinterpret_cast<T&>(oldval);
     assume = oldval;
     newval = op.apply(reinterpret_cast<T&>(assume), val);
     oldval = desul::atomic_compare_exchange(
