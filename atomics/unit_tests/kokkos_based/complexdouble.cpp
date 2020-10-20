@@ -47,6 +47,7 @@
 namespace Test {
 TEST(TEST_CATEGORY, atomic_operations_complexdouble) {
   DESUL_ENSURE_CUDA_LOCK_ARRAYS_ON_DEVICE();
+  DESUL_ENSURE_HIP_LOCK_ARRAYS_ON_DEVICE();
   const int start = 1;  // Avoid zero for division.
   const int end = 11;
   for (int i = start; i < end; ++i) {

@@ -47,14 +47,15 @@
 namespace Test {
 TEST(TEST_CATEGORY, atomic_operations_double) {
   DESUL_ENSURE_CUDA_LOCK_ARRAYS_ON_DEVICE();
+  DESUL_ENSURE_HIP_LOCK_ARRAYS_ON_DEVICE();
   const int start = 2;  // Avoid zero for division.
   const int end = 11;
-  for(int test = 1; test<7; test++)
-  for (int i = start; i < end; ++i) {
-    ASSERT_TRUE(
-        (TestAtomicOperations::AtomicOperationsTestNonIntegralType<double,
-                                                                   TEST_EXECSPACE>(
-            start, end - i, test)));
-  }
+  for (int test = 1; test < 7; test++)
+    for (int i = start; i < end; ++i) {
+      ASSERT_TRUE(
+          (TestAtomicOperations::AtomicOperationsTestNonIntegralType<double,
+                                                                     TEST_EXECSPACE>(
+              start, end - i, test)));
+    }
 }
 }  // namespace Test
