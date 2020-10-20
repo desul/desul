@@ -315,6 +315,24 @@ atomic_fetch_oper(const Oper& op,
   // This is a way to avoid dead lock in a warp or wave front
   T return_val;
   int done = 0;
+#ifdef __HIPCC__
+  unsigned int active = DESUL_IMPL_BALLOT_MASK(1);
+  unsigned int done_active = 0;
+  while (active != done_active) {
+    if (!done) {
+      if (Impl::lock_address_hip((void*)dest, scope)) {
+        atomic_thread_fence(MemoryOrderAcquire(), scope);
+        return_val = *dest;
+        *dest = op.apply(return_val, val);
+        atomic_thread_fence(MemoryOrderRelease(), scope);
+        Impl::unlock_address_hip((void*)dest, scope);
+        done = 1;
+      }
+    }
+    done_active = DESUL_IMPL_BALLOT_MASK(done);
+  }
+  return return_val;
+#else
   unsigned int mask = DESUL_IMPL_ACTIVEMASK;
   unsigned int active = DESUL_IMPL_BALLOT_MASK(mask, 1);
   unsigned int done_active = 0;
@@ -332,6 +350,7 @@ atomic_fetch_oper(const Oper& op,
     done_active = DESUL_IMPL_BALLOT_MASK(mask, done);
   }
   return return_val;
+#endif
 #else
   static_assert(false, "Unimplemented lock based attomic\n");
   return val;
@@ -364,6 +383,24 @@ atomic_oper_fetch(const Oper& op,
   // This is a way to avoid dead lock in a warp or wave front
   T return_val;
   int done = 0;
+#ifdef __HIPCC__
+  unsigned int active = DESUL_IMPL_BALLOT_MASK(1);
+  unsigned int done_active = 0;
+  while (active != done_active) {
+    if (!done) {
+      if (Impl::lock_address_hip((void*)dest, scope)) {
+        atomic_thread_fence(MemoryOrderAcquire(), scope);
+        return_val = op.apply(*dest, val);
+        *dest = return_val;
+        atomic_thread_fence(MemoryOrderRelease(), scope);
+        Impl::unlock_address_hip((void*)dest, scope);
+        done = 1;
+      }
+    }
+    done_active = DESUL_IMPL_BALLOT_MASK(done);
+  }
+  return return_val;
+#else
   unsigned int mask = DESUL_IMPL_ACTIVEMASK;
   unsigned int active = DESUL_IMPL_BALLOT_MASK(mask, 1);
   unsigned int done_active = 0;
@@ -381,6 +418,7 @@ atomic_oper_fetch(const Oper& op,
     done_active = DESUL_IMPL_BALLOT_MASK(mask, done);
   }
   return return_val;
+#endif
 #else
   static_assert(false, "Unimplemented lock based attomic\n");
   return val;
@@ -702,6 +740,7 @@ DESUL_INLINE_FUNCTION bool atomic_compare_exchange_weak(T* const dest,
 
 }  // namespace desul
 
-#include <desul/atomics/GCC.hpp>
 #include <desul/atomics/CUDA.hpp>
+#include <desul/atomics/GCC.hpp>
+#include <desul/atomics/HIP.hpp>
 #endif
