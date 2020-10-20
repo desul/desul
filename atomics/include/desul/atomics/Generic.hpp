@@ -709,12 +709,13 @@ template <typename T,
           class SuccessMemoryOrder,
           class FailureMemoryOrder,
           class MemoryScope>
-DESUL_INLINE_FUNCTION bool atomic_compare_exchange_strong(T* const dest,
-                                                          T& expected,
-                                                          T desired,
-                                                          SuccessMemoryOrder success,
-                                                          FailureMemoryOrder failure,
-                                                          MemoryScope scope) {
+DESUL_INLINE_FUNCTION bool atomic_compare_exchange_strong(
+    T* const dest,
+    T& expected,
+    T desired,
+    SuccessMemoryOrder success,
+    FailureMemoryOrder /*failure*/,
+    MemoryScope scope) {
   T const old = atomic_compare_exchange(dest, expected, desired, success, scope);
   if (old != expected) {
     expected = old;
