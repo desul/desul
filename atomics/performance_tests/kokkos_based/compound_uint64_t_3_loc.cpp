@@ -43,6 +43,8 @@
 */
 
 #include "PerfTestAtomics.hpp"
+// TODO: Not supported with OpenMPTarget yet
+#ifndef KOKKOS_ENABLE_OPENMPTARGET
 #define MEMORY_SPACE DefaultExecutionSpace::memory_space
 #define EXECUTION_SPACE DefaultExecutionSpace
 #define SCALAR compound_type<uint64_t,3>
@@ -83,4 +85,5 @@
 #define MEMORY_OP atomic_fetch_max_op
 #include "PerfTestAtomicsLoc_Scope.inc"
 #undef MEMORY_OP
+#endif
 

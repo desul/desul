@@ -11,9 +11,11 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 // Macros
 
-#if defined(__GNUC__) &&                              \
-    (!defined(__CUDA_ARCH__) || !defined(__NVCC__) || \
-     !defined(__HIP_DEVICE_COMPILE) || !defined(__HIP_PLATFORM_HCC__))
+#if defined(__GNUC__) && \
+    (!defined(__CUDA_ARCH__) || !defined(__NVCC__)) && \
+    (!defined(__HIP_DEVICE_COMPILE) || !defined(__HIP_PLATFORM_HCC__)) && \
+    !defined(DESUL_HAVE_OPENMP_ATOMICS) && \
+    !defined(DESUL_HAVE_SERIAL_ATOMICS)
 #define DESUL_HAVE_GCC_ATOMICS
 #endif
 
@@ -43,7 +45,7 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #define DESUL_FUNCTION
 #endif
 
-#if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__)
+#if !defined(DESUL_HAVE_GPU_LIKE_PROGRESS)
 #define DESUL_HAVE_FORWARD_PROGRESS
 #endif
 
