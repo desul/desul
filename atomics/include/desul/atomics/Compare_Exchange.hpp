@@ -1,4 +1,4 @@
-/* 
+/*
 Copyright (c) 2019, Lawrence Livermore National Security, LLC
 and DESUL project contributors. See the COPYRIGHT file for details.
 Source: https://github.com/desul/desul
@@ -22,5 +22,8 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #endif
 #ifdef DESUL_HAVE_CUDA_ATOMICS
 #include "desul/atomics/Compare_Exchange_CUDA.hpp"
+#endif
+#ifdef DESUL_HAVE_HIP_ATOMICS
+#include "desul/atomics/Compare_Exchange_HIP.hpp"
 #endif
 #endif

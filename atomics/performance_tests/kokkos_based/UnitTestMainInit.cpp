@@ -57,6 +57,10 @@ int main(int argc, char *argv[]) {
   DESUL_ENSURE_CUDA_LOCK_ARRAYS_ON_DEVICE();
 #endif
 
+#ifdef DESUL_HAVE_HIP_ATOMICS
+  DESUL_ENSURE_HIP_LOCK_ARRAYS_ON_DEVICE();
+#endif
+
   ::testing::InitGoogleTest(&argc, argv);
 
   int result = RUN_ALL_TESTS();
