@@ -150,45 +150,6 @@ struct LoadOper {
   static Scalar1 apply(const Scalar1& val1, const Scalar2&) { return val1; }
 };
 
-constexpr bool atomic_always_lock_free(std::size_t size) {
-  return size == 4 || size == 8
-#if defined(DESUL_HAVE_16BYTE_COMPARE_AND_SWAP)
-         || size == 16
-#endif
-      ;
-}
-
-template <std::size_t Size, std::size_t Align>
-DESUL_INLINE_FUNCTION bool atomic_is_lock_free() noexcept {
-  return Size == 4 || Size == 8
-#if defined(DESUL_HAVE_16BYTE_COMPARE_AND_SWAP)
-         || Size == 16
-#endif
-      ;
-}
-
-template<std::size_t N>
-struct atomic_compare_exchange_type;
-
-template<>
-struct atomic_compare_exchange_type<4> {
-  using type = int32_t;
-};
-
-template<>
-struct atomic_compare_exchange_type<8> {
-  using type = int64_t;
-};
-
-template<>
-struct atomic_compare_exchange_type<16> {
-  using type = Dummy16ByteValue;
-};
-
-template<class T>
-struct dont_deduce_this_parameter { using type = T; };
-template<class T>
-using dont_deduce_this_parameter_t = typename dont_deduce_this_parameter<T>::type;
 
 template <class Oper, typename T, class MemoryOrder, class MemoryScope,
   // equivalent to:
@@ -695,4 +656,5 @@ DESUL_INLINE_FUNCTION bool atomic_compare_exchange_weak(T* const dest,
 #include <desul/atomics/CUDA.hpp>
 #include <desul/atomics/GCC.hpp>
 #include <desul/atomics/HIP.hpp>
+#include <desul/atomics/OpenMP.hpp>
 #endif
