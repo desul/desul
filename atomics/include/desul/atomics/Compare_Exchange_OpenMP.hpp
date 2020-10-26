@@ -16,8 +16,8 @@ namespace desul {
 #if _OPENMP > 201800
 // atomic_thread_fence for Core Scope
 inline void atomic_thread_fence(MemoryOrderSeqCst, MemoryScopeCore) {
-  // There is no seq_cst flush in OpenMP, isn't it the same anyway for fence?
-  #pragma omp flush acq_rel
+  // There is no explicit seq_cst flush in OpenMP
+  #pragma omp flush
 }
 inline void atomic_thread_fence(MemoryOrderAcqRel, MemoryScopeCore) {
   #pragma omp flush acq_rel
@@ -30,8 +30,8 @@ inline void atomic_thread_fence(MemoryOrderAcquire, MemoryScopeCore) {
 }
 // atomic_thread_fence for Device Scope
 inline void atomic_thread_fence(MemoryOrderSeqCst, MemoryScopeDevice) {
-  // There is no seq_cst flush in OpenMP, isn't it the same anyway for fence?
-  #pragma omp flush acq_rel
+  // There is no explicit seq_cst flush in OpenMP
+  #pragma omp flush
 }
 inline void atomic_thread_fence(MemoryOrderAcqRel, MemoryScopeDevice) {
   #pragma omp flush acq_rel
