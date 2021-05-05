@@ -16,41 +16,41 @@ namespace desul {
 // Only include if compiling device code, or the CUDA compiler is not NVCC (i.e. Clang)
 // atomic_thread_fence implementation
 #if defined(__CUDA_ARCH__) || !defined(__NVCC__)
-__device__ void atomic_thread_fence(MemoryOrderRelease, MemoryScopeDevice) {
+__device__ inline void atomic_thread_fence(MemoryOrderRelease, MemoryScopeDevice) {
   __threadfence();
 }
-__device__ void atomic_thread_fence(MemoryOrderAcquire, MemoryScopeDevice) {
+__device__ inline void atomic_thread_fence(MemoryOrderAcquire, MemoryScopeDevice) {
   __threadfence();
 }
-__device__ void atomic_thread_fence(MemoryOrderAcqRel, MemoryScopeDevice) {
+__device__ inline void atomic_thread_fence(MemoryOrderAcqRel, MemoryScopeDevice) {
   __threadfence();
 }
-__device__ void atomic_thread_fence(MemoryOrderSeqCst, MemoryScopeDevice) {
+__device__ inline void atomic_thread_fence(MemoryOrderSeqCst, MemoryScopeDevice) {
   __threadfence();
 }
-__device__ void atomic_thread_fence(MemoryOrderRelease, MemoryScopeCore) {
+__device__ inline void atomic_thread_fence(MemoryOrderRelease, MemoryScopeCore) {
   __threadfence_block();
 }
-__device__ void atomic_thread_fence(MemoryOrderAcquire, MemoryScopeCore) {
+__device__ inline void atomic_thread_fence(MemoryOrderAcquire, MemoryScopeCore) {
   __threadfence_block();
 }
-__device__ void atomic_thread_fence(MemoryOrderAcqRel, MemoryScopeCore) {
+__device__ inline void atomic_thread_fence(MemoryOrderAcqRel, MemoryScopeCore) {
   __threadfence_block();
 }
-__device__ void atomic_thread_fence(MemoryOrderSeqCst, MemoryScopeCore) {
+__device__ inline void atomic_thread_fence(MemoryOrderSeqCst, MemoryScopeCore) {
   __threadfence_block();
 }
 #if (__CUDA_ARCH__>=600) || !defined(__NVCC__)
-__device__ void atomic_thread_fence(MemoryOrderRelease, MemoryScopeNode) {
+__device__ inline void atomic_thread_fence(MemoryOrderRelease, MemoryScopeNode) {
   __threadfence_system();
 }
-__device__ void atomic_thread_fence(MemoryOrderAcquire, MemoryScopeNode) {
+__device__ inline void atomic_thread_fence(MemoryOrderAcquire, MemoryScopeNode) {
   __threadfence_system();
 }
-__device__ void atomic_thread_fence(MemoryOrderAcqRel, MemoryScopeNode) {
+__device__ inline void atomic_thread_fence(MemoryOrderAcqRel, MemoryScopeNode) {
   __threadfence_system();
 }
-__device__ void atomic_thread_fence(MemoryOrderSeqCst, MemoryScopeNode) {
+__device__ inline void atomic_thread_fence(MemoryOrderSeqCst, MemoryScopeNode) {
   __threadfence_system();
 }
 #endif
@@ -183,7 +183,6 @@ __device__ typename std::enable_if<sizeof(T) == 8, T>::type atomic_compare_excha
 #if defined(__CUDA_ARCH__) || !defined(__NVCC__)
 namespace desul {
 template <typename T, class MemoryOrder, class MemoryScope>
-DESUL_INLINE_FUNCTION 
 __device__ typename std::enable_if<(sizeof(T) != 8) && (sizeof(T) != 4), T>::type atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrder, MemoryScope scope) {
   // This is a way to avoid dead lock in a warp or wave front
@@ -211,7 +210,6 @@ __device__ typename std::enable_if<(sizeof(T) != 8) && (sizeof(T) != 4), T>::typ
   return return_val;
 }
 template <typename T, class MemoryOrder, class MemoryScope>
-DESUL_INLINE_FUNCTION 
 __device__ typename std::enable_if<(sizeof(T) != 8) && (sizeof(T) != 4), T>::type atomic_exchange(
     T* const dest, T value, MemoryOrder, MemoryScope scope) {
   // This is a way to avoid dead lock in a warp or wave front
