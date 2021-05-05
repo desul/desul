@@ -16,8 +16,8 @@ namespace desul {
 #if _OPENMP > 201800
 // atomic_thread_fence for Core Scope
 inline void atomic_thread_fence(MemoryOrderSeqCst, MemoryScopeCore) {
-  // There is no explicit seq_cst flush in OpenMP
-  #pragma omp flush
+  // There is no seq_cst flush in OpenMP, isn't it the same anyway for fence?
+  #pragma omp flush acq_rel
 }
 inline void atomic_thread_fence(MemoryOrderAcqRel, MemoryScopeCore) {
   #pragma omp flush acq_rel
@@ -30,8 +30,8 @@ inline void atomic_thread_fence(MemoryOrderAcquire, MemoryScopeCore) {
 }
 // atomic_thread_fence for Device Scope
 inline void atomic_thread_fence(MemoryOrderSeqCst, MemoryScopeDevice) {
-  // There is no explicit seq_cst flush in OpenMP
-  #pragma omp flush
+  // There is no seq_cst flush in OpenMP, isn't it the same anyway for fence?
+  #pragma omp flush acq_rel
 }
 inline void atomic_thread_fence(MemoryOrderAcqRel, MemoryScopeDevice) {
   #pragma omp flush acq_rel
@@ -99,6 +99,14 @@ std::enable_if_t<Impl::atomic_always_lock_free(sizeof(T)),T> atomic_compare_exch
 }
 // Make 16 byte cas work on host at least (is_initial_device check, note this requires C++17)
 #if __cplusplus>=201703L
+
+#if defined(__clang__) && (__clang_major__>=7)
+// Disable warning for large atomics on clang 7 and up (checked with godbolt)
+// error: large atomic operation may incur significant performance penalty [-Werror,-Watomic-alignment]
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Watomic-alignment"
+#endif
+
 template <typename T, class MemoryOrder, class MemoryScope>
 std::enable_if_t<!Impl::atomic_always_lock_free(sizeof(T)) && (sizeof(T)==16),T> atomic_compare_exchange(
     T* dest, T compare, T value, MemoryOrder, MemoryScope) {
@@ -110,6 +118,9 @@ std::enable_if_t<!Impl::atomic_always_lock_free(sizeof(T)) && (sizeof(T)==16),T>
     return value;
   }
 }
+#if defined(__clang__) && (__clang_major__>=7)
+#pragma GCC diagnostic pop
+#endif
 #endif
 
 }  // namespace desul
