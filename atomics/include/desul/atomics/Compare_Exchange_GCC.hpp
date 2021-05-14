@@ -17,13 +17,21 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #endif
 namespace desul {
 
+#if defined(__clang__) && (__clang_major__>=7) && !defined(__APPLE__)
+// Disable warning for large atomics on clang 7 and up (checked with godbolt)
+// error: large atomic operation may incur significant performance penalty [-Werror,-Watomic-alignment]
+// https://godbolt.org/z/G7YhqhbG6
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Watomic-alignment"
+#endif
 template<class MemoryOrder, class MemoryScope>
 void atomic_thread_fence(MemoryOrder, MemoryScope) {
   __atomic_thread_fence(GCCMemoryOrder<MemoryOrder>::value);
 }
 
 template <typename T, class MemoryOrder, class MemoryScope>
-T atomic_exchange(
+std::enable_if_t<std::is_trivially_copyable<T>::value, T>
+atomic_exchange(
     T* dest, T value, MemoryOrder, MemoryScope) {
   T return_val;
   __atomic_exchange(
@@ -34,7 +42,8 @@ T atomic_exchange(
 // Failure mode for atomic_compare_exchange_n cannot be RELEASE nor ACQREL so
 // Those two get handled separatly.
 template <typename T, class MemoryOrder, class MemoryScope>
-T atomic_compare_exchange(
+std::enable_if_t<std::is_trivially_copyable<T>::value, T>
+atomic_compare_exchange(
     T* dest, T compare, T value, MemoryOrder, MemoryScope) {
   (void)__atomic_compare_exchange(
       dest, &compare, &value, false, GCCMemoryOrder<MemoryOrder>::value, GCCMemoryOrder<MemoryOrder>::value);
@@ -42,7 +51,8 @@ T atomic_compare_exchange(
 }
 
 template <typename T, class MemoryScope>
-T atomic_compare_exchange(
+std::enable_if_t<std::is_trivially_copyable<T>::value, T>
+atomic_compare_exchange(
     T* dest, T compare, T value, MemoryOrderRelease, MemoryScope) {
   (void)__atomic_compare_exchange(
       dest, &compare, &value, false, __ATOMIC_RELEASE, __ATOMIC_RELAXED);
@@ -50,12 +60,17 @@ T atomic_compare_exchange(
 }
 
 template <typename T, class MemoryScope>
-T atomic_compare_exchange(
+std::enable_if_t<std::is_trivially_copyable<T>::value, T>
+atomic_compare_exchange(
     T* dest, T compare, T value, MemoryOrderAcqRel, MemoryScope) {
   (void)__atomic_compare_exchange(
       dest, &compare, &value, false, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE);
   return compare;
 }
+
+#if defined(__clang__) && (__clang_major__>=7) && !defined(__APPLE__)
+#pragma GCC diagnostic pop
+#endif
 }  // namespace desul
 #endif
 #endif
