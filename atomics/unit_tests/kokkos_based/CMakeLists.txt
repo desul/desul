@@ -1,4 +1,4 @@
-if(ENABLE_TESTS)
+if(DESUL_ENABLE_TESTS)
 find_package(Kokkos 3 REQUIRED)
 
 # Make sure that Kokkos was built with the requested backends
