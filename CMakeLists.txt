@@ -9,6 +9,8 @@ endif()
 
 include(cmake/blt_boilerplate.cmake)
 
+cmake_dependent_option(DESUL_ENABLE_TESTS "Build tests" On "ENABLE_TESTS" Off)
+
 # list of backends to add as dependencies
 if(ENABLE_OPENMP)
   list(APPEND DESUL_BACKENDS openmp)

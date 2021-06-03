@@ -1,4 +1,4 @@
-if(ENABLE_TESTS)
+if(DESUL_ENABLE_TESTS)
 find_package(Kokkos 3 REQUIRED)
 blt_add_library(NAME kokkos_perf_test_main
                 SOURCES UnitTestMainInit.cpp
