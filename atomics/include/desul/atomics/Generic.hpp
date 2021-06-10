@@ -262,6 +262,16 @@ atomic_fetch_oper(const Oper& op,
     done_active = DESUL_IMPL_BALLOT_MASK(done);
   }
   return return_val;
+// FIXME_SYCL not implemented
+#elif defined(__SYCL_DEVICE_ONLY__)
+  (void)op;
+  (void)dest;
+  (void)scope;
+  (void)return_val;
+  (void)done;
+
+  assert(false);
+  return val;
 #else
   unsigned int mask = DESUL_IMPL_ACTIVEMASK;
   unsigned int active = DESUL_IMPL_BALLOT_MASK(mask, 1);
@@ -329,6 +339,15 @@ atomic_oper_fetch(const Oper& op,
     done_active = DESUL_IMPL_BALLOT_MASK(done);
   }
   return return_val;
+  // FIXME_SYCL not implemented
+#elif defined(__SYCL_DEVICE_ONLY__)
+  (void)op;
+  (void)dest;
+  (void)scope;
+  (void)done;
+
+  assert(false);
+  return val;
 #else
   unsigned int mask = DESUL_IMPL_ACTIVEMASK;
   unsigned int active = DESUL_IMPL_BALLOT_MASK(mask, 1);
@@ -693,5 +712,6 @@ DESUL_INLINE_FUNCTION bool atomic_compare_exchange_weak(T* const dest,
 #include <desul/atomics/GCC.hpp>
 #include <desul/atomics/HIP.hpp>
 #include <desul/atomics/OpenMP.hpp>
+#include <desul/atomics/SYCL.hpp>
 #pragma GCC diagnostic pop
 #endif
