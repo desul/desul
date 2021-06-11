@@ -36,7 +36,7 @@ struct is_sycl_atomic_type {
 // Atomic Add
 template<class T, class MemoryOrder/*, class MemoryScope*/>
 inline
-typename std::enable_if<Impl::is_sycl_atomic_type<T>::value,T>::type
+typename std::enable_if_t<Impl::is_sycl_atomic_type<T>::value,T>
 atomic_fetch_add(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
   sycl_atomic::atomic_ref<
     T,
@@ -50,7 +50,7 @@ atomic_fetch_add(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
 // Atomic Sub
 template<class T, class MemoryOrder/*, class MemoryScope*/>
 inline
-typename std::enable_if<Impl::is_sycl_atomic_type<T>::value,T>::type
+typename std::enable_if_t<Impl::is_sycl_atomic_type<T>::value,T>
 atomic_fetch_sub(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
   sycl_atomic::atomic_ref<
     T,
@@ -64,7 +64,7 @@ atomic_fetch_sub(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
 // Atomic Max
 template<class T, class MemoryOrder/*, class MemoryScope*/>
 inline
-typename std::enable_if<Impl::is_sycl_atomic_type<T>::value,T>::type
+typename std::enable_if_t<Impl::is_sycl_atomic_type<T>::value,T>
 atomic_fetch_max(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
   sycl_atomic::atomic_ref<
     T,
@@ -78,7 +78,7 @@ atomic_fetch_max(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
 // Atomic Min
 template<class T, class MemoryOrder/*, class MemoryScope*/>
 inline
-typename std::enable_if<Impl::is_sycl_atomic_type<T>::value,T>::type
+typename std::enable_if_t<Impl::is_sycl_atomic_type<T>::value,T>
 atomic_fetch_min(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
   sycl_atomic::atomic_ref<
     T,
@@ -92,7 +92,7 @@ atomic_fetch_min(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
 // Atomic And
 template<class T, class MemoryOrder/*, class MemoryScope*/>
 inline
-typename std::enable_if<Impl::is_sycl_atomic_type<T>::value,T>::type
+typename std::enable_if_t<Impl::is_sycl_atomic_type<T>::value,T>
 atomic_fetch_and(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
   sycl_atomic::atomic_ref<
     T,
@@ -106,7 +106,7 @@ atomic_fetch_and(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
 // Atomic XOR
 template<class T, class MemoryOrder/*, class MemoryScope*/>
 inline
-typename std::enable_if<Impl::is_sycl_atomic_type<T>::value,T>::type
+typename std::enable_if_t<Impl::is_sycl_atomic_type<T>::value,T>
 atomic_fetch_xor(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
   sycl_atomic::atomic_ref<
     T,
@@ -120,7 +120,7 @@ atomic_fetch_xor(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
 // Atomic OR
 template<class T, class MemoryOrder/*, class MemoryScope*/>
 inline
-typename std::enable_if<Impl::is_sycl_atomic_type<T>::value,T>::type
+typename std::enable_if_t<Impl::is_sycl_atomic_type<T>::value,T>
 atomic_fetch_or(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
   sycl_atomic::atomic_ref<
     T,

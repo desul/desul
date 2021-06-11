@@ -30,7 +30,7 @@ inline void atomic_thread_fence(MemoryOrder, MemoryScope) {
 }
 
 template <typename T, class MemoryOrder, class MemoryScope>
-typename std::enable_if<sizeof(T) == 4, T>::type atomic_compare_exchange(
+typename std::enable_if_t<sizeof(T) == 4, T> atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrder, MemoryScope) {
   static_assert(sizeof(unsigned int) == 4, "this function assumes an unsigned int is 32-bit");
   sycl_atomic::atomic_ref<
@@ -45,7 +45,7 @@ typename std::enable_if<sizeof(T) == 4, T>::type atomic_compare_exchange(
   return compare;
 }
 template <typename T, class MemoryOrder, class MemoryScope>
-typename std::enable_if<sizeof(T) == 8, T>::type atomic_compare_exchange(
+typename std::enable_if_t<sizeof(T) == 8, T> atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrder, MemoryScope) {
   static_assert(sizeof(unsigned long long int) == 8, "this function assumes an unsigned long long  is 64-bit");
   sycl_atomic::atomic_ref<
@@ -61,7 +61,7 @@ typename std::enable_if<sizeof(T) == 8, T>::type atomic_compare_exchange(
 }
 
 template <typename T, class MemoryOrder, class MemoryScope>
-typename std::enable_if<sizeof(T) == 4, T>::type atomic_exchange(
+typename std::enable_if_t<sizeof(T) == 4, T> atomic_exchange(
     T* const dest, T value, MemoryOrder, MemoryScope) {
   static_assert(sizeof(unsigned int) == 4, "this function assumes an unsigned int is 32-bit");
   sycl_atomic::atomic_ref<
@@ -75,7 +75,7 @@ typename std::enable_if<sizeof(T) == 4, T>::type atomic_exchange(
   return reinterpret_cast<T&>(return_val);
 }
 template <typename T, class MemoryOrder, class MemoryScope>
-typename std::enable_if<sizeof(T) == 8, T>::type atomic_exchange(
+typename std::enable_if_t<sizeof(T) == 8, T> atomic_exchange(
     T* const dest, T value, MemoryOrder, MemoryScope) {
   static_assert(sizeof(unsigned long long int) == 8, "this function assumes an unsigned long long  is 64-bit");
   sycl_atomic::atomic_ref<
@@ -91,7 +91,7 @@ typename std::enable_if<sizeof(T) == 8, T>::type atomic_exchange(
 }
 
 template <typename T, class MemoryOrder, class MemoryScope>
-typename std::enable_if<(sizeof(T) != 8) && (sizeof(T) != 4), T>::type atomic_compare_exchange(
+typename std::enable_if_t<(sizeof(T) != 8) && (sizeof(T) != 4), T> atomic_compare_exchange(
     T* const /*dest*/, T compare, T /*value*/, MemoryOrder, MemoryScope) {
   // FIXME_SYCL not implemented
   static_assert((sizeof(T) == 8) || (sizeof(T) == 4), "Not implemented!");
@@ -99,7 +99,7 @@ typename std::enable_if<(sizeof(T) != 8) && (sizeof(T) != 4), T>::type atomic_co
 }
 
 template <typename T, class MemoryOrder, class MemoryScope>
-typename std::enable_if<(sizeof(T) != 8) && (sizeof(T) != 4), T>::type atomic_exchange(
+typename std::enable_if_t<(sizeof(T) != 8) && (sizeof(T) != 4), T> atomic_exchange(
     T* const /*dest*/, T value, MemoryOrder, MemoryScope) {
   // FIXME_SYCL not implemented
   static_assert((sizeof(T) == 8) || (sizeof(T) == 4), "Not implemented!");
