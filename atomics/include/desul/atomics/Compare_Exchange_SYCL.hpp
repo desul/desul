@@ -29,12 +29,13 @@ typename std::enable_if<sizeof(T) == 4, T>::type atomic_compare_exchange(
   static_assert(sizeof(unsigned int) == 4, "this function assumes an unsigned int is 32-bit");
   DESUL_SYCL_NAMESPACE::atomic_ref<
     unsigned int,
-    DesulToSYCLMemoryOrder<MemoryOrder>::value,
+    DESUL_SYCL_NAMESPACE::memory_order::relaxed,
     DesulToSYCLMemoryScope<MemoryScope>::value,
     sycl::access::address_space::global_device_space>
   dest_ref(*reinterpret_cast<unsigned int*>(dest));
   dest_ref.compare_exchange_strong(*reinterpret_cast<unsigned int*>(&compare),
-                                   *reinterpret_cast<unsigned int*>(&value));
+                                   *reinterpret_cast<unsigned int*>(&value),
+                                   DesulToSYCLMemoryOrder<MemoryOrder>::value);
   return compare;
 }
 template <typename T, class MemoryOrder, class MemoryScope>
@@ -43,12 +44,13 @@ typename std::enable_if<sizeof(T) == 8, T>::type atomic_compare_exchange(
   static_assert(sizeof(unsigned long long int) == 8, "this function assumes an unsigned long long  is 64-bit");
   DESUL_SYCL_NAMESPACE::atomic_ref<
     unsigned long long int,
-    DesulToSYCLMemoryOrder<MemoryOrder>::value,
+    DESUL_SYCL_NAMESPACE::memory_order::relaxed,
     DesulToSYCLMemoryScope<MemoryScope>::value,
     sycl::access::address_space::global_device_space>
   dest_ref(*reinterpret_cast<unsigned long long int*>(dest));
   dest_ref.compare_exchange_strong(*reinterpret_cast<unsigned long long int*>(&compare),
-                                   *reinterpret_cast<unsigned long long int*>(&value));
+                                   *reinterpret_cast<unsigned long long int*>(&value),
+                                   DesulToSYCLMemoryOrder<MemoryOrder>::value);
   return compare;
 }
 
@@ -58,11 +60,12 @@ typename std::enable_if<sizeof(T) == 4, T>::type atomic_exchange(
   static_assert(sizeof(unsigned int) == 4, "this function assumes an unsigned int is 32-bit");
   DESUL_SYCL_NAMESPACE::atomic_ref<
     unsigned int,
-    DesulToSYCLMemoryOrder<MemoryOrder>::value,
+    DESUL_SYCL_NAMESPACE::memory_order::relaxed,
     DesulToSYCLMemoryScope<MemoryScope>::value,
     sycl::access::address_space::global_device_space>
   dest_ref(*reinterpret_cast<unsigned int*>(dest));
-  unsigned int return_val = dest_ref.exchange(*reinterpret_cast<unsigned int*>(&value));
+  unsigned int return_val = dest_ref.exchange(*reinterpret_cast<unsigned int*>(&value),
+                                              DesulToSYCLMemoryOrder<MemoryOrder>::value);
   return reinterpret_cast<T&>(return_val);
 }
 template <typename T, class MemoryOrder, class MemoryScope>
@@ -71,12 +74,13 @@ typename std::enable_if<sizeof(T) == 8, T>::type atomic_exchange(
   static_assert(sizeof(unsigned long long int) == 8, "this function assumes an unsigned long long  is 64-bit");
   DESUL_SYCL_NAMESPACE::atomic_ref<
     unsigned long long int,
-    DesulToSYCLMemoryOrder<MemoryOrder>::value,
+    DESUL_SYCL_NAMESPACE::memory_order::relaxed,
     DesulToSYCLMemoryScope<MemoryScope>::value,
     sycl::access::address_space::global_device_space>
   dest_ref(*reinterpret_cast<unsigned long long int*>(dest));
   unsigned long long int return_val =
-      dest_ref.exchange(reinterpret_cast<unsigned long long int&>(value));
+      dest_ref.exchange(reinterpret_cast<unsigned long long int&>(value),
+                        DesulToSYCLMemoryOrder<MemoryOrder>::value);
   return reinterpret_cast<T&>(return_val);
 }
 
