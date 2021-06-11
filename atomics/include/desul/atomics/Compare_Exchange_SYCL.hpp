@@ -94,7 +94,7 @@ template <typename T, class MemoryOrder, class MemoryScope>
 typename std::enable_if<(sizeof(T) != 8) && (sizeof(T) != 4), T>::type atomic_compare_exchange(
     T* const /*dest*/, T compare, T /*value*/, MemoryOrder, MemoryScope) {
   // FIXME_SYCL not implemented
-  assert(false);
+  static_assert((sizeof(T) == 8) || (sizeof(T) == 4), "Not implemented!");
   return compare;
 }
 
@@ -102,7 +102,7 @@ template <typename T, class MemoryOrder, class MemoryScope>
 typename std::enable_if<(sizeof(T) != 8) && (sizeof(T) != 4), T>::type atomic_exchange(
     T* const /*dest*/, T value, MemoryOrder, MemoryScope) {
   // FIXME_SYCL not implemented
-  assert(false);
+  static_assert((sizeof(T) == 8) || (sizeof(T) == 4), "Not implemented!");
   return value;
 }
 
