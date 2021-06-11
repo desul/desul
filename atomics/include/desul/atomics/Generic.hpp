@@ -662,10 +662,10 @@ DESUL_INLINE_FUNCTION bool atomic_compare_exchange_weak(T* const dest,
 
 }  // namespace desul
 
-#include <desul/atomics/SYCL.hpp>
 #include <desul/atomics/CUDA.hpp>
 #include <desul/atomics/GCC.hpp>
 #include <desul/atomics/HIP.hpp>
 #include <desul/atomics/OpenMP.hpp>
+#include <desul/atomics/SYCL.hpp>
 #pragma GCC diagnostic pop
 #endif
