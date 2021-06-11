@@ -249,13 +249,7 @@ atomic_fetch_oper(const Oper& op,
   return return_val;
 // FIXME_SYCL not implemented
 #elif defined(__SYCL_DEVICE_ONLY__)
-  (void) op;
-  (void) dest;
-  (void) scope;
-  (void) return_val;
-  (void) done;
-
-  assert(false);
+  static_assert(atomic_always_lock_free(sizeof(T)), "Not implemented!");
   return val;
 #else
   unsigned int mask = DESUL_IMPL_ACTIVEMASK;
@@ -324,14 +318,8 @@ atomic_oper_fetch(const Oper& op,
     done_active = DESUL_IMPL_BALLOT_MASK(done);
   }
   return return_val;
-  // FIXME_SYCL not implemented
 #elif defined(__SYCL_DEVICE_ONLY__)
-  (void) op;
-  (void) dest;
-  (void) scope;
-  (void) done;
-
-  assert(false);
+  static_assert(atomic_always_lock_free(sizeof(T)), "Not implemented!");
   return val;
 #else
   unsigned int mask = DESUL_IMPL_ACTIVEMASK;
