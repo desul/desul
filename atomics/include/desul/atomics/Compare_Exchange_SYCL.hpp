@@ -17,9 +17,15 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 namespace desul {
 
+#ifdef __INTEL_LLVM_COMPILER
+namespace sycl_atomic = ::sycl::ONEAPI;
+#else
+namespace sycl_atomic = ::sycl;
+#endif
+
 template<class MemoryOrder, class MemoryScope>
 inline void atomic_thread_fence(MemoryOrder, MemoryScope) {
-  DESUL_SYCL_NAMESPACE::atomic_fence(DesulToSYCLMemoryOrder<MemoryOrder>::value,
+  sycl_atomic::atomic_fence(DesulToSYCLMemoryOrder<MemoryOrder>::value,
                                      DesulToSYCLMemoryScope<MemoryScope>::value);
 }
 
@@ -27,9 +33,9 @@ template <typename T, class MemoryOrder, class MemoryScope>
 typename std::enable_if<sizeof(T) == 4, T>::type atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrder, MemoryScope) {
   static_assert(sizeof(unsigned int) == 4, "this function assumes an unsigned int is 32-bit");
-  DESUL_SYCL_NAMESPACE::atomic_ref<
+  sycl_atomic::atomic_ref<
     unsigned int,
-    DESUL_SYCL_NAMESPACE::memory_order::relaxed,
+    sycl_atomic::memory_order::relaxed,
     DesulToSYCLMemoryScope<MemoryScope>::value,
     sycl::access::address_space::global_device_space>
   dest_ref(*reinterpret_cast<unsigned int*>(dest));
@@ -42,9 +48,9 @@ template <typename T, class MemoryOrder, class MemoryScope>
 typename std::enable_if<sizeof(T) == 8, T>::type atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrder, MemoryScope) {
   static_assert(sizeof(unsigned long long int) == 8, "this function assumes an unsigned long long  is 64-bit");
-  DESUL_SYCL_NAMESPACE::atomic_ref<
+  sycl_atomic::atomic_ref<
     unsigned long long int,
-    DESUL_SYCL_NAMESPACE::memory_order::relaxed,
+    sycl_atomic::memory_order::relaxed,
     DesulToSYCLMemoryScope<MemoryScope>::value,
     sycl::access::address_space::global_device_space>
   dest_ref(*reinterpret_cast<unsigned long long int*>(dest));
@@ -58,9 +64,9 @@ template <typename T, class MemoryOrder, class MemoryScope>
 typename std::enable_if<sizeof(T) == 4, T>::type atomic_exchange(
     T* const dest, T value, MemoryOrder, MemoryScope) {
   static_assert(sizeof(unsigned int) == 4, "this function assumes an unsigned int is 32-bit");
-  DESUL_SYCL_NAMESPACE::atomic_ref<
+  sycl_atomic::atomic_ref<
     unsigned int,
-    DESUL_SYCL_NAMESPACE::memory_order::relaxed,
+    sycl_atomic::memory_order::relaxed,
     DesulToSYCLMemoryScope<MemoryScope>::value,
     sycl::access::address_space::global_device_space>
   dest_ref(*reinterpret_cast<unsigned int*>(dest));
@@ -72,9 +78,9 @@ template <typename T, class MemoryOrder, class MemoryScope>
 typename std::enable_if<sizeof(T) == 8, T>::type atomic_exchange(
     T* const dest, T value, MemoryOrder, MemoryScope) {
   static_assert(sizeof(unsigned long long int) == 8, "this function assumes an unsigned long long  is 64-bit");
-  DESUL_SYCL_NAMESPACE::atomic_ref<
+  sycl_atomic::atomic_ref<
     unsigned long long int,
-    DESUL_SYCL_NAMESPACE::memory_order::relaxed,
+    sycl_atomic::memory_order::relaxed,
     DesulToSYCLMemoryScope<MemoryScope>::value,
     sycl::access::address_space::global_device_space>
   dest_ref(*reinterpret_cast<unsigned long long int*>(dest));

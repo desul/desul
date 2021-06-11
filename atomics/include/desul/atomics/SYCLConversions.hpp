@@ -14,42 +14,48 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 namespace desul {
 
+#ifdef __INTEL_LLVM_COMPILER
+namespace sycl_atomic = ::sycl::ONEAPI;
+#else
+namespace sycl_atomic = ::sycl;
+#endif
+
 template<class MemoryOrder>
 struct DesulToSYCLMemoryOrder;
 template<>
 struct DesulToSYCLMemoryOrder<MemoryOrderSeqCst> {
-  static constexpr DESUL_SYCL_NAMESPACE::memory_order value = DESUL_SYCL_NAMESPACE::memory_order::seq_cst;
+  static constexpr sycl_atomic::memory_order value = sycl_atomic::memory_order::seq_cst;
 };
 template<>
 struct DesulToSYCLMemoryOrder<MemoryOrderAcquire> {
-  static constexpr DESUL_SYCL_NAMESPACE::memory_order value = DESUL_SYCL_NAMESPACE::memory_order::acquire;
+  static constexpr sycl_atomic::memory_order value = sycl_atomic::memory_order::acquire;
 };
 template<>
 struct DesulToSYCLMemoryOrder<MemoryOrderRelease> {
-  static constexpr DESUL_SYCL_NAMESPACE::memory_order value = DESUL_SYCL_NAMESPACE::memory_order::release;
+  static constexpr sycl_atomic::memory_order value = sycl_atomic::memory_order::release;
 };
 template<>
 struct DesulToSYCLMemoryOrder<MemoryOrderAcqRel> {
-  static constexpr DESUL_SYCL_NAMESPACE::memory_order value = DESUL_SYCL_NAMESPACE::memory_order::acq_rel;
+  static constexpr sycl_atomic::memory_order value = sycl_atomic::memory_order::acq_rel;
 };
 template<>
 struct DesulToSYCLMemoryOrder<MemoryOrderRelaxed> {
-  static constexpr DESUL_SYCL_NAMESPACE::memory_order value = DESUL_SYCL_NAMESPACE::memory_order::relaxed;
+  static constexpr sycl_atomic::memory_order value = sycl_atomic::memory_order::relaxed;
 };
 
 template<class MemoryScope>
 struct DesulToSYCLMemoryScope;
 template<>
 struct DesulToSYCLMemoryScope<MemoryScopeCore> {
-  static constexpr DESUL_SYCL_NAMESPACE::memory_scope value = DESUL_SYCL_NAMESPACE::memory_scope::work_group;
+  static constexpr sycl_atomic::memory_scope value = sycl_atomic::memory_scope::work_group;
 };
 template<>
 struct DesulToSYCLMemoryScope<MemoryScopeDevice> {
-  static constexpr DESUL_SYCL_NAMESPACE::memory_scope value = DESUL_SYCL_NAMESPACE::memory_scope::device;
+  static constexpr sycl_atomic::memory_scope value = sycl_atomic::memory_scope::device;
 };
 template<>
 struct DesulToSYCLMemoryScope<MemoryScopeSystem> {
-  static constexpr DESUL_SYCL_NAMESPACE::memory_scope value = DESUL_SYCL_NAMESPACE::memory_scope::system;
+  static constexpr sycl_atomic::memory_scope value = sycl_atomic::memory_scope::system;
 };
 
 }

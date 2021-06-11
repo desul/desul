@@ -12,6 +12,13 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #include "desul/atomics/Common.hpp"
 
 namespace desul {
+
+#ifdef __INTEL_LLVM_COMPILER
+namespace sycl_atomic = ::sycl::ONEAPI;
+#else
+namespace sycl_atomic = ::sycl;
+#endif
+
 namespace Impl {
 template<class T>
 struct is_sycl_atomic_type {
@@ -31,9 +38,9 @@ template<class T, class MemoryOrder/*, class MemoryScope*/>
 inline
 typename std::enable_if<Impl::is_sycl_atomic_type<T>::value,T>::type
 atomic_fetch_add(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
-  DESUL_SYCL_NAMESPACE::atomic_ref<
+  sycl_atomic::atomic_ref<
     T,
-    DESUL_SYCL_NAMESPACE::memory_order::relaxed,
+    sycl_atomic::memory_order::relaxed,
     DesulToSYCLMemoryScope<MemoryScopeDevice>::value,
     sycl::access::address_space::global_device_space>
   dest_ref(*dest);
@@ -45,9 +52,9 @@ template<class T, class MemoryOrder/*, class MemoryScope*/>
 inline
 typename std::enable_if<Impl::is_sycl_atomic_type<T>::value,T>::type
 atomic_fetch_sub(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
-  DESUL_SYCL_NAMESPACE::atomic_ref<
+  sycl_atomic::atomic_ref<
     T,
-    DESUL_SYCL_NAMESPACE::memory_order::relaxed,
+    sycl_atomic::memory_order::relaxed,
     DesulToSYCLMemoryScope<MemoryScopeDevice>::value,
     sycl::access::address_space::global_device_space>
   dest_ref(*dest);
@@ -59,9 +66,9 @@ template<class T, class MemoryOrder/*, class MemoryScope*/>
 inline
 typename std::enable_if<Impl::is_sycl_atomic_type<T>::value,T>::type
 atomic_fetch_max(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
-  DESUL_SYCL_NAMESPACE::atomic_ref<
+  sycl_atomic::atomic_ref<
     T,
-    DESUL_SYCL_NAMESPACE::memory_order::relaxed,
+    sycl_atomic::memory_order::relaxed,
     DesulToSYCLMemoryScope<MemoryScopeDevice>::value,
     sycl::access::address_space::global_device_space>
   dest_ref(*dest);
@@ -73,9 +80,9 @@ template<class T, class MemoryOrder/*, class MemoryScope*/>
 inline
 typename std::enable_if<Impl::is_sycl_atomic_type<T>::value,T>::type
 atomic_fetch_min(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
-  DESUL_SYCL_NAMESPACE::atomic_ref<
+  sycl_atomic::atomic_ref<
     T,
-    DESUL_SYCL_NAMESPACE::memory_order::relaxed,
+    sycl_atomic::memory_order::relaxed,
     DesulToSYCLMemoryScope<MemoryScopeDevice>::value,
     sycl::access::address_space::global_device_space>
   dest_ref(*dest);
@@ -87,9 +94,9 @@ template<class T, class MemoryOrder/*, class MemoryScope*/>
 inline
 typename std::enable_if<Impl::is_sycl_atomic_type<T>::value,T>::type
 atomic_fetch_and(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
-  DESUL_SYCL_NAMESPACE::atomic_ref<
+  sycl_atomic::atomic_ref<
     T,
-    DESUL_SYCL_NAMESPACE::memory_order::relaxed,
+    sycl_atomic::memory_order::relaxed,
     DesulToSYCLMemoryScope<MemoryScopeDevice>::value,
     sycl::access::address_space::global_device_space>
   dest_ref(*dest);
@@ -101,9 +108,9 @@ template<class T, class MemoryOrder/*, class MemoryScope*/>
 inline
 typename std::enable_if<Impl::is_sycl_atomic_type<T>::value,T>::type
 atomic_fetch_xor(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
-  DESUL_SYCL_NAMESPACE::atomic_ref<
+  sycl_atomic::atomic_ref<
     T,
-    DESUL_SYCL_NAMESPACE::memory_order::relaxed,
+    sycl_atomic::memory_order::relaxed,
     DesulToSYCLMemoryScope<MemoryScopeDevice>::value,
     sycl::access::address_space::global_device_space>
   dest_ref(*dest);
@@ -115,9 +122,9 @@ template<class T, class MemoryOrder/*, class MemoryScope*/>
 inline
 typename std::enable_if<Impl::is_sycl_atomic_type<T>::value,T>::type
 atomic_fetch_or(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
-  DESUL_SYCL_NAMESPACE::atomic_ref<
+  sycl_atomic::atomic_ref<
     T,
-    DESUL_SYCL_NAMESPACE::memory_order::relaxed,
+    sycl_atomic::memory_order::relaxed,
     DesulToSYCLMemoryScope<MemoryScopeDevice>::value,
     sycl::access::address_space::global_device_space>
   dest_ref(*dest);
