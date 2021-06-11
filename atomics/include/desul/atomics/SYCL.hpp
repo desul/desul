@@ -51,21 +51,7 @@ atomic_fetch_sub(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
     DesulToSYCLMemoryScope<MemoryScopeDevice>::value,
     sycl::access::address_space::global_device_space>
   dest_ref(*dest);
-  return dest_ref.fetch_sub(val);
-}
-
-// Atomic Inc
-template<class MemoryOrder/*, class MemoryScope*/>
-inline
-unsigned int atomic_fetch_inc(unsigned int* dest, unsigned int val, MemoryOrder memory_order, MemoryScopeDevice memory_scope) {
-  return atomic_fetch_add(dest, val, memory_order, memory_scope);
-}
-
-// Atomic Dec
-template<class MemoryOrder/*, class MemoryScope*/>
-inline
-unsigned int atomic_fetch_dec(unsigned int* dest, unsigned int val, MemoryOrder memory_order, MemoryScopeDevice memory_scope) {
-  return atomic_fetch_sub(dest, val, memory_order, memory_scope);
+  return dest_ref.fetch_sub(val, DesulToSYCLMemoryOrder<MemoryOrder>::value);
 }
 
 // Atomic Max
