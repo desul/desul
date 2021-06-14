@@ -16,28 +16,13 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 namespace desul {
 
-#ifdef __INTEL_LLVM_COMPILER
-namespace sycl_atomic = ::sycl::ONEAPI;
-#else
-namespace sycl_atomic = ::sycl;
-#endif
-
-template <class MemoryOrder, class MemoryScope>
-inline void atomic_thread_fence(MemoryOrder, MemoryScope) {
-  sycl_atomic::atomic_fence(DesulToSYCLMemoryOrder<MemoryOrder>::value,
-                            DesulToSYCLMemoryScope<MemoryScope>::value);
-}
-
 template <typename T, class MemoryOrder, class MemoryScope>
 typename std::enable_if_t<sizeof(T) == 4, T> atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrder, MemoryScope) {
   static_assert(sizeof(unsigned int) == 4,
                 "this function assumes an unsigned int is 32-bit");
-  sycl_atomic::atomic_ref<unsigned int,
-                          sycl_atomic::memory_order::relaxed,
-                          DesulToSYCLMemoryScope<MemoryScope>::value,
-                          sycl::access::address_space::global_device_space>
-  dest_ref(*reinterpret_cast<unsigned int*>(dest));
+  sycl_atomic_ref<unsigned int, MemoryScope> dest_ref(
+      *reinterpret_cast<unsigned int*>(dest));
   dest_ref.compare_exchange_strong(*reinterpret_cast<unsigned int*>(&compare),
                                    *reinterpret_cast<unsigned int*>(&value),
                                    DesulToSYCLMemoryOrder<MemoryOrder>::value);
@@ -48,11 +33,8 @@ typename std::enable_if_t<sizeof(T) == 8, T> atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrder, MemoryScope) {
   static_assert(sizeof(unsigned long long int) == 8,
                 "this function assumes an unsigned long long  is 64-bit");
-  sycl_atomic::atomic_ref<unsigned long long int,
-                          sycl_atomic::memory_order::relaxed,
-                          DesulToSYCLMemoryScope<MemoryScope>::value,
-                          sycl::access::address_space::global_device_space>
-  dest_ref(*reinterpret_cast<unsigned long long int*>(dest));
+  sycl_atomic_ref<unsigned long long int, MemoryScope> dest_ref(
+      *reinterpret_cast<unsigned long long int*>(dest));
   dest_ref.compare_exchange_strong(*reinterpret_cast<unsigned long long int*>(&compare),
                                    *reinterpret_cast<unsigned long long int*>(&value),
                                    DesulToSYCLMemoryOrder<MemoryOrder>::value);
@@ -66,11 +48,8 @@ typename std::enable_if_t<sizeof(T) == 4, T> atomic_exchange(T* const dest,
                                                              MemoryScope) {
   static_assert(sizeof(unsigned int) == 4,
                 "this function assumes an unsigned int is 32-bit");
-  sycl_atomic::atomic_ref<unsigned int,
-                          sycl_atomic::memory_order::relaxed,
-                          DesulToSYCLMemoryScope<MemoryScope>::value,
-                          sycl::access::address_space::global_device_space>
-  dest_ref(*reinterpret_cast<unsigned int*>(dest));
+  sycl_atomic_ref<unsigned int, MemoryScope> dest_ref(
+      *reinterpret_cast<unsigned int*>(dest));
   unsigned int return_val =
       dest_ref.exchange(*reinterpret_cast<unsigned int*>(&value),
                         DesulToSYCLMemoryOrder<MemoryOrder>::value);
@@ -83,11 +62,8 @@ typename std::enable_if_t<sizeof(T) == 8, T> atomic_exchange(T* const dest,
                                                              MemoryScope) {
   static_assert(sizeof(unsigned long long int) == 8,
                 "this function assumes an unsigned long long  is 64-bit");
-  sycl_atomic::atomic_ref<unsigned long long int,
-                          sycl_atomic::memory_order::relaxed,
-                          DesulToSYCLMemoryScope<MemoryScope>::value,
-                          sycl::access::address_space::global_device_space>
-  dest_ref(*reinterpret_cast<unsigned long long int*>(dest));
+  sycl_atomic_ref<unsigned long long int, MemoryScope> dest_ref(
+      *reinterpret_cast<unsigned long long int*>(dest));
   unsigned long long int return_val =
       dest_ref.exchange(reinterpret_cast<unsigned long long int&>(value),
                         DesulToSYCLMemoryOrder<MemoryOrder>::value);

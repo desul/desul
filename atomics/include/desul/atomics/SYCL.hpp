@@ -10,14 +10,9 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 #ifdef DESUL_HAVE_SYCL_ATOMICS
 #include "desul/atomics/Common.hpp"
+#include "desul/atomics/SYCLConversions.hpp"
 
 namespace desul {
-
-#ifdef __INTEL_LLVM_COMPILER
-namespace sycl_atomic = ::sycl::ONEAPI;
-#else
-namespace sycl_atomic = ::sycl;
-#endif
 
 namespace Impl {
 template <class T>
@@ -35,11 +30,7 @@ struct is_sycl_atomic_type {
 template <class T, class MemoryOrder /*, class MemoryScope*/>
 inline typename std::enable_if_t<Impl::is_sycl_atomic_type<T>::value, T>
 atomic_fetch_add(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
-  sycl_atomic::atomic_ref<T,
-                          sycl_atomic::memory_order::relaxed,
-                          DesulToSYCLMemoryScope<MemoryScopeDevice>::value,
-                          sycl::access::address_space::global_device_space>
-      dest_ref(*dest);
+  sycl_atomic_ref<T, MemoryScopeDevice> dest_ref(*dest);
   return dest_ref.fetch_add(val, DesulToSYCLMemoryOrder<MemoryOrder>::value);
 }
 
@@ -47,11 +38,7 @@ atomic_fetch_add(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
 template <class T, class MemoryOrder /*, class MemoryScope*/>
 inline typename std::enable_if_t<Impl::is_sycl_atomic_type<T>::value, T>
 atomic_fetch_sub(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
-  sycl_atomic::atomic_ref<T,
-                          sycl_atomic::memory_order::relaxed,
-                          DesulToSYCLMemoryScope<MemoryScopeDevice>::value,
-                          sycl::access::address_space::global_device_space>
-      dest_ref(*dest);
+  sycl_atomic_ref<T, MemoryScopeDevice> dest_ref(*dest);
   return dest_ref.fetch_sub(val, DesulToSYCLMemoryOrder<MemoryOrder>::value);
 }
 
@@ -59,11 +46,7 @@ atomic_fetch_sub(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
 template <class T, class MemoryOrder /*, class MemoryScope*/>
 inline typename std::enable_if_t<Impl::is_sycl_atomic_type<T>::value, T>
 atomic_fetch_max(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
-  sycl_atomic::atomic_ref<T,
-                          sycl_atomic::memory_order::relaxed,
-                          DesulToSYCLMemoryScope<MemoryScopeDevice>::value,
-                          sycl::access::address_space::global_device_space>
-      dest_ref(*dest);
+  sycl_atomic_ref<T, MemoryScopeDevice> dest_ref(*dest);
   return dest_ref.fetch_max(val, DesulToSYCLMemoryOrder<MemoryOrder>::value);
 }
 
@@ -71,11 +54,7 @@ atomic_fetch_max(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
 template <class T, class MemoryOrder /*, class MemoryScope*/>
 inline typename std::enable_if_t<Impl::is_sycl_atomic_type<T>::value, T>
 atomic_fetch_min(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
-  sycl_atomic::atomic_ref<T,
-                          sycl_atomic::memory_order::relaxed,
-                          DesulToSYCLMemoryScope<MemoryScopeDevice>::value,
-                          sycl::access::address_space::global_device_space>
-      dest_ref(*dest);
+  sycl_atomic_ref<T, MemoryScopeDevice> dest_ref(*dest);
   return dest_ref.fetch_min(val, DesulToSYCLMemoryOrder<MemoryOrder>::value);
 }
 
@@ -83,11 +62,7 @@ atomic_fetch_min(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
 template <class T, class MemoryOrder /*, class MemoryScope*/>
 inline typename std::enable_if_t<Impl::is_sycl_atomic_type<T>::value, T>
 atomic_fetch_and(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
-  sycl_atomic::atomic_ref<T,
-                          sycl_atomic::memory_order::relaxed,
-                          DesulToSYCLMemoryScope<MemoryScopeDevice>::value,
-                          sycl::access::address_space::global_device_space>
-      dest_ref(*dest);
+  sycl_atomic_ref<T, MemoryScopeDevice> dest_ref(*dest);
   return dest_ref.fetch_and(val, DesulToSYCLMemoryOrder<MemoryOrder>::value);
 }
 
@@ -95,11 +70,7 @@ atomic_fetch_and(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
 template <class T, class MemoryOrder /*, class MemoryScope*/>
 inline typename std::enable_if_t<Impl::is_sycl_atomic_type<T>::value, T>
 atomic_fetch_xor(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
-  sycl_atomic::atomic_ref<T,
-                          sycl_atomic::memory_order::relaxed,
-                          DesulToSYCLMemoryScope<MemoryScopeDevice>::value,
-                          sycl::access::address_space::global_device_space>
-      dest_ref(*dest);
+  sycl_atomic_ref<T, MemoryScopeDevice> dest_ref(*dest);
   return dest_ref.fetch_xor(val, DesulToSYCLMemoryOrder<MemoryOrder>::value);
 }
 
@@ -107,11 +78,7 @@ atomic_fetch_xor(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
 template <class T, class MemoryOrder /*, class MemoryScope*/>
 inline typename std::enable_if_t<Impl::is_sycl_atomic_type<T>::value, T>
 atomic_fetch_or(T* dest, T val, MemoryOrder, MemoryScopeDevice) {
-  sycl_atomic::atomic_ref<T,
-                          sycl_atomic::memory_order::relaxed,
-                          DesulToSYCLMemoryScope<MemoryScopeDevice>::value,
-                          sycl::access::address_space::global_device_space>
-      dest_ref(*dest);
+  sycl_atomic_ref<T, MemoryScopeDevice> dest_ref(*dest);
   return dest_ref.fetch_or(val, DesulToSYCLMemoryOrder<MemoryOrder>::value);
 }
 

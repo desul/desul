@@ -59,6 +59,12 @@ struct DesulToSYCLMemoryScope<MemoryScopeSystem> {
   static constexpr sycl_atomic::memory_scope value = sycl_atomic::memory_scope::system;
 };
 
+template <class T, class MemoryScope>
+using sycl_atomic_ref =
+    sycl_atomic::atomic_ref<T,
+                            sycl_atomic::memory_order::relaxed,
+                            DesulToSYCLMemoryScope<MemoryScope>::value,
+                            sycl::access::address_space::global_device_space>;
 }  // namespace desul
 
 #endif
