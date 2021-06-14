@@ -1,0 +1,58 @@
+name: github-Linux
+on: [push, pull_request]
+
+jobs:
+  CI:
+    strategy:
+      matrix:
+        distro: ['fedora:latest', 'fedora:rawhide', 'ubuntu:latest']
+        cxx: ['g++', 'clang++']
+        cmake_build_type: ['Release', 'Debug']
+        include:
+          - distro: 'fedora:intel'
+            cxx: 'icpc'
+            cmake_build_type: 'Release'
+          - distro: 'fedora:intel'
+            cxx: 'icpc'
+            cmake_build_type: 'Debug'
+          - distro: 'fedora:intel'
+            cxx: 'icpx'
+            cmake_build_type: 'Release'
+          - distro: 'fedora:intel'
+            cxx: 'icpx'
+            cmake_build_type: 'Debug'
+    runs-on: ubuntu-latest
+    container: ghcr.io/kokkos/ci-containers/${{ matrix.distro }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2.2.0
+      - name: Update submodules
+        run: |
+          git submodule init
+          git submodule update
+      - name: Install Kokkos
+        run: |
+          git clone --branch 3.4.01 --single-branch --depth 1 https://github.com/kokkos/kokkos.git kokkos_src
+          cd kokkos_src
+          mkdir -p build
+          cd build
+          cmake \
+            -DKokkos_ENABLE_OPENMP=ON \
+            -DCMAKE_CXX_COMPILER=${{ matrix.cxx }} \
+            -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }} \
+            -DCMAKE_INSTALL_PREFIX=/tmp/kokkos-install \
+            ..
+          make install
+      - name: Build DESUL
+        run: |
+          mkdir -p build
+          cd build
+          cmake \
+            -DCMAKE_CXX_COMPILER=${{ matrix.cxx }} \
+            -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }} \
+            -DCMAKE_PREFIX_PATH=/tmp/kokkos-install \
+            ..
+          make
+      - name: Test DESUL
+        working-directory: build
+        run: ctest --output-on-failure
