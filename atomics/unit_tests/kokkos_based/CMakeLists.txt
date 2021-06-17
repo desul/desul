@@ -7,14 +7,14 @@ foreach(BACKEND ${DESUL_BACKENDS})
   kokkos_check(DEVICES ${BACKEND})
 endforeach()
 
-blt_add_library(NAME kokkos_unit_test_main
-                SOURCES UnitTestMainInit.cpp
-                DEPENDS_ON desul_atomics gtest Kokkos::kokkos ${DESUL_BACKENDS})
+add_library(kokkos_unit_test_main
+            UnitTestMainInit.cpp)
+target_link_libraries(kokkos_unit_test_main Kokkos::kokkos gtest desul_atomics)
+
 foreach(T complexdouble  complexfloat  double  float  int  longint  longlongint  unsignedint  unsignedlongint)
-blt_add_executable(NAME ${T}_unit_test
-                   SOURCES ${T}.cpp
-                   DEPENDS_ON desul_atomics kokkos_unit_test_main gtest Kokkos::kokkos ${DESUL_BACKENDS})
-blt_add_test(NAME ${T}_unit_test
-             COMMAND ${T}_unit_test)
+  add_executable(${T}_unit_test
+               ${T}.cpp)
+  target_link_libraries(${T}_unit_test desul_atomics kokkos_unit_test_main gtest Kokkos::kokkoscore)
+  add_test(NAME ${T}_unit_test COMMAND ${T}_unit_test WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 endforeach()
 endif()
