@@ -96,13 +96,13 @@ TEST(TEST_CATEGORY, atomic_operations_unsignedlong) {
                                                                 TEST_EXECSPACE>(
             start, end - i, 12)));
     ASSERT_TRUE(
-        (TestAtomicOperations::AtomicOperationsTestIntegralType<unsigned long int,
-                                                                TEST_EXECSPACE>(
-            start, end - i, 15))); // Wrapping Inc
-//    ASSERT_TRUE(
-//        (TestAtomicOperations::AtomicOperationsTestIntegralType<unsigned long int,
-//                                                                TEST_EXECSPACE>(
-//            start, end - i, 16))); // Wrapping Dec
+        (TestAtomicOperations::AtomicOperationsTestUnsignedIntegralType<unsigned long int,
+                                                                        TEST_EXECSPACE>(
+            start, end - i, 1))); // Wrapping Inc
+    ASSERT_TRUE(
+        (TestAtomicOperations::AtomicOperationsTestUnsignedIntegralType<unsigned long int,
+                                                                        TEST_EXECSPACE>(
+            start, end - i, 2))); // Wrapping Dec
   }
 }
 }  // namespace Test
