@@ -1,7 +1,7 @@
 ## Description
 
 The DESUL organization and project will contain open source common core
-components for DoE applications and libraries with a focus on C++ development
+components for DOE applications and libraries with a focus on C++ development
 and standardization. This is intended to cover high performance computing
 system software and development libraries and helpers as well as possibly
 fundamental computer science algorithms and basic components and
