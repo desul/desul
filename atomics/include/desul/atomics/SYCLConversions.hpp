@@ -14,7 +14,7 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 namespace desul {
 
-#ifdef __INTEL_LLVM_COMPILER
+#ifdef __clang__
 namespace sycl_atomic = ::sycl::ONEAPI;
 #else
 namespace sycl_atomic = ::sycl;
