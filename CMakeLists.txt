@@ -28,3 +28,14 @@ MACRO(APPEND_GLOB VAR)
 ENDMACRO()
 
 add_subdirectory(atomics)
+
+# install options
+install(TARGETS desul_atomics
+        EXPORT desul_atomics
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION lib)
+
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/atomics/include/
+        DESTINATION include
+        FILES_MATCHING PATTERN *.hpp)
