@@ -34,7 +34,8 @@ install(TARGETS desul_atomics
         EXPORT desul_atomics
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
-        RUNTIME DESTINATION lib)
+        RUNTIME DESTINATION bin
+        INCLUDES DESTINATION include)
 
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/atomics/include/
         DESTINATION include
