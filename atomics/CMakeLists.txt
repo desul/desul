@@ -23,9 +23,41 @@ endif()
 blt_add_library(NAME desul_atomics
                 HEADERS include/desul/atomics.hpp
                 ${SOURCES_ARG}
-                INCLUDES include
                 ${DEPENDS_ARG})
 
-# TODO: Add tests and install targets if needed.
+
+if(ENABLE_CUDA)
+  # Doesn't work
+  target_include_directories(desul_atomics
+    PUBLIC
+    $<INSTALL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/atomics/cuda>)
+endif()
+
+if (ENABLE_HIP)
+  # Something
+endif()
+
+target_include_directories(desul_atomics
+  INTERFACE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+
+# Install options
+install(TARGETS desul_atomics
+  EXPORT desul_atomics
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include)
+
+install(EXPORT desul_atomics
+  DESTINATION lib/cmake/desul)
+
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/atomics/include/
+  DESTINATION include
+  FILES_MATCHING PATTERN *.hpp)
+
+
+  # TODO: Add tests and install targets if needed.
 add_subdirectory(unit_tests)
 add_subdirectory(performance_tests)
