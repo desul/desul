@@ -20,23 +20,16 @@ if(ENABLE_HIP)
   set(SOURCES_ARG SOURCES ${DESUL_HIP_ATOMICS_SOURCES})
   set(DEPENDS_ARG DEPENDS_ON hip)
 endif()
+
+set(INCLUDES_ARG
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+
 blt_add_library(NAME desul_atomics
                 HEADERS include/desul/atomics.hpp
                 ${SOURCES_ARG}
-                ${DEPENDS_ARG})
-
-
-if(ENABLE_CUDA OR ENABLE_HIP)
-  target_include_directories(desul_atomics
-    PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>)
-endif()
-
-target_include_directories(desul_atomics
-  INTERFACE
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
+                ${DEPENDS_ARG}
+                INCLUDES ${INCLUDES_ARG})
 
 # Install options
 install(TARGETS desul_atomics
