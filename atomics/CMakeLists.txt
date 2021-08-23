@@ -28,8 +28,8 @@ set(INCLUDES_ARG
 blt_add_library(NAME desul_atomics
                 HEADERS include/desul/atomics.hpp
                 ${SOURCES_ARG}
-                ${DEPENDS_ARG}
-                INCLUDES ${INCLUDES_ARG})
+                INCLUDES ${INCLUDES_ARG}
+                ${DEPENDS_ARG})
 
 # Install options
 install(TARGETS desul_atomics
