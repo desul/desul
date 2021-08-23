@@ -26,14 +26,7 @@ blt_add_library(NAME desul_atomics
                 ${DEPENDS_ARG})
 
 
-if(ENABLE_CUDA)
-  target_include_directories(desul_atomics
-    PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>)
-endif()
-
-if (ENABLE_HIP)
+if(ENABLE_CUDA OR ENABLE_HIP)
   target_include_directories(desul_atomics
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
