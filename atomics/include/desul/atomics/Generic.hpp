@@ -268,7 +268,7 @@ atomic_fetch_oper(const Oper& op,
   return return_val;
 #endif
 #else
-  static_assert(false, "Unimplemented lock based attomic\n");
+  static_assert(false, "Unimplemented lock based atomic\n");
   return val;
 #endif
 }
