@@ -32,7 +32,6 @@ namespace Impl {
 extern int32_t* CUDA_SPACE_ATOMIC_LOCKS_DEVICE_h;
 extern int32_t* CUDA_SPACE_ATOMIC_LOCKS_NODE_h;
 
-
 /// \brief After this call, the g_host_cuda_lock_arrays variable has
 ///        valid, initialized arrays.
 ///
@@ -47,8 +46,8 @@ void init_lock_arrays_cuda();
 ///
 /// This call is idempotent.
 /// The function is templated to make it a weak symbol to deal with Kokkos/RAJA
-///   snappshotted version while also linking against pure Desul
-template<typename T = int>
+///   snapshotted version while also linking against pure Desul
+template<typename /*AlwaysInt*/ = int>
 void finalize_lock_arrays_cuda();
 
 }  // namespace Impl
@@ -160,7 +159,7 @@ inline int eliminate_warning_for_lock_array() { return lock_array_copied; }
 
 #endif /* defined( __CUDACC__ ) */
 
-#endif /* defined( KOKKOS_ENABLE_CUDA ) */
+#endif /* defined( DESUL_HAVE_CUDA_ATOMICS ) */
 
 #if defined(__CUDACC_RDC__) || (!defined(__CUDACC__))
 #define DESUL_ENSURE_CUDA_LOCK_ARRAYS_ON_DEVICE()
