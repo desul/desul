@@ -40,7 +40,7 @@ __device__ inline void atomic_thread_fence(MemoryOrderAcqRel, MemoryScopeCore) {
 __device__ inline void atomic_thread_fence(MemoryOrderSeqCst, MemoryScopeCore) {
   __threadfence_block();
 }
-#if (__CUDA_ARCH__>=600) || !defined(__NVCC__)
+#if (__CUDA_ARCH__ >= 600) || !defined(__NVCC__)
 __device__ inline void atomic_thread_fence(MemoryOrderRelease, MemoryScopeNode) {
   __threadfence_system();
 }
@@ -55,17 +55,19 @@ __device__ inline void atomic_thread_fence(MemoryOrderSeqCst, MemoryScopeNode) {
 }
 #endif
 #endif
-}
+}  // namespace desul
 
-// Compare Exchange for PRE Volta, not supported with CLANG as CUDA compiler, since we do NOT have a way
-// of having the code included for clang only when the CC is smaller than 700
+// Compare Exchange for PRE Volta, not supported with CLANG as CUDA compiler, since we
+// do NOT have a way of having the code included for clang only when the CC is smaller
+// than 700
 // But on Clang the device side symbol list must be independent of __CUDA_ARCH__
 #if defined(__CUDA_ARCH__) && (__CUDA_ARCH__ < 700)
 namespace desul {
 template <typename T, class MemoryScope>
 __device__ typename std::enable_if<sizeof(T) == 4, T>::type atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrderRelaxed, MemoryScope) {
-  static_assert(sizeof(unsigned int) == 4, "this function assumes an unsigned int is 32-bit");
+  static_assert(sizeof(unsigned int) == 4,
+                "this function assumes an unsigned int is 32-bit");
   unsigned int return_val = atomicCAS(reinterpret_cast<unsigned int*>(dest),
                                       reinterpret_cast<unsigned int&>(compare),
                                       reinterpret_cast<unsigned int&>(value));
@@ -74,7 +76,8 @@ __device__ typename std::enable_if<sizeof(T) == 4, T>::type atomic_compare_excha
 template <typename T, class MemoryScope>
 __device__ typename std::enable_if<sizeof(T) == 8, T>::type atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrderRelaxed, MemoryScope) {
-  static_assert(sizeof(unsigned long long int) == 8, "this function assumes an unsigned long long  is 64-bit");
+  static_assert(sizeof(unsigned long long int) == 8,
+                "this function assumes an unsigned long long  is 64-bit");
   unsigned long long int return_val =
       atomicCAS(reinterpret_cast<unsigned long long int*>(dest),
                 reinterpret_cast<unsigned long long int&>(compare),
@@ -83,34 +86,41 @@ __device__ typename std::enable_if<sizeof(T) == 8, T>::type atomic_compare_excha
 }
 
 template <typename T, class MemoryScope>
-__device__ typename std::enable_if<sizeof(T) == 4 || sizeof(T) == 8, T>::type atomic_compare_exchange(
+__device__ typename std::enable_if<sizeof(T) == 4 || sizeof(T) == 8, T>::type
+atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrderRelease, MemoryScope) {
-  T return_val = atomic_compare_exchange(dest, compare, value, MemoryOrderRelaxed(), MemoryScope());
-  atomic_thread_fence(MemoryOrderRelease(),MemoryScope());
+  T return_val = atomic_compare_exchange(
+      dest, compare, value, MemoryOrderRelaxed(), MemoryScope());
+  atomic_thread_fence(MemoryOrderRelease(), MemoryScope());
   return return_val;
 }
 
 template <typename T, class MemoryScope>
-__device__ typename std::enable_if<sizeof(T) == 4 || sizeof(T) == 8, T>::type atomic_compare_exchange(
+__device__ typename std::enable_if<sizeof(T) == 4 || sizeof(T) == 8, T>::type
+atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrderAcquire, MemoryScope) {
-  atomic_thread_fence(MemoryOrderAcquire(),MemoryScope());
-  T return_val = atomic_compare_exchange(dest, compare, value, MemoryOrderRelaxed(), MemoryScope());
+  atomic_thread_fence(MemoryOrderAcquire(), MemoryScope());
+  T return_val = atomic_compare_exchange(
+      dest, compare, value, MemoryOrderRelaxed(), MemoryScope());
   return return_val;
 }
 
 template <typename T, class MemoryScope>
-__device__ typename std::enable_if<sizeof(T) == 4 || sizeof(T) == 8, T>::type atomic_compare_exchange(
+__device__ typename std::enable_if<sizeof(T) == 4 || sizeof(T) == 8, T>::type
+atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrderAcqRel, MemoryScope) {
-  atomic_thread_fence(MemoryOrderAcquire(),MemoryScope());
-  T return_val = atomic_compare_exchange(dest, compare, value, MemoryOrderRelaxed(), MemoryScope());
-  atomic_thread_fence(MemoryOrderRelease(),MemoryScope());
+  atomic_thread_fence(MemoryOrderAcquire(), MemoryScope());
+  T return_val = atomic_compare_exchange(
+      dest, compare, value, MemoryOrderRelaxed(), MemoryScope());
+  atomic_thread_fence(MemoryOrderRelease(), MemoryScope());
   return return_val;
 }
 
 template <typename T, class MemoryScope>
 __device__ typename std::enable_if<sizeof(T) == 4, T>::type atomic_exchange(
     T* const dest, T value, MemoryOrderRelaxed, MemoryScope) {
-  static_assert(sizeof(unsigned int) == 4, "this function assumes an unsigned int is 32-bit");
+  static_assert(sizeof(unsigned int) == 4,
+                "this function assumes an unsigned int is 32-bit");
   unsigned int return_val = atomicExch(reinterpret_cast<unsigned int*>(dest),
                                        reinterpret_cast<unsigned int&>(value));
   return reinterpret_cast<T&>(return_val);
@@ -118,7 +128,8 @@ __device__ typename std::enable_if<sizeof(T) == 4, T>::type atomic_exchange(
 template <typename T, class MemoryScope>
 __device__ typename std::enable_if<sizeof(T) == 8, T>::type atomic_exchange(
     T* const dest, T value, MemoryOrderRelaxed, MemoryScope) {
-  static_assert(sizeof(unsigned long long int) == 8, "this function assumes an unsigned long long  is 64-bit");
+  static_assert(sizeof(unsigned long long int) == 8,
+                "this function assumes an unsigned long long  is 64-bit");
   unsigned long long int return_val =
       atomicExch(reinterpret_cast<unsigned long long int*>(dest),
                  reinterpret_cast<unsigned long long int&>(value));
@@ -126,33 +137,34 @@ __device__ typename std::enable_if<sizeof(T) == 8, T>::type atomic_exchange(
 }
 
 template <typename T, class MemoryScope>
-__device__ typename std::enable_if<sizeof(T) == 4 || sizeof(T) == 8, T>::type atomic_exchange(
-    T* const dest, T compare, T value, MemoryOrderRelease, MemoryScope) {
-  T return_val = atomic_compare_exchange(dest, compare, value, MemoryOrderRelaxed(), MemoryScope());
-  atomic_thread_fence(MemoryOrderRelease(),MemoryScope());
+__device__ typename std::enable_if<sizeof(T) == 4 || sizeof(T) == 8, T>::type
+atomic_exchange(T* const dest, T compare, T value, MemoryOrderRelease, MemoryScope) {
+  T return_val = atomic_compare_exchange(
+      dest, compare, value, MemoryOrderRelaxed(), MemoryScope());
+  atomic_thread_fence(MemoryOrderRelease(), MemoryScope());
   return reinterpret_cast<T&>(return_val);
 }
 
 template <typename T, class MemoryScope>
-__device__ typename std::enable_if<sizeof(T) == 4 || sizeof(T) == 8, T>::type atomic_exchange(
-    T* const dest, T compare, T value, MemoryOrderAcquire, MemoryScope) {
-  atomic_thread_fence(MemoryOrderAcquire(),MemoryScope());
+__device__ typename std::enable_if<sizeof(T) == 4 || sizeof(T) == 8, T>::type
+atomic_exchange(T* const dest, T compare, T value, MemoryOrderAcquire, MemoryScope) {
+  atomic_thread_fence(MemoryOrderAcquire(), MemoryScope());
   T return_val = atomic_exchange(dest, value, MemoryOrderRelaxed(), MemoryScope());
   return reinterpret_cast<T&>(return_val);
 }
 
 template <typename T, class MemoryScope>
-__device__ typename std::enable_if<sizeof(T) == 4 || sizeof(T) == 8, T>::type atomic_exchange(
-    T* const dest, T value, MemoryOrderAcqRel, MemoryScope) {
-  atomic_thread_fence(MemoryOrderAcquire(),MemoryScope());
+__device__ typename std::enable_if<sizeof(T) == 4 || sizeof(T) == 8, T>::type
+atomic_exchange(T* const dest, T value, MemoryOrderAcqRel, MemoryScope) {
+  atomic_thread_fence(MemoryOrderAcquire(), MemoryScope());
   T return_val = atomic_exchange(dest, value, MemoryOrderRelaxed(), MemoryScope());
-  atomic_thread_fence(MemoryOrderRelease(),MemoryScope());
+  atomic_thread_fence(MemoryOrderRelease(), MemoryScope());
   return reinterpret_cast<T&>(return_val);
 }
 }  // namespace desul
 #endif
 
-// Including CUDA ptx based exchange atomics 
+// Including CUDA ptx based exchange atomics
 #if (defined(__CUDA_ARCH__) && (__CUDA_ARCH__ >= 700)) || !defined(__NVCC__)
 #include <desul/atomics/cuda/CUDA_asm_exchange.hpp>
 #endif
@@ -164,26 +176,29 @@ namespace desul {
 template <typename T, class MemoryScope>
 __device__ typename std::enable_if<sizeof(T) == 4, T>::type atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrderSeqCst, MemoryScope) {
-  atomic_thread_fence(MemoryOrderAcquire(),MemoryScope());
-  T return_val = atomic_compare_exchange(dest,compare,value,MemoryOrderRelaxed(),MemoryScope());
-  atomic_thread_fence(MemoryOrderRelease(),MemoryScope());
+  atomic_thread_fence(MemoryOrderAcquire(), MemoryScope());
+  T return_val = atomic_compare_exchange(
+      dest, compare, value, MemoryOrderRelaxed(), MemoryScope());
+  atomic_thread_fence(MemoryOrderRelease(), MemoryScope());
   return return_val;
 }
 template <typename T, class MemoryScope>
 __device__ typename std::enable_if<sizeof(T) == 8, T>::type atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrderSeqCst, MemoryScope) {
-  atomic_thread_fence(MemoryOrderAcquire(),MemoryScope());
-  T return_val = atomic_compare_exchange(dest,compare,value,MemoryOrderRelaxed(),MemoryScope());
-  atomic_thread_fence(MemoryOrderRelease(),MemoryScope());
+  atomic_thread_fence(MemoryOrderAcquire(), MemoryScope());
+  T return_val = atomic_compare_exchange(
+      dest, compare, value, MemoryOrderRelaxed(), MemoryScope());
+  atomic_thread_fence(MemoryOrderRelease(), MemoryScope());
   return return_val;
 }
-}
+}  // namespace desul
 #endif
 
 #if defined(__CUDA_ARCH__) || !defined(__NVCC__)
 namespace desul {
 template <typename T, class MemoryOrder, class MemoryScope>
-__device__ typename std::enable_if<(sizeof(T) != 8) && (sizeof(T) != 4), T>::type atomic_compare_exchange(
+__device__ typename std::enable_if<(sizeof(T) != 8) && (sizeof(T) != 4), T>::type
+atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrder, MemoryScope scope) {
   // This is a way to avoid dead lock in a warp or wave front
   T return_val;
@@ -194,12 +209,13 @@ __device__ typename std::enable_if<(sizeof(T) != 8) && (sizeof(T) != 4), T>::typ
   while (active != done_active) {
     if (!done) {
       if (Impl::lock_address_cuda((void*)dest, scope)) {
-        if(std::is_same<MemoryOrder,MemoryOrderSeqCst>::value) atomic_thread_fence(MemoryOrderRelease(),scope);
-        atomic_thread_fence(MemoryOrderAcquire(),scope);
+        if (std::is_same<MemoryOrder, MemoryOrderSeqCst>::value)
+          atomic_thread_fence(MemoryOrderRelease(), scope);
+        atomic_thread_fence(MemoryOrderAcquire(), scope);
         return_val = *dest;
-        if(return_val == compare) {
+        if (return_val == compare) {
           *dest = value;
-          atomic_thread_fence(MemoryOrderRelease(),scope);
+          atomic_thread_fence(MemoryOrderRelease(), scope);
         }
         Impl::unlock_address_cuda((void*)dest, scope);
         done = 1;
@@ -210,8 +226,8 @@ __device__ typename std::enable_if<(sizeof(T) != 8) && (sizeof(T) != 4), T>::typ
   return return_val;
 }
 template <typename T, class MemoryOrder, class MemoryScope>
-__device__ typename std::enable_if<(sizeof(T) != 8) && (sizeof(T) != 4), T>::type atomic_exchange(
-    T* const dest, T value, MemoryOrder, MemoryScope scope) {
+__device__ typename std::enable_if<(sizeof(T) != 8) && (sizeof(T) != 4), T>::type
+atomic_exchange(T* const dest, T value, MemoryOrder, MemoryScope scope) {
   // This is a way to avoid dead lock in a warp or wave front
   T return_val;
   int done = 0;
@@ -221,11 +237,12 @@ __device__ typename std::enable_if<(sizeof(T) != 8) && (sizeof(T) != 4), T>::typ
   while (active != done_active) {
     if (!done) {
       if (Impl::lock_address_cuda((void*)dest, scope)) {
-        if(std::is_same<MemoryOrder,MemoryOrderSeqCst>::value) atomic_thread_fence(MemoryOrderRelease(),scope);
-        atomic_thread_fence(MemoryOrderAcquire(),scope);
+        if (std::is_same<MemoryOrder, MemoryOrderSeqCst>::value)
+          atomic_thread_fence(MemoryOrderRelease(), scope);
+        atomic_thread_fence(MemoryOrderAcquire(), scope);
         return_val = *dest;
         *dest = value;
-        atomic_thread_fence(MemoryOrderRelease(),scope);
+        atomic_thread_fence(MemoryOrderRelease(), scope);
         Impl::unlock_address_cuda((void*)dest, scope);
         done = 1;
       }
@@ -234,9 +251,8 @@ __device__ typename std::enable_if<(sizeof(T) != 8) && (sizeof(T) != 4), T>::typ
   }
   return return_val;
 }
-}
+}  // namespace desul
 #endif
-
 
 #endif
 #endif
