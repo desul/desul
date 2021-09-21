@@ -8,7 +8,6 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #ifndef DESUL_ATOMICS_COMPARE_EXCHANGE_OPENMP_HPP_
 #define DESUL_ATOMICS_COMPARE_EXCHANGE_OPENMP_HPP_
 #include "desul/atomics/Common.hpp"
-#include<cstdio>
 
 #ifdef DESUL_HAVE_OPENMP_ATOMICS
 namespace desul {
