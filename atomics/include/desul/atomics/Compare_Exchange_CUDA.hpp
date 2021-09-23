@@ -61,7 +61,8 @@ __device__ inline void atomic_thread_fence(MemoryOrderSeqCst, MemoryScopeNode) {
 // do NOT have a way of having the code included for clang only when the CC is smaller
 // than 700
 // But on Clang the device side symbol list must be independent of __CUDA_ARCH__
-#if defined(__CUDA_ARCH__) && (__CUDA_ARCH__ < 700)
+#if (defined(__CUDA_ARCH__) && (__CUDA_ARCH__ < 700)) || \
+    (!defined(__NVCC__) && defined(DESUL_CUDA_ARCH_IS_PRE_VOLTA))
 namespace desul {
 template <typename T, class MemoryScope>
 __device__ typename std::enable_if<sizeof(T) == 4, T>::type atomic_compare_exchange(
@@ -164,7 +165,8 @@ atomic_exchange(T* const dest, T value, MemoryOrderAcqRel, MemoryScope) {
 #endif
 
 // Including CUDA ptx based exchange atomics
-#if (defined(__CUDA_ARCH__) && (__CUDA_ARCH__ >= 700)) || !defined(__NVCC__)
+#if (defined(__CUDA_ARCH__) && (__CUDA_ARCH__ >= 700)) || \
+    (!defined(__NVCC__) && !defined(DESUL_CUDA_ARCH_IS_PRE_VOLTA))
 #include <desul/atomics/cuda/CUDA_asm_exchange.hpp>
 #endif
 
