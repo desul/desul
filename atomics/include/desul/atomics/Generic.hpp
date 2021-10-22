@@ -633,11 +633,11 @@ DESUL_INLINE_FUNCTION T atomic_fetch_inc(T* const dest,
 }
 
 template <typename T, class MemoryOrder, class MemoryScope>
-DESUL_INLINE_FUNCTION T atomic_wrapping_fetch_inc(T* const dest,
+DESUL_INLINE_FUNCTION T atomic_fetch_wrapping_inc(T* const dest,
                                          T val,
                                          MemoryOrder order,
                                          MemoryScope scope) {
-  static_assert(std::is_unsigned<T>::value, "Signed types not supported by atomic_wrapping_fetch_inc.");
+  static_assert(std::is_unsigned<T>::value, "Signed types not supported by atomic_fetch_wrapping_inc.");
   return Impl::atomic_fetch_oper(Impl::WrappingIncOper<T, const T>(), dest, val, order, scope);
 }
 
@@ -649,11 +649,11 @@ DESUL_INLINE_FUNCTION T atomic_fetch_dec(T* const dest,
 }
 
 template <typename T, class MemoryOrder, class MemoryScope>
-DESUL_INLINE_FUNCTION T atomic_wrapping_fetch_dec(T* const dest,
+DESUL_INLINE_FUNCTION T atomic_fetch_wrapping_dec(T* const dest,
                                          T val,
                                          MemoryOrder order,
                                          MemoryScope scope) {
-  static_assert(std::is_unsigned<T>::value, "Signed types not supported by atomic_wrapping_fetch_dec.");
+  static_assert(std::is_unsigned<T>::value, "Signed types not supported by atomic_fetch_wrapping_dec.");
   return Impl::atomic_fetch_oper(Impl::WrappingDecOper<T, const T>(), dest, val, order, scope);
 }
 

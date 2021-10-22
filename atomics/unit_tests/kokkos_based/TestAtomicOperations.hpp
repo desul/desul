@@ -467,7 +467,7 @@ struct WrappingIncFunctor {
 
   KOKKOS_INLINE_FUNCTION
   void operator()(int) const {
-    desul::atomic_wrapping_fetch_inc(
+    desul::atomic_fetch_wrapping_inc(
         &data(), (T)i1, desul::MemoryOrderRelaxed(), desul::MemoryScopeDevice());
   }
 
@@ -615,7 +615,7 @@ struct WrappingDecFunctor {
 
   KOKKOS_INLINE_FUNCTION
   void operator()(int) const {
-    desul::atomic_wrapping_fetch_dec(
+    desul::atomic_fetch_wrapping_dec(
         &data(), (T)i1, desul::MemoryOrderRelaxed(), desul::MemoryScopeDevice());
   }
 
