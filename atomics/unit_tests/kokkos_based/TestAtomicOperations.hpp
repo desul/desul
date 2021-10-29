@@ -453,11 +453,11 @@ bool IncAtomicTest(T i0) {
 }
 
 //---------------------------------------------------
-//-------------atomic_wrapping_increment-------------
+//-------------atomic_inc_mod------------------------
 //---------------------------------------------------
 
 template <class T, class DEVICE_TYPE>
-struct WrappingIncFunctor {
+struct IncModFunctor {
   typedef DEVICE_TYPE execution_space;
   typedef Kokkos::View<T, execution_space> type;
 
@@ -471,11 +471,11 @@ struct WrappingIncFunctor {
         &data(), (T)i1, desul::MemoryOrderRelaxed(), desul::MemoryScopeDevice());
   }
 
-  WrappingIncFunctor(T _i0, T _i1) : i0(_i0), i1(_i1) {}
+  IncModFunctor(T _i0, T _i1) : i0(_i0), i1(_i1) {}
 };
 
 template <class T, class execution_space>
-T WrappingIncAtomic(T i0, T i1) {
+T IncModAtomic(T i0, T i1) {
   struct InitFunctor<T, execution_space> f_init(i0);
   typename InitFunctor<T, execution_space>::type data("Data");
   typename InitFunctor<T, execution_space>::h_type h_data("HData");
@@ -484,7 +484,7 @@ T WrappingIncAtomic(T i0, T i1) {
   Kokkos::parallel_for(1, f_init);
   execution_space().fence();
 
-  struct WrappingIncFunctor<T, execution_space> f(i0, i1);
+  struct IncModFunctor<T, execution_space> f(i0, i1);
 
   f.data = data;
   Kokkos::parallel_for(1, f);
@@ -497,7 +497,7 @@ T WrappingIncAtomic(T i0, T i1) {
 }
 
 template <class T>
-T WrappingIncAtomicCheck(T i0, T i1) {
+T IncModAtomicCheck(T i0, T i1) {
   T* data = new T[1];
   data[0] = 0;
 
@@ -511,16 +511,16 @@ T WrappingIncAtomicCheck(T i0, T i1) {
 }
 
 template <class T, class DeviceType>
-bool WrappingIncAtomicTest(T i0, T i1) {
-  T res = WrappingIncAtomic<T, DeviceType>(i0, i1);
-  T resSerial = WrappingIncAtomicCheck<T>(i0, i1);
+bool IncModAtomicTest(T i0, T i1) {
+  T res = IncModAtomic<T, DeviceType>(i0, i1);
+  T resSerial = IncModAtomicCheck<T>(i0, i1);
 
   bool passed = true;
 
   if (resSerial != res) {
     passed = false;
 
-    std::cout << "Loop<" << typeid(T).name() << ">( test = WrappingIncAtomicTest"
+    std::cout << "Loop<" << typeid(T).name() << ">( test = IncModAtomicTest"
               << " FAILED : " << resSerial << " != " << res << std::endl;
   }
 
@@ -601,11 +601,11 @@ bool DecAtomicTest(T i0) {
 }
 
 //---------------------------------------------------
-//-------------atomic_wrapping_decrement-------------
+//-------------atomic_dec_mod------------------------
 //---------------------------------------------------
 
 template <class T, class DEVICE_TYPE>
-struct WrappingDecFunctor {
+struct DecModFunctor {
   typedef DEVICE_TYPE execution_space;
   typedef Kokkos::View<T, execution_space> type;
 
@@ -619,11 +619,11 @@ struct WrappingDecFunctor {
         &data(), (T)i1, desul::MemoryOrderRelaxed(), desul::MemoryScopeDevice());
   }
 
-  WrappingDecFunctor(T _i0, T _i1) : i0(_i0), i1(_i1) {}
+  DecModFunctor(T _i0, T _i1) : i0(_i0), i1(_i1) {}
 };
 
 template <class T, class execution_space>
-T WrappingDecAtomic(T i0, T i1) {
+T DecModAtomic(T i0, T i1) {
   struct InitFunctor<T, execution_space> f_init(i0);
   typename InitFunctor<T, execution_space>::type data("Data");
   typename InitFunctor<T, execution_space>::h_type h_data("HData");
@@ -632,7 +632,7 @@ T WrappingDecAtomic(T i0, T i1) {
   Kokkos::parallel_for(1, f_init);
   execution_space().fence();
 
-  struct WrappingDecFunctor<T, execution_space> f(i0, i1);
+  struct DecModFunctor<T, execution_space> f(i0, i1);
 
   f.data = data;
   Kokkos::parallel_for(1, f);
@@ -645,7 +645,7 @@ T WrappingDecAtomic(T i0, T i1) {
 }
 
 template <class T>
-T WrappingDecAtomicCheck(T i0, T i1) {
+T DecModAtomicCheck(T i0, T i1) {
   T* data = new T[1];
   data[0] = 0;
 
@@ -660,16 +660,16 @@ T WrappingDecAtomicCheck(T i0, T i1) {
 }
 
 template <class T, class DeviceType>
-bool WrappingDecAtomicTest(T i0, T i1) {
-  T res = WrappingDecAtomic<T, DeviceType>(i0, i1);
-  T resSerial = WrappingDecAtomicCheck<T>(i0, i1);
+bool DecModAtomicTest(T i0, T i1) {
+  T res = DecModAtomic<T, DeviceType>(i0, i1);
+  T resSerial = DecModAtomicCheck<T>(i0, i1);
 
   bool passed = true;
 
   if (resSerial != res) {
     passed = false;
 
-    std::cout << "Loop<" << typeid(T).name() << ">( test = WrappingDecAtomicTest"
+    std::cout << "Loop<" << typeid(T).name() << ">( test = DecModAtomicTest"
               << " FAILED : " << resSerial << " != " << res << std::endl;
   }
 
@@ -1314,9 +1314,9 @@ template <class T, class DeviceType>
 bool AtomicOperationsTestUnsignedIntegralType(int i0, int i1, int test) {
   switch (test) {
     case 1:
-      return WrappingIncAtomicTest<T, DeviceType>((T)i0, (T)i1);
+      return IncModAtomicTest<T, DeviceType>((T)i0, (T)i1);
     case 2:
-      return WrappingDecAtomicTest<T, DeviceType>((T)i0, (T)i1);
+      return DecModAtomicTest<T, DeviceType>((T)i0, (T)i1);
   }
 
   return 0;
