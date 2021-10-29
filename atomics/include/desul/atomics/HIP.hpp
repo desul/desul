@@ -59,8 +59,8 @@ inline __device__                int atomic_fetch_dec(               int* ptr,  
 inline __device__       unsigned int atomic_fetch_dec(      unsigned int* ptr,                         MemoryOrderRelaxed, MemoryScopeDevice) { return atomicSub(ptr, 1u  ); }
 inline __device__ unsigned long long atomic_fetch_dec(unsigned long long* ptr,                         MemoryOrderRelaxed, MemoryScopeDevice) { return atomicAdd(ptr, -1  ); }
 
-inline __device__ unsigned int atomic_fetch_wrapping_inc(   unsigned int* ptr,       unsigned int val, MemoryOrderRelaxed, MemoryScopeDevice) { return atomicInc(ptr, val); }
-inline __device__ unsigned int atomic_fetch_wrapping_dec(   unsigned int* ptr,       unsigned int val, MemoryOrderRelaxed, MemoryScopeDevice) { return atomicDec(ptr, val); }
+inline __device__       unsigned int atomic_fetch_inc_mod(  unsigned int* ptr,       unsigned int val, MemoryOrderRelaxed, MemoryScopeDevice) { return atomicInc(ptr, val); }
+inline __device__       unsigned int atomic_fetch_dec_mod(  unsigned int* ptr,       unsigned int val, MemoryOrderRelaxed, MemoryScopeDevice) { return atomicDec(ptr, val); }
 // clang-format on
 
 #define DESUL_IMPL_HIP_DEVICE_ATOMIC_FETCH_OP(OP, TYPE)                         \
@@ -102,8 +102,8 @@ DESUL_IMPL_HIP_DEVICE_ATOMIC_FETCH_OP_INTEGRAL(sub)
 DESUL_IMPL_HIP_DEVICE_ATOMIC_FETCH_OP_INTEGRAL(inc)
 DESUL_IMPL_HIP_DEVICE_ATOMIC_FETCH_OP_INTEGRAL(dec)
 
-DESUL_IMPL_HIP_DEVICE_ATOMIC_FETCH_OP(wrapping_inc, unsigned int)
-DESUL_IMPL_HIP_DEVICE_ATOMIC_FETCH_OP(wrapping_dec, unsigned int)
+DESUL_IMPL_HIP_DEVICE_ATOMIC_FETCH_OP(inc_mod, unsigned int)
+DESUL_IMPL_HIP_DEVICE_ATOMIC_FETCH_OP(dec_mod, unsigned int)
 
 #undef DESUL_IMPL_HIP_DEVICE_ATOMIC_FETCH_OP_FLOATING_POINT
 #undef DESUL_IMPL_HIP_DEVICE_ATOMIC_FETCH_OP_INTEGRAL
@@ -142,8 +142,8 @@ DESUL_IMPL_HIP_HOST_FALLBACK_ATOMIC_FUN_INTEGRAL(max, Max)
 DESUL_IMPL_HIP_HOST_FALLBACK_ATOMIC_FUN_FLOATING_POINT(add, Add)
 DESUL_IMPL_HIP_HOST_FALLBACK_ATOMIC_FUN_FLOATING_POINT(sub, Sub)
 
-DESUL_IMPL_HIP_HOST_FALLBACK_ATOMIC_FUN(wrapping_inc, WrappingIncOper, unsigned int)
-DESUL_IMPL_HIP_HOST_FALLBACK_ATOMIC_FUN(wrapping_dec, WrappingDecOper, unsigned int)
+DESUL_IMPL_HIP_HOST_FALLBACK_ATOMIC_FUN(inc_mod, IncModOper, unsigned int)
+DESUL_IMPL_HIP_HOST_FALLBACK_ATOMIC_FUN(dec_mod, DecModOper, unsigned int)
 
 #undef DESUL_IMPL_HIP_HOST_FALLBACK_ATOMIC_FUN_FLOATING_POINT
 #undef DESUL_IMPL_HIP_HOST_FALLBACK_ATOMIC_FUN_INTEGRAL
