@@ -96,19 +96,19 @@ atomic_fetch_sub(T* dest, T val, MemoryOrder, MemoryScopeCore) {
   return atomic_fetch_sub(dest,val,MemoryOrder(),MemoryScopeDevice());
 }
 
-// Wrapping Atomic Inc
-__device__ inline unsigned int atomic_fetch_wrapping_inc(unsigned int* dest,
-                                                unsigned int val,
-                                                MemoryOrderRelaxed,
-                                                MemoryScopeDevice) {
+// Wrap around atomic add
+__device__ inline unsigned int atomic_fetch_inc_mod(unsigned int* dest,
+                                                    unsigned int val,
+                                                    MemoryOrderRelaxed,
+                                                    MemoryScopeDevice) {
   return atomicInc(dest, val);
 }
 
 template <typename MemoryOrder>
-__device__ inline unsigned int atomic_fetch_wrapping_inc(unsigned int* dest,
-                                                unsigned int val,
-                                                MemoryOrder,
-                                                MemoryScopeDevice) {
+__device__ inline unsigned int atomic_fetch_inc_mod(unsigned int* dest,
+                                                    unsigned int val,
+                                                    MemoryOrder,
+                                                    MemoryScopeDevice) {
   __threadfence();
   unsigned int return_val = atomicInc(dest, val);
   __threadfence();
@@ -116,26 +116,26 @@ __device__ inline unsigned int atomic_fetch_wrapping_inc(unsigned int* dest,
 }
 
 template <typename MemoryOrder>
-__device__ inline unsigned int atomic_fetch_wrapping_inc(unsigned int* dest,
-                                                unsigned int val,
-                                                MemoryOrder,
-                                                MemoryScopeCore) {
-  return atomic_fetch_wrapping_inc(dest, val, MemoryOrder(), MemoryScopeDevice());
+__device__ inline unsigned int atomic_fetch_inc_mod(unsigned int* dest,
+                                                    unsigned int val,
+                                                    MemoryOrder,
+                                                    MemoryScopeCore) {
+  return atomic_fetch_inc_mod(dest, val, MemoryOrder(), MemoryScopeDevice());
 }
 
-// Wrapping Atomic Dec
-__device__ inline unsigned int atomic_fetch_wrapping_dec(unsigned int* dest,
-                                                unsigned int val,
-                                                MemoryOrderRelaxed,
-                                                MemoryScopeDevice) {
+// Wrap around atomic sub
+__device__ inline unsigned int atomic_fetch_dec_mod(unsigned int* dest,
+                                                    unsigned int val,
+                                                    MemoryOrderRelaxed,
+                                                    MemoryScopeDevice) {
   return atomicDec(dest, val);
 }
 
 template <typename MemoryOrder>
-__device__ inline unsigned int atomic_fetch_wrapping_dec(unsigned int* dest,
-                                                unsigned int val,
-                                                MemoryOrder,
-                                                MemoryScopeDevice) {
+__device__ inline unsigned int atomic_fetch_dec_mod(unsigned int* dest,
+                                                    unsigned int val,
+                                                    MemoryOrder,
+                                                    MemoryScopeDevice) {
   __threadfence();
   unsigned int return_val = atomicDec(dest, val);
   __threadfence();
@@ -143,11 +143,11 @@ __device__ inline unsigned int atomic_fetch_wrapping_dec(unsigned int* dest,
 }
 
 template <typename MemoryOrder>
-__device__ inline unsigned int atomic_fetch_wrapping_dec(unsigned int* dest,
-                                                unsigned int val,
-                                                MemoryOrder,
-                                                MemoryScopeCore) {
-  return atomic_fetch_wrapping_dec(dest, val, MemoryOrder(), MemoryScopeDevice());
+__device__ inline unsigned int atomic_fetch_dec_mod(unsigned int* dest,
+                                                    unsigned int val,
+                                                    MemoryOrder,
+                                                    MemoryScopeCore) {
+  return atomic_fetch_dec_mod(dest, val, MemoryOrder(), MemoryScopeDevice());
 }
 
 // Atomic Inc
@@ -360,8 +360,8 @@ namespace desul {
   }
   DESUL_IMPL_CUDA_HOST_ATOMIC_INC(unsigned int,MemoryOrderRelaxed,MemoryScopeDevice); // only for ASM?
 
-  #define DESUL_IMPL_CUDA_HOST_ATOMIC_FETCH_WRAPPING_INC(TYPE,ORDER,SCOPE) \
-    inline TYPE atomic_fetch_wrapping_inc(TYPE* dest, TYPE val, ORDER order, SCOPE scope) { \
+  #define DESUL_IMPL_CUDA_HOST_ATOMIC_INC_MOD(TYPE,ORDER,SCOPE) \
+    inline TYPE atomic_fetch_inc_mod(TYPE* dest, TYPE val, ORDER order, SCOPE scope) { \
     using cas_t = typename Impl::atomic_compare_exchange_type<sizeof(TYPE)>::type; \
     cas_t oldval = reinterpret_cast<cas_t&>(*dest); \
     cas_t assume = oldval; \
@@ -372,7 +372,7 @@ namespace desul {
     } while (assume != oldval); \
     return reinterpret_cast<TYPE&>(oldval); \
   }
-  DESUL_IMPL_CUDA_HOST_ATOMIC_FETCH_WRAPPING_INC(unsigned int,MemoryOrderRelaxed,MemoryScopeDevice);
+  DESUL_IMPL_CUDA_HOST_ATOMIC_INC_MOD(unsigned int,MemoryOrderRelaxed,MemoryScopeDevice);
 
   #define DESUL_IMPL_CUDA_HOST_ATOMIC_DEC(TYPE,ORDER,SCOPE) \
     inline void atomic_dec(TYPE* const dest, ORDER order, SCOPE scope) { \
@@ -380,8 +380,8 @@ namespace desul {
   }
   DESUL_IMPL_CUDA_HOST_ATOMIC_DEC(unsigned,MemoryOrderRelaxed,MemoryScopeDevice); // only for ASM?
 
-  #define DESUL_IMPL_CUDA_HOST_ATOMIC_FETCH_WRAPPING_DEC(TYPE,ORDER,SCOPE) \
-    inline TYPE atomic_fetch_wrapping_dec(TYPE* dest, TYPE val, ORDER order, SCOPE scope) { \
+  #define DESUL_IMPL_CUDA_HOST_ATOMIC_DEC_MOD(TYPE,ORDER,SCOPE) \
+    inline TYPE atomic_fetch_dec_mod(TYPE* dest, TYPE val, ORDER order, SCOPE scope) { \
     using cas_t = typename Impl::atomic_compare_exchange_type<sizeof(TYPE)>::type; \
     cas_t oldval = reinterpret_cast<cas_t&>(*dest); \
     cas_t assume = oldval; \
@@ -392,7 +392,7 @@ namespace desul {
     } while (assume != oldval); \
     return reinterpret_cast<TYPE&>(oldval); \
   }
-  DESUL_IMPL_CUDA_HOST_ATOMIC_FETCH_WRAPPING_DEC(unsigned int,MemoryOrderRelaxed,MemoryScopeDevice);
+  DESUL_IMPL_CUDA_HOST_ATOMIC_DEC_MOD(unsigned int,MemoryOrderRelaxed,MemoryScopeDevice);
 
 #endif // DESUL_HAVE_CUDA_ATOMICS_ASM
 
