@@ -19,6 +19,16 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 namespace desul {
 
+// Forward declare these functions. They use compare_exchange themselves
+// so the actual header file with them comes after this file is included.
+namespace Impl {
+template <typename MemoryScope>
+inline bool lock_address(void* ptr, MemoryScope ms);
+
+template <typename MemoryScope>
+void unlock_address(void* ptr, MemoryScope ms);
+}  // namespace Impl
+
 template <class MemoryOrder, class MemoryScope>
 void atomic_thread_fence(MemoryOrder, MemoryScope) {
   std::atomic_thread_fence(CXXMemoryOrder<MemoryOrder>::value);
