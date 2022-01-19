@@ -1,4 +1,4 @@
-/* 
+/*
 Copyright (c) 2019, Lawrence Livermore National Security, LLC
 and DESUL project contributors. See the COPYRIGHT file for details.
 Source: https://github.com/desul/desul
@@ -10,8 +10,10 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #define DESUL_ATOMICS_GENERIC_HPP_
 
 #include <type_traits>
+#if defined(__GNUC__) && (!defined(__clang__))
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#endif
 #include "desul/atomics/Common.hpp"
 #include "desul/atomics/Compare_Exchange.hpp"
 #include "desul/atomics/Lock_Array.hpp"
@@ -60,14 +62,16 @@ struct may_exit_early<Op,
 #endif
 
 template <typename Op, typename Scalar1, typename Scalar2>
-constexpr DESUL_FUNCTION typename std::enable_if<may_exit_early<Op, Scalar1, Scalar2>{}, bool>::type
-check_early_exit(Op const&, Scalar1 const& val1, Scalar2 const& val2) {
+constexpr DESUL_FUNCTION
+    typename std::enable_if<may_exit_early<Op, Scalar1, Scalar2>::value, bool>::type
+    check_early_exit(Op const&, Scalar1 const& val1, Scalar2 const& val2) {
   return Op::check_early_exit(val1, val2);
 }
 
 template <typename Op, typename Scalar1, typename Scalar2>
-constexpr DESUL_FUNCTION typename std::enable_if<!may_exit_early<Op, Scalar1, Scalar2>{}, bool>::type
-check_early_exit(Op const&, Scalar1 const&, Scalar2 const&) {
+constexpr DESUL_FUNCTION
+    typename std::enable_if<!may_exit_early<Op, Scalar1, Scalar2>::value, bool>::type
+    check_early_exit(Op const&, Scalar1 const&, Scalar2 const&) {
   return false;
 }
 
@@ -146,13 +150,17 @@ struct RShiftOper {
 template <class Scalar1, class Scalar2>
 struct IncModOper {
   DESUL_FORCEINLINE_FUNCTION
-  static Scalar1 apply(const Scalar1& val1, const Scalar2& val2) { return ((val1 >= val2) ? Scalar1(0) : val1 + Scalar1(1)); }
+  static Scalar1 apply(const Scalar1& val1, const Scalar2& val2) {
+    return ((val1 >= val2) ? Scalar1(0) : val1 + Scalar1(1));
+  }
 };
 
 template <class Scalar1, class Scalar2>
 struct DecModOper {
   DESUL_FORCEINLINE_FUNCTION
-  static Scalar1 apply(const Scalar1& val1, const Scalar2& val2) { return (((val1 == Scalar1(0)) | (val1 > val2)) ? val2 : (val1 - Scalar1(1))); }
+  static Scalar1 apply(const Scalar1& val1, const Scalar2& val2) {
+    return (((val1 == Scalar1(0)) | (val1 > val2)) ? val2 : (val1 - Scalar1(1)));
+  }
 };
 
 template <class Scalar1, class Scalar2>
@@ -167,78 +175,89 @@ struct LoadOper {
   static Scalar1 apply(const Scalar1& val1, const Scalar2&) { return val1; }
 };
 
-
-template <class Oper, typename T, class MemoryOrder, class MemoryScope,
-  // equivalent to:
-  //   requires atomic_always_lock_free(sizeof(T))
-  std::enable_if_t<atomic_always_lock_free(sizeof(T)), int> = 0
->
-DESUL_INLINE_FUNCTION T
-atomic_fetch_oper(const Oper& op,
-                  T* const dest,
-                  dont_deduce_this_parameter_t<const T> val,
-                  MemoryOrder order,
-                  MemoryScope scope) {
+template <class Oper,
+          typename T,
+          class MemoryOrder,
+          class MemoryScope,
+          // equivalent to:
+          //   requires atomic_always_lock_free(sizeof(T))
+          std::enable_if_t<atomic_always_lock_free(sizeof(T)), int> = 0>
+DESUL_INLINE_FUNCTION T atomic_fetch_oper(const Oper& op,
+                                          T* const dest,
+                                          dont_deduce_this_parameter_t<const T> val,
+                                          MemoryOrder order,
+                                          MemoryScope scope) {
   using cas_t = typename atomic_compare_exchange_type<sizeof(T)>::type;
   cas_t oldval = reinterpret_cast<cas_t&>(*dest);
   cas_t assume = oldval;
 
   do {
-    if (Impl::check_early_exit(op, reinterpret_cast<T&>(oldval), val)) return reinterpret_cast<T&>(oldval);
+    if (Impl::check_early_exit(op, reinterpret_cast<T&>(oldval), val))
+      return reinterpret_cast<T&>(oldval);
     assume = oldval;
     T newval = op.apply(reinterpret_cast<T&>(assume), val);
-    oldval = desul::atomic_compare_exchange(
-        reinterpret_cast<cas_t*>(dest), assume, reinterpret_cast<cas_t&>(newval), order, scope);
+    oldval = desul::atomic_compare_exchange(reinterpret_cast<cas_t*>(dest),
+                                            assume,
+                                            reinterpret_cast<cas_t&>(newval),
+                                            order,
+                                            scope);
   } while (assume != oldval);
 
   return reinterpret_cast<T&>(oldval);
 }
 
-template <class Oper, typename T, class MemoryOrder, class MemoryScope,
-  // equivalent to:
-  //   requires atomic_always_lock_free(sizeof(T))
-  std::enable_if_t<atomic_always_lock_free(sizeof(T)), int> = 0
->
-DESUL_INLINE_FUNCTION T
-atomic_oper_fetch(const Oper& op,
-                  T* const dest,
-                  dont_deduce_this_parameter_t<const T> val,
-                  MemoryOrder order,
-                  MemoryScope scope) {
+template <class Oper,
+          typename T,
+          class MemoryOrder,
+          class MemoryScope,
+          // equivalent to:
+          //   requires atomic_always_lock_free(sizeof(T))
+          std::enable_if_t<atomic_always_lock_free(sizeof(T)), int> = 0>
+DESUL_INLINE_FUNCTION T atomic_oper_fetch(const Oper& op,
+                                          T* const dest,
+                                          dont_deduce_this_parameter_t<const T> val,
+                                          MemoryOrder order,
+                                          MemoryScope scope) {
   using cas_t = typename atomic_compare_exchange_type<sizeof(T)>::type;
   cas_t oldval = reinterpret_cast<cas_t&>(*dest);
   T newval = val;
   cas_t assume = oldval;
   do {
-    if (Impl::check_early_exit(op, reinterpret_cast<T&>(oldval), val)) return reinterpret_cast<T&>(oldval);
+    if (Impl::check_early_exit(op, reinterpret_cast<T&>(oldval), val))
+      return reinterpret_cast<T&>(oldval);
     assume = oldval;
     newval = op.apply(reinterpret_cast<T&>(assume), val);
-    oldval = desul::atomic_compare_exchange(
-        reinterpret_cast<cas_t*>(dest), assume, reinterpret_cast<cas_t&>(newval), order, scope);
+    oldval = desul::atomic_compare_exchange(reinterpret_cast<cas_t*>(dest),
+                                            assume,
+                                            reinterpret_cast<cas_t&>(newval),
+                                            order,
+                                            scope);
   } while (assume != oldval);
 
   return newval;
 }
 
-template <class Oper, typename T, class MemoryOrder, class MemoryScope,
-  // equivalent to:
-  //   requires !atomic_always_lock_free(sizeof(T))
-  std::enable_if_t<!atomic_always_lock_free(sizeof(T)), int> = 0
->
-DESUL_INLINE_FUNCTION T
-atomic_fetch_oper(const Oper& op,
-                  T* const dest,
-                  dont_deduce_this_parameter_t<const T> val,
-                  MemoryOrder /*order*/,
-                  MemoryScope scope) {
+template <class Oper,
+          typename T,
+          class MemoryOrder,
+          class MemoryScope,
+          // equivalent to:
+          //   requires !atomic_always_lock_free(sizeof(T))
+          std::enable_if_t<!atomic_always_lock_free(sizeof(T)), int> = 0>
+DESUL_INLINE_FUNCTION T atomic_fetch_oper(const Oper& op,
+                                          T* const dest,
+                                          dont_deduce_this_parameter_t<const T> val,
+                                          MemoryOrder /*order*/,
+                                          MemoryScope scope) {
 #if defined(DESUL_HAVE_FORWARD_PROGRESS)
   // Acquire a lock for the address
-  while (!Impl::lock_address((void*)dest, scope)) {}
+  while (!Impl::lock_address((void*)dest, scope)) {
+  }
 
-  atomic_thread_fence(MemoryOrderAcquire(),scope);
+  atomic_thread_fence(MemoryOrderAcquire(), scope);
   T return_val = *dest;
   *dest = op.apply(return_val, val);
-  atomic_thread_fence(MemoryOrderRelease(),scope);
+  atomic_thread_fence(MemoryOrderRelease(), scope);
   Impl::unlock_address((void*)dest, scope);
   return return_val;
 #elif defined(DESUL_HAVE_GPU_LIKE_PROGRESS)
@@ -279,10 +298,10 @@ atomic_fetch_oper(const Oper& op,
   while (active != done_active) {
     if (!done) {
       if (Impl::lock_address_cuda((void*)dest, scope)) {
-        atomic_thread_fence(MemoryOrderAcquire(),scope);
+        atomic_thread_fence(MemoryOrderAcquire(), scope);
         return_val = *dest;
         *dest = op.apply(return_val, val);
-        atomic_thread_fence(MemoryOrderRelease(),scope);
+        atomic_thread_fence(MemoryOrderRelease(), scope);
         Impl::unlock_address_cuda((void*)dest, scope);
         done = 1;
       }
@@ -297,25 +316,27 @@ atomic_fetch_oper(const Oper& op,
 #endif
 }
 
-template <class Oper, typename T, class MemoryOrder, class MemoryScope,
-  // equivalent to:
-  //   requires !atomic_always_lock_free(sizeof(T))
-  std::enable_if_t<!atomic_always_lock_free(sizeof(T)), int> = 0
->
-DESUL_INLINE_FUNCTION T
-atomic_oper_fetch(const Oper& op,
-                  T* const dest,
-                  dont_deduce_this_parameter_t<const T> val,
-                  MemoryOrder /*order*/,
-                  MemoryScope scope) {
+template <class Oper,
+          typename T,
+          class MemoryOrder,
+          class MemoryScope,
+          // equivalent to:
+          //   requires !atomic_always_lock_free(sizeof(T))
+          std::enable_if_t<!atomic_always_lock_free(sizeof(T)), int> = 0>
+DESUL_INLINE_FUNCTION T atomic_oper_fetch(const Oper& op,
+                                          T* const dest,
+                                          dont_deduce_this_parameter_t<const T> val,
+                                          MemoryOrder /*order*/,
+                                          MemoryScope scope) {
 #if defined(DESUL_HAVE_FORWARD_PROGRESS)
   // Acquire a lock for the address
-  while (!Impl::lock_address((void*)dest, scope)) {}
+  while (!Impl::lock_address((void*)dest, scope)) {
+  }
 
-  atomic_thread_fence(MemoryOrderAcquire(),scope);
+  atomic_thread_fence(MemoryOrderAcquire(), scope);
   T return_val = op.apply(*dest, val);
   *dest = return_val;
-  atomic_thread_fence(MemoryOrderRelease(),scope);
+  atomic_thread_fence(MemoryOrderRelease(), scope);
   Impl::unlock_address((void*)dest, scope);
   return return_val;
 #elif defined(DESUL_HAVE_GPU_LIKE_PROGRESS)
@@ -355,10 +376,10 @@ atomic_oper_fetch(const Oper& op,
   while (active != done_active) {
     if (!done) {
       if (Impl::lock_address_cuda((void*)dest, scope)) {
-        atomic_thread_fence(MemoryOrderAcquire(),scope);
+        atomic_thread_fence(MemoryOrderAcquire(), scope);
         return_val = op.apply(*dest, val);
         *dest = return_val;
-        atomic_thread_fence(MemoryOrderRelease(),scope);
+        atomic_thread_fence(MemoryOrderRelease(), scope);
         Impl::unlock_address_cuda((void*)dest, scope);
         done = 1;
       }
@@ -371,6 +392,29 @@ atomic_oper_fetch(const Oper& op,
   static_assert(false, "Unimplemented lock based atomic\n");
   return val;
 #endif
+}
+
+template <class Oper, typename T, class MemoryOrder>
+DESUL_INLINE_FUNCTION T atomic_fetch_oper(const Oper& op,
+                                          T* const dest,
+                                          dont_deduce_this_parameter_t<const T> val,
+                                          MemoryOrder /*order*/,
+                                          MemoryScopeCaller /*scope*/) {
+  T oldval = *dest;
+  *dest = op.apply(oldval, val);
+  return oldval;
+}
+
+template <class Oper, typename T, class MemoryOrder>
+DESUL_INLINE_FUNCTION T atomic_oper_fetch(const Oper& op,
+                                          T* const dest,
+                                          dont_deduce_this_parameter_t<const T> val,
+                                          MemoryOrder /*order*/,
+                                          MemoryScopeCaller /*scope*/) {
+  T oldval = *dest;
+  T newval = op.apply(oldval, val);
+  *dest = newval;
+  return newval;
 }
 
 }  // namespace Impl
@@ -554,7 +598,8 @@ template <typename T, class MemoryOrder, class MemoryScope>
 DESUL_INLINE_FUNCTION T atomic_load(const T* const dest,
                                     MemoryOrder order,
                                     MemoryScope scope) {
-  return Impl::atomic_fetch_oper(Impl::LoadOper<T, const T>(), const_cast<T*>(dest), T(), order, scope);
+  return Impl::atomic_fetch_oper(
+      Impl::LoadOper<T, const T>(), const_cast<T*>(dest), T(), order, scope);
 }
 
 template <typename T, class MemoryOrder, class MemoryScope>
@@ -614,14 +659,16 @@ DESUL_INLINE_FUNCTION void atomic_max(T* const dest,
 }
 
 template <typename T, class MemoryOrder, class MemoryScope>
-DESUL_INLINE_FUNCTION T
-atomic_inc_fetch(T* const dest, MemoryOrder order, MemoryScope scope) {
+DESUL_INLINE_FUNCTION T atomic_inc_fetch(T* const dest,
+                                         MemoryOrder order,
+                                         MemoryScope scope) {
   return atomic_add_fetch(dest, T(1), order, scope);
 }
 
 template <typename T, class MemoryOrder, class MemoryScope>
-DESUL_INLINE_FUNCTION T
-atomic_dec_fetch(T* const dest, MemoryOrder order, MemoryScope scope) {
+DESUL_INLINE_FUNCTION T atomic_dec_fetch(T* const dest,
+                                         MemoryOrder order,
+                                         MemoryScope scope) {
   return atomic_sub_fetch(dest, T(1), order, scope);
 }
 
@@ -633,12 +680,12 @@ DESUL_INLINE_FUNCTION T atomic_fetch_inc(T* const dest,
 }
 
 template <typename T, class MemoryOrder, class MemoryScope>
-DESUL_INLINE_FUNCTION T atomic_fetch_inc_mod(T* const dest,
-                                             T val,
-                                             MemoryOrder order,
-                                             MemoryScope scope) {
-  static_assert(std::is_unsigned<T>::value, "Signed types not supported by atomic_fetch_inc_mod.");
-  return Impl::atomic_fetch_oper(Impl::IncModOper<T, const T>(), dest, val, order, scope);
+DESUL_INLINE_FUNCTION T
+atomic_fetch_inc_mod(T* const dest, T val, MemoryOrder order, MemoryScope scope) {
+  static_assert(std::is_unsigned<T>::value,
+                "Signed types not supported by atomic_fetch_inc_mod.");
+  return Impl::atomic_fetch_oper(
+      Impl::IncModOper<T, const T>(), dest, val, order, scope);
 }
 
 template <typename T, class MemoryOrder, class MemoryScope>
@@ -649,25 +696,25 @@ DESUL_INLINE_FUNCTION T atomic_fetch_dec(T* const dest,
 }
 
 template <typename T, class MemoryOrder, class MemoryScope>
-DESUL_INLINE_FUNCTION T atomic_fetch_dec_mod(T* const dest,
-                                             T val,
-                                             MemoryOrder order,
-                                             MemoryScope scope) {
-  static_assert(std::is_unsigned<T>::value, "Signed types not supported by atomic_fetch_dec_mod.");
-  return Impl::atomic_fetch_oper(Impl::DecModOper<T, const T>(), dest, val, order, scope);
+DESUL_INLINE_FUNCTION T
+atomic_fetch_dec_mod(T* const dest, T val, MemoryOrder order, MemoryScope scope) {
+  static_assert(std::is_unsigned<T>::value,
+                "Signed types not supported by atomic_fetch_dec_mod.");
+  return Impl::atomic_fetch_oper(
+      Impl::DecModOper<T, const T>(), dest, val, order, scope);
 }
 
 template <typename T, class MemoryOrder, class MemoryScope>
 DESUL_INLINE_FUNCTION void atomic_inc(T* const dest,
-                                         MemoryOrder order,
-                                         MemoryScope scope) {
+                                      MemoryOrder order,
+                                      MemoryScope scope) {
   return atomic_add(dest, T(1), order, scope);
 }
 
 template <typename T, class MemoryOrder, class MemoryScope>
 DESUL_INLINE_FUNCTION void atomic_dec(T* const dest,
-                                         MemoryOrder order,
-                                         MemoryScope scope) {
+                                      MemoryOrder order,
+                                      MemoryScope scope) {
   return atomic_sub(dest, T(1), order, scope);
 }
 
@@ -713,5 +760,7 @@ DESUL_INLINE_FUNCTION bool atomic_compare_exchange_weak(T* const dest,
 #include <desul/atomics/HIP.hpp>
 #include <desul/atomics/OpenMP.hpp>
 #include <desul/atomics/SYCL.hpp>
+#if defined(__GNUC__) && (!defined(__clang__))
 #pragma GCC diagnostic pop
+#endif
 #endif
