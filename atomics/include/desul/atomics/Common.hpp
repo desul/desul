@@ -11,6 +11,7 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #include <atomic>
 #include <cstdint>
 #include <type_traits>
+
 #include "desul/atomics/Macros.hpp"
 
 namespace desul {
