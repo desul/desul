@@ -15,10 +15,11 @@ SPDX-License-Identifier: (BSD-3-Clause)
 // compile knowledge of architecture.
 #if (defined(__CUDA_ARCH__) && (__CUDA_ARCH__ >= 700)) || \
     (!defined(__NVCC__) && !defined(DESUL_CUDA_ARCH_IS_PRE_VOLTA))
+#define DESUL_HAVE_CUDA_ATOMICS_ASM
 #include <desul/atomics/cuda/CUDA_asm.hpp>
 #endif
 
-#if defined(__CUDA_ARCH__) && (__CUDA_ARCH__ < 700) || \
+#if (defined(__CUDA_ARCH__) && (__CUDA_ARCH__ < 700)) || \
     (!defined(__NVCC__) && !defined(DESUL_HAVE_CUDA_ATOMICS_ASM))
 namespace desul {
 namespace Impl {

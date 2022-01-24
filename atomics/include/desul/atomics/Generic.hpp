@@ -10,8 +10,10 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #define DESUL_ATOMICS_GENERIC_HPP_
 
 #include <type_traits>
+#if defined(__GNUC__) && (!defined(__clang__))
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#endif
 #include "desul/atomics/Common.hpp"
 #include "desul/atomics/Compare_Exchange.hpp"
 #include "desul/atomics/Lock_Array.hpp"
@@ -61,14 +63,14 @@ struct may_exit_early<Op,
 
 template <typename Op, typename Scalar1, typename Scalar2>
 constexpr DESUL_FUNCTION
-    typename std::enable_if<may_exit_early<Op, Scalar1, Scalar2>{}, bool>::type
+    typename std::enable_if<may_exit_early<Op, Scalar1, Scalar2>::value, bool>::type
     check_early_exit(Op const&, Scalar1 const& val1, Scalar2 const& val2) {
   return Op::check_early_exit(val1, val2);
 }
 
 template <typename Op, typename Scalar1, typename Scalar2>
 constexpr DESUL_FUNCTION
-    typename std::enable_if<!may_exit_early<Op, Scalar1, Scalar2>{}, bool>::type
+    typename std::enable_if<!may_exit_early<Op, Scalar1, Scalar2>::value, bool>::type
     check_early_exit(Op const&, Scalar1 const&, Scalar2 const&) {
   return false;
 }
@@ -735,5 +737,7 @@ DESUL_INLINE_FUNCTION bool atomic_compare_exchange_weak(T* const dest,
 #include <desul/atomics/HIP.hpp>
 #include <desul/atomics/OpenMP.hpp>
 #include <desul/atomics/SYCL.hpp>
+#if defined(__GNUC__) && (!defined(__clang__))
 #pragma GCC diagnostic pop
+#endif
 #endif
