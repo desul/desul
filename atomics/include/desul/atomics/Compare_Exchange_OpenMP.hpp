@@ -7,6 +7,8 @@ SPDX-License-Identifier: (BSD-3-Clause)
 */
 #ifndef DESUL_ATOMICS_COMPARE_EXCHANGE_OPENMP_HPP_
 #define DESUL_ATOMICS_COMPARE_EXCHANGE_OPENMP_HPP_
+#include <omp.h>
+
 #include "desul/atomics/Common.hpp"
 
 #ifdef DESUL_HAVE_OPENMP_ATOMICS
@@ -107,6 +109,7 @@ std::enable_if_t<Impl::atomic_always_lock_free(sizeof(T)), T> atomic_compare_exc
 #pragma GCC diagnostic ignored "-Watomic-alignment"
 #endif
 
+// Make 16 byte cas work on host at least
 #pragma omp begin declare variant match(device = {kind(host)})
 template <typename T, class MemoryOrder, class MemoryScope>
 std::enable_if_t<!Impl::atomic_always_lock_free(sizeof(T)) && (sizeof(T) == 16), T>

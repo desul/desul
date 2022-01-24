@@ -165,6 +165,13 @@ atomic_exchange(T* const dest, T value, MemoryOrderAcqRel, MemoryScope) {
 #endif
 
 // Including CUDA ptx based exchange atomics
+// When building with clang we need to include the device functions always
+// since clang must see a consistent overload set in both device and host compilation
+// but that means we need to know on the host what to make visible, i.e. we need
+// a host side compile knowledge of architecture.
+// We simply can say DESUL proper doesn't support clang CUDA build pre Volta,
+// Kokkos has that knowledge and so I use it here, allowing in Kokkos to use
+// clang with pre Volta as CUDA compiler
 #if (defined(__CUDA_ARCH__) && (__CUDA_ARCH__ >= 700)) || \
     (!defined(__NVCC__) && !defined(DESUL_CUDA_ARCH_IS_PRE_VOLTA))
 #include <desul/atomics/cuda/CUDA_asm_exchange.hpp>
@@ -190,7 +197,6 @@ __device__ typename std::enable_if<sizeof(T) == 8, T>::type atomic_exchange(
   atomic_thread_fence(MemoryOrderRelease(), MemoryScope());
   return return_val;
 }
-
 template <typename T, class MemoryScope>
 __device__ typename std::enable_if<sizeof(T) == 4, T>::type atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrderSeqCst, MemoryScope) {
