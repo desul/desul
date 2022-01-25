@@ -44,7 +44,9 @@ install(EXPORT desul_atomics
 
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/atomics/include/
   DESTINATION include
-  FILES_MATCHING PATTERN *.hpp)
+  FILES_MATCHING
+  PATTERN *.hpp
+  PATTERN *.inc)
 
 
   # TODO: Add tests and install targets if needed.
