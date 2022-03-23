@@ -394,6 +394,29 @@ DESUL_INLINE_FUNCTION T atomic_oper_fetch(const Oper& op,
 #endif
 }
 
+template <class Oper, typename T, class MemoryOrder>
+DESUL_INLINE_FUNCTION T atomic_fetch_oper(const Oper& op,
+                                          T* const dest,
+                                          dont_deduce_this_parameter_t<const T> val,
+                                          MemoryOrder /*order*/,
+                                          MemoryScopeCaller /*scope*/) {
+  T oldval = *dest;
+  *dest = op.apply(oldval, val);
+  return oldval;
+}
+
+template <class Oper, typename T, class MemoryOrder>
+DESUL_INLINE_FUNCTION T atomic_oper_fetch(const Oper& op,
+                                          T* const dest,
+                                          dont_deduce_this_parameter_t<const T> val,
+                                          MemoryOrder /*order*/,
+                                          MemoryScopeCaller /*scope*/) {
+  T oldval = *dest;
+  T newval = op.apply(oldval, val);
+  *dest = newval;
+  return newval;
+}
+
 }  // namespace Impl
 }  // namespace desul
 
