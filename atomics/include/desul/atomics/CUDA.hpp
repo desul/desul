@@ -369,6 +369,16 @@ DESUL_IMPL_CUDA_HOST_ATOMIC_INC(unsigned int,
                                 MemoryOrderRelaxed,
                                 MemoryScopeDevice);  // only for ASM?
 
+#define DESUL_IMPL_CUDA_HOST_ATOMIC_DEC(TYPE, ORDER, SCOPE)            \
+  inline void atomic_dec(TYPE* const dest, ORDER order, SCOPE scope) { \
+    (void)atomic_fetch_dec(dest, order, scope);                        \
+  }
+DESUL_IMPL_CUDA_HOST_ATOMIC_DEC(unsigned,
+                                MemoryOrderRelaxed,
+                                MemoryScopeDevice);  // only for ASM?
+
+#endif  // DESUL_HAVE_CUDA_ATOMICS_ASM
+
 #define DESUL_IMPL_CUDA_HOST_ATOMIC_INC_MOD(TYPE, ORDER, SCOPE)                      \
   inline TYPE atomic_fetch_inc_mod(TYPE* dest, TYPE val, ORDER order, SCOPE scope) { \
     using cas_t = typename Impl::atomic_compare_exchange_type<sizeof(TYPE)>::type;   \
@@ -390,15 +400,6 @@ DESUL_IMPL_CUDA_HOST_ATOMIC_INC(unsigned int,
 DESUL_IMPL_CUDA_HOST_ATOMIC_INC_MOD(unsigned int,
                                     MemoryOrderRelaxed,
                                     MemoryScopeDevice);
-
-#define DESUL_IMPL_CUDA_HOST_ATOMIC_DEC(TYPE, ORDER, SCOPE)            \
-  inline void atomic_dec(TYPE* const dest, ORDER order, SCOPE scope) { \
-    (void)atomic_fetch_dec(dest, order, scope);                        \
-  }
-DESUL_IMPL_CUDA_HOST_ATOMIC_DEC(unsigned,
-                                MemoryOrderRelaxed,
-                                MemoryScopeDevice);  // only for ASM?
-
 #define DESUL_IMPL_CUDA_HOST_ATOMIC_DEC_MOD(TYPE, ORDER, SCOPE)                      \
   inline TYPE atomic_fetch_dec_mod(TYPE* dest, TYPE val, ORDER order, SCOPE scope) { \
     using cas_t = typename Impl::atomic_compare_exchange_type<sizeof(TYPE)>::type;   \
@@ -421,8 +422,6 @@ DESUL_IMPL_CUDA_HOST_ATOMIC_DEC(unsigned,
 DESUL_IMPL_CUDA_HOST_ATOMIC_DEC_MOD(unsigned int,
                                     MemoryOrderRelaxed,
                                     MemoryScopeDevice);
-
-#endif  // DESUL_HAVE_CUDA_ATOMICS_ASM
 
 #define DESUL_IMPL_CUDA_HOST_ATOMIC_FETCH_ADD(TYPE, ORDER, SCOPE)                      \
   inline TYPE atomic_fetch_add(TYPE* const dest, TYPE val, ORDER order, SCOPE scope) { \
