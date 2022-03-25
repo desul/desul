@@ -1,6 +1,8 @@
 ﻿cmake_minimum_required (VERSION 3.10)
 
-project(DESUL CXX)
+project(desul
+  LANGUAGES CXX
+  VERSION 0.1.0)
 
 # Default to C++14 if not set TODO: check to ensure this is the minimum
 if (NOT BLT_CXX_STD)
@@ -28,3 +30,4 @@ MACRO(APPEND_GLOB VAR)
 ENDMACRO()
 
 add_subdirectory(atomics)
+
