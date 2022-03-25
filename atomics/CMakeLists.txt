@@ -27,7 +27,7 @@ set(INCLUDES_ARG
 
 blt_add_library(NAME desul_atomics
                 HEADERS include/desul/atomics.hpp
-                ${SOURCES_ARG}
+                SOURCES src/common.cpp ${SOURCES_ARG}
                 INCLUDES ${INCLUDES_ARG}
                 ${DEPENDS_ARG})
 target_include_directories (desul_atomics PUBLIC
