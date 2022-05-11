@@ -70,7 +70,8 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/atomics/include/
   DESTINATION include
   FILES_MATCHING
   PATTERN *.hpp
-  PATTERN *.inc)
+  PATTERN *.inc
+  PATTERN *.inc_*)
 
 add_subdirectory(unit_tests)
 add_subdirectory(performance_tests)
