@@ -43,8 +43,9 @@
 */
 
 #include <gtest/gtest.h>
-#include <desul/atomics.hpp>
+
 #include <Kokkos_Core.hpp>
+#include <desul/atomics.hpp>
 
 #define TEST_CATEGORY kokkos_default
 #define TEST_EXECSPACE Kokkos::DefaultExecutionSpace
@@ -232,7 +233,6 @@ bool MinAtomicTest(T i0, T i1) {
 
   return passed;
 }
-
 
 //---------------------------------------------------
 //--------------atomic_add---------------------
@@ -1301,9 +1301,9 @@ bool AtomicOperationsTestIntegralType(int i0, int i1, int test) {
       return IncAtomicTest<T, DeviceType>((T)i0);
     case 12:
       return DecAtomicTest<T, DeviceType>((T)i0);
-    case 13: 
+    case 13:
       return AddAtomicTest<T, DeviceType>((T)i0);
-    case 14: 
+    case 14:
       return SubAtomicTest<T, DeviceType>((T)i0);
   }
 
@@ -1333,9 +1333,9 @@ bool AtomicOperationsTestNonIntegralType(int i0, int i1, int test) {
       return MulAtomicTest<T, DeviceType>((T)i0, (T)i1);
     case 4:
       return DivAtomicTest<T, DeviceType>((T)i0, (T)i1);
-    case 5: 
+    case 5:
       return AddAtomicTest<T, DeviceType>((T)i0);
-    case 6: 
+    case 6:
       return SubAtomicTest<T, DeviceType>((T)i0);
   }
 
