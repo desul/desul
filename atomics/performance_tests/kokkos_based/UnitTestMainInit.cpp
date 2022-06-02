@@ -43,18 +43,17 @@
 */
 
 #include <gtest/gtest.h>
-#include <cstdlib>
 
-#include <desul/atomics.hpp>
 #include <Kokkos_Core.hpp>
-
+#include <cstdlib>
+#include <desul/atomics.hpp>
 
 int main(int argc, char *argv[]) {
   Kokkos::initialize(argc, argv);
   desul::Impl::init_lock_arrays();
 
 #ifdef DESUL_HAVE_CUDA_ATOMICS
-  DESUL_ENSURE_CUDA_LOCK_ARRAYS_ON_DEVICE();
+  desul::ensure_cuda_lock_arrays_on_device();
 #endif
 
 #ifdef DESUL_HAVE_HIP_ATOMICS

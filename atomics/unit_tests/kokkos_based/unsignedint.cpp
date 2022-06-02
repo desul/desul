@@ -46,7 +46,7 @@
 
 namespace Test {
 TEST(TEST_CATEGORY, atomic_operations_unsigned) {
-  DESUL_ENSURE_CUDA_LOCK_ARRAYS_ON_DEVICE();
+  desul::ensure_cuda_lock_arrays_on_device();
   DESUL_ENSURE_HIP_LOCK_ARRAYS_ON_DEVICE();
   const int start = 1;  // Avoid zero for division.
   const int end = 11;
@@ -84,12 +84,14 @@ TEST(TEST_CATEGORY, atomic_operations_unsigned) {
     ASSERT_TRUE((TestAtomicOperations::AtomicOperationsTestIntegralType<unsigned int,
                                                                         TEST_EXECSPACE>(
         start, end - i, 12)));
-    ASSERT_TRUE((TestAtomicOperations::AtomicOperationsTestUnsignedIntegralType<unsigned int,
-                                                                                TEST_EXECSPACE>(
-        start, end - i, 1))); // Wrapping Inc
-    ASSERT_TRUE((TestAtomicOperations::AtomicOperationsTestUnsignedIntegralType<unsigned int,
-                                                                                TEST_EXECSPACE>(
-        start, end - i, 2))); // Wrapping Dec
+    ASSERT_TRUE(
+        (TestAtomicOperations::AtomicOperationsTestUnsignedIntegralType<unsigned int,
+                                                                        TEST_EXECSPACE>(
+            start, end - i, 1)));  // Wrapping Inc
+    ASSERT_TRUE(
+        (TestAtomicOperations::AtomicOperationsTestUnsignedIntegralType<unsigned int,
+                                                                        TEST_EXECSPACE>(
+            start, end - i, 2)));  // Wrapping Dec
   }
 }
 }  // namespace Test

@@ -46,7 +46,7 @@
 
 namespace Test {
 TEST(TEST_CATEGORY, atomic_operations_float) {
-  DESUL_ENSURE_CUDA_LOCK_ARRAYS_ON_DEVICE();
+  desul::ensure_cuda_lock_arrays_on_device();
   DESUL_ENSURE_HIP_LOCK_ARRAYS_ON_DEVICE();
   const int start = 1;  // Avoid zero for division.
   const int end = 11;
