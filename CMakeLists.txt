@@ -31,3 +31,7 @@ ENDMACRO()
 
 add_subdirectory(atomics)
 
+install(FILES
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/desulConfig.cmake"
+  DESTINATION lib/cmake/desul)
+
