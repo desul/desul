@@ -9,10 +9,9 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #ifndef DESUL_ATOMICS_THREAD_FENCE_MSVC_HPP_
 #define DESUL_ATOMICS_THREAD_FENCE_MSVC_HPP_
 
+#include <atomic>
 #include <desul/atomics/Adapt_CXX.hpp>
 #include <desul/atomics/Common.hpp>
-
-#include <atomic>
 
 namespace desul {
 namespace Impl {

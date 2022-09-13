@@ -9,9 +9,8 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #ifndef DESUL_ATOMICS_ADAPT_CXX_HPP_
 #define DESUL_ATOMICS_ADAPT_CXX_HPP_
 
-#include <desul/atomics/Common.hpp>
-
 #include <atomic>
+#include <desul/atomics/Common.hpp>
 
 namespace desul {
 namespace Impl {

@@ -9,11 +9,11 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #ifndef DESUL_ATOMICS_COMPARE_EXCHANGE_OPENMP_HPP_
 #define DESUL_ATOMICS_COMPARE_EXCHANGE_OPENMP_HPP_
 
+#include <omp.h>
+
 #include <desul/atomics/Adapt_GCC.hpp>
 #include <desul/atomics/Common.hpp>
 #include <desul/atomics/Thread_Fence_OpenMP.hpp>
-
-#include <omp.h>
 
 namespace desul {
 namespace Impl {

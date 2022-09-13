@@ -9,11 +9,10 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #ifndef DESUL_ATOMIC_REF_IMPL_HPP_
 #define DESUL_ATOMIC_REF_IMPL_HPP_
 
+#include <cstddef>
 #include <desul/atomics/Common.hpp>
 #include <desul/atomics/Generic.hpp>
 #include <desul/atomics/Macros.hpp>
-
-#include <cstddef>
 #include <memory>
 #include <type_traits>
 
