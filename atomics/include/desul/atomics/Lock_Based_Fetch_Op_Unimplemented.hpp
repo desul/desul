@@ -9,8 +9,8 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #ifndef DESUL_ATOMICS_LOCK_BASED_FETCH_OP_UNIMPLEMENTED_HPP_
 #define DESUL_ATOMICS_LOCK_BASED_FETCH_OP_UNIMPLEMENTED_HPP_
 
-#include <desul/atomics/Common.hpp>
 #include <cassert>
+#include <desul/atomics/Common.hpp>
 #include <type_traits>
 
 namespace desul {

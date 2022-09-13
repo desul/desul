@@ -9,9 +9,8 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #ifndef DESUL_ATOMICS_COMMON_HPP_
 #define DESUL_ATOMICS_COMMON_HPP_
 
-#include <desul/atomics/Macros.hpp>
-
 #include <cstdint>
+#include <desul/atomics/Macros.hpp>
 #include <type_traits>
 
 namespace desul {

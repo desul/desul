@@ -10,7 +10,6 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #define DESUL_ATOMICS_FETCH_OP_GCC_HPP_
 
 #include <desul/atomics/Adapt_GCC.hpp>
-
 #include <type_traits>
 
 namespace desul {

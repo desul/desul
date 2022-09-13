@@ -10,8 +10,8 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #define DESUL_ATOMICS_LOCK_BASED_FETCH_OP_HOST_HPP_
 
 #include <desul/atomics/Common.hpp>
-#include <desul/atomics/Thread_Fence.hpp>
 #include <desul/atomics/Lock_Array.hpp>
+#include <desul/atomics/Thread_Fence.hpp>
 #include <type_traits>
 
 namespace desul {

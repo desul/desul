@@ -11,7 +11,6 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 #include <desul/atomics/Common.hpp>
 #include <desul/atomics/Thread_Fence_MSVC.hpp>
-
 #include <type_traits>
 
 #ifndef DESUL_HAVE_16BYTE_COMPARE_AND_SWAP

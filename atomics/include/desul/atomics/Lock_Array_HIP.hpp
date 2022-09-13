@@ -9,12 +9,12 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #ifndef DESUL_ATOMICS_LOCK_ARRAY_HIP_HPP_
 #define DESUL_ATOMICS_LOCK_ARRAY_HIP_HPP_
 
-#include "desul/atomics/Common.hpp"
-#include "desul/atomics/Macros.hpp"
-
 #include <hip/hip_runtime.h>
 
 #include <cstdint>
+
+#include "desul/atomics/Common.hpp"
+#include "desul/atomics/Macros.hpp"
 
 namespace desul {
 namespace Impl {
