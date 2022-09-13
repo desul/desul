@@ -24,12 +24,11 @@ template <class Oper,
           // equivalent to:
           //   requires !atomic_always_lock_free(sizeof(T))
           std::enable_if_t<!atomic_always_lock_free(sizeof(T)), int> = 0>
-__device__ T
-device_atomic_fetch_oper(const Oper& op,
-                         T* const dest,
-                         dont_deduce_this_parameter_t<const T> val,
-                         MemoryOrder /*order*/,
-                         MemoryScope scope) {
+__device__ T device_atomic_fetch_oper(const Oper& op,
+                                      T* const dest,
+                                      dont_deduce_this_parameter_t<const T> val,
+                                      MemoryOrder /*order*/,
+                                      MemoryScope scope) {
   // This is a way to avoid deadlock in a warp or wave front
   T return_val;
   int done = 0;
@@ -58,12 +57,11 @@ template <class Oper,
           // equivalent to:
           //   requires !atomic_always_lock_free(sizeof(T))
           std::enable_if_t<!atomic_always_lock_free(sizeof(T)), int> = 0>
-__device__ T
-device_atomic_oper_fetch(const Oper& op,
-                         T* const dest,
-                         dont_deduce_this_parameter_t<const T> val,
-                         MemoryOrder /*order*/,
-                         MemoryScope scope) {
+__device__ T device_atomic_oper_fetch(const Oper& op,
+                                      T* const dest,
+                                      dont_deduce_this_parameter_t<const T> val,
+                                      MemoryOrder /*order*/,
+                                      MemoryScope scope) {
   // This is a way to avoid deadlock in a warp or wave front
   T return_val;
   int done = 0;
