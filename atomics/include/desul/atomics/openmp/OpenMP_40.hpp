@@ -8,6 +8,7 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 #ifndef DESUL_ATOMICS_OPENMP40_HPP_
 #define DESUL_ATOMICS_OPENMP40_HPP_
+
 #include <type_traits>
 
 namespace desul {
@@ -43,15 +44,12 @@ void openmp_maybe_call_post_capture_flush(MemoryOrderSeqCst, MEMORY_SCOPE_TMP) {
 }
 
 template <class T>
-struct is_openmp_atomic_type_t {
-  static constexpr bool value = std::is_arithmetic<T>::value;
-};
-template <class T>
-constexpr bool is_openmp_atomic_type_v = is_openmp_atomic_type_t<T>::value;
+constexpr bool is_openmp_atomic_type_v = std::is_arithmetic<T>::value;
 }  // namespace Impl
 }  // namespace desul
 
 namespace desul {
+namespace impl {
 // Can't use a macro approach to get all definitions since the ops include #pragma omp
 // So gonna use multiple inclusion of the same code snippet here.
 
@@ -94,5 +92,6 @@ namespace desul {
 #include <desul/atomics/openmp/OpenMP_40_op.inc>
 #undef MEMORY_SCOPE
 #undef MEMORY_ORDER
+}  // namespace impl
 }  // namespace desul
 #endif
