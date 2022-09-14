@@ -61,6 +61,16 @@ inline void finalize_lock_arrays() {
 #endif
 }
 
+inline void ensure_lock_arrays_on_device() {
+#ifdef DESUL_HAVE_CUDA_ATOMICS
+  ensure_cuda_lock_arrays_on_device();
+#endif
+
+#ifdef DESUL_HAVE_HIP_ATOMICS
+  DESUL_ENSURE_HIP_LOCK_ARRAYS_ON_DEVICE();
+#endif
+}
+
 template <class MemoryScope>
 bool lock_address(void* ptr, MemoryScope ms) {
   return 0 == atomic_exchange(
