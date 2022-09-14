@@ -11,8 +11,7 @@
 
 #define ADD_NS(A, B) A ::B
 TEST(atomic, TESTNAME) {
-  desul::ensure_cuda_lock_arrays_on_device();
-  DESUL_ENSURE_HIP_LOCK_ARRAYS_ON_DEVICE();
+  desul::ensure_lock_arrays_on_device();
   test_atomic_perf_random_neighs<
       SCALAR,
       MEMORY_OP<ADD_NS(desul, MEMORY_ORDER), ADD_NS(desul, MEMORY_SCOPE)>,
