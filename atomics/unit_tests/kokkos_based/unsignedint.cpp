@@ -46,7 +46,7 @@
 
 namespace Test {
 TEST(TEST_CATEGORY, atomic_operations_unsigned) {
-  desul::ensure_lock_arrays_on_device();
+  desul::Impl::ensure_lock_arrays_on_device();
   const int start = 1;  // Avoid zero for division.
   const int end = 11;
   for (int i = start; i < end; ++i) {
