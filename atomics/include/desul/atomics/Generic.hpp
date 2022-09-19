@@ -141,8 +141,8 @@ DESUL_INLINE_FUNCTION T atomic_fetch_rshift(T* const dest,
 template <class T, class MemoryOrder, class MemoryScope>
 DESUL_INLINE_FUNCTION T
 atomic_add_fetch(T* const dest, const T val, MemoryOrder order, MemoryScope scope) {
-  DESUL_IF_ON_DEVICE(return Impl::device_atomic_and_fetch(dest, val, order, scope);)
-  DESUL_IF_ON_HOST(return Impl::host_atomic_and_fetch(dest, val, order, scope);)
+  DESUL_IF_ON_DEVICE(return Impl::device_atomic_add_fetch(dest, val, order, scope);)
+  DESUL_IF_ON_HOST(return Impl::host_atomic_add_fetch(dest, val, order, scope);)
 }
 
 template <class T, class MemoryOrder, class MemoryScope>
