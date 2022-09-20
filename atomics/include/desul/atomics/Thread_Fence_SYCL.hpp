@@ -24,7 +24,7 @@ namespace desul {
 namespace Impl {
 
 template <class MemoryOrder, class MemoryScope>
-void host_atomic_thread_fence(MemoryOrder, MemoryScope) {
+void device_atomic_thread_fence(MemoryOrder, MemoryScope) {
   sycl::atomic_fence(SYCLMemoryOrder<MemoryOrder, /*extended namespace*/ false>::value,
                      SYCLMemoryScope<MemoryScope, /*extended namespace*/ false>::value);
 }
