@@ -25,7 +25,7 @@ namespace desul {
 namespace Impl {
 
 template <class T, class MemoryOrder, class MemoryScope>
-std::enable_if_t<sizeof(T) == 4, T> host_atomic_compare_exchange(
+std::enable_if_t<sizeof(T) == 4, T> device_atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrder, MemoryScope) {
   static_assert(sizeof(unsigned int) == 4,
                 "this function assumes an unsigned int is 32-bit");
@@ -37,7 +37,7 @@ std::enable_if_t<sizeof(T) == 4, T> host_atomic_compare_exchange(
 }
 
 template <class T, class MemoryOrder, class MemoryScope>
-std::enable_if_t<sizeof(T) == 8, T> host_atomic_compare_exchange(
+std::enable_if_t<sizeof(T) == 8, T> device_atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrder, MemoryScope) {
   static_assert(sizeof(unsigned long long int) == 8,
                 "this function assumes an unsigned long long is 64-bit");
@@ -49,10 +49,10 @@ std::enable_if_t<sizeof(T) == 8, T> host_atomic_compare_exchange(
 }
 
 template <class T, class MemoryOrder, class MemoryScope>
-std::enable_if_t<sizeof(T) == 4, T> host_atomic_exchange(T* const dest,
-                                                         T value,
-                                                         MemoryOrder,
-                                                         MemoryScope) {
+std::enable_if_t<sizeof(T) == 4, T> device_atomic_exchange(T* const dest,
+                                                           T value,
+                                                           MemoryOrder,
+                                                           MemoryScope) {
   static_assert(sizeof(unsigned int) == 4,
                 "this function assumes an unsigned int is 32-bit");
   sycl_atomic_ref<unsigned int, MemoryOrder, MemoryScope> dest_ref(
@@ -62,10 +62,10 @@ std::enable_if_t<sizeof(T) == 4, T> host_atomic_exchange(T* const dest,
 }
 
 template <class T, class MemoryOrder, class MemoryScope>
-std::enable_if_t<sizeof(T) == 8, T> host_atomic_exchange(T* const dest,
-                                                         T value,
-                                                         MemoryOrder,
-                                                         MemoryScope) {
+std::enable_if_t<sizeof(T) == 8, T> device_atomic_exchange(T* const dest,
+                                                           T value,
+                                                           MemoryOrder,
+                                                           MemoryScope) {
   static_assert(sizeof(unsigned long long int) == 8,
                 "this function assumes an unsigned long long is 64-bit");
   sycl_atomic_ref<unsigned long long int, MemoryOrder, MemoryScope> dest_ref(
@@ -76,14 +76,15 @@ std::enable_if_t<sizeof(T) == 8, T> host_atomic_exchange(T* const dest,
 }
 
 template <class T, class MemoryOrder, class MemoryScope>
-std::enable_if_t<(sizeof(T) != 8) && (sizeof(T) != 4), T> host_atomic_compare_exchange(
+std::enable_if_t<(sizeof(T) != 8) && (sizeof(T) != 4), T>
+device_atomic_compare_exchange(
     T* const /*dest*/, T compare, T /*value*/, MemoryOrder, MemoryScope) {
   assert(false);  // FIXME_SYCL not implemented
   return compare;
 }
 
 template <class T, class MemoryOrder, class MemoryScope>
-std::enable_if_t<(sizeof(T) != 8) && (sizeof(T) != 4), T> host_atomic_exchange(
+std::enable_if_t<(sizeof(T) != 8) && (sizeof(T) != 4), T> device_atomic_exchange(
     T* const /*dest*/, T value, MemoryOrder, MemoryScope) {
   assert(false);  // FIXME_SYCL not implemented
   return value;

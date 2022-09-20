@@ -16,16 +16,16 @@ namespace desul {
 namespace Impl {
 
 // clang-format off
-#define DESUL_IMPL_SYCL_ATOMIC_FETCH_OPER(OPER, TYPE)                                   \
-  template <class MemoryOrder>                                                          \
-  TYPE host_atomic_fetch_##OPER(TYPE* dest, TYPE val, MemoryOrder, MemoryScopeDevice) { \
-    sycl_atomic_ref<TYPE, MemoryOrder, MemoryScopeDevice> dest_ref(*dest);              \
-    return dest_ref.fetch_##OPER(val);                                                  \
-  }                                                                                     \
-  template <class MemoryOrder>                                                          \
-  TYPE host_atomic_fetch_##OPER(TYPE* dest, TYPE val, MemoryOrder, MemoryScopeCore ) {  \
-    sycl_atomic_ref<TYPE, MemoryOrder, MemoryScopeCore> dest_ref(*dest);                \
-    return dest_ref.fetch_##OPER(val);                                                  \
+#define DESUL_IMPL_SYCL_ATOMIC_FETCH_OPER(OPER, TYPE)                                     \
+  template <class MemoryOrder>                                                            \
+  TYPE device_atomic_fetch_##OPER(TYPE* dest, TYPE val, MemoryOrder, MemoryScopeDevice) { \
+    sycl_atomic_ref<TYPE, MemoryOrder, MemoryScopeDevice> dest_ref(*dest);                \
+    return dest_ref.fetch_##OPER(val);                                                    \
+  }                                                                                       \
+  template <class MemoryOrder>                                                            \
+  TYPE device_atomic_fetch_##OPER(TYPE* dest, TYPE val, MemoryOrder, MemoryScopeCore  ) { \
+    sycl_atomic_ref<TYPE, MemoryOrder, MemoryScopeCore> dest_ref(*dest);                  \
+    return dest_ref.fetch_##OPER(val);                                                    \
   }
 // clang-format on
 
