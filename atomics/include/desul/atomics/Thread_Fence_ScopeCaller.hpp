@@ -12,15 +12,15 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #include <desul/atomics/Common.hpp>
 
 namespace desul {
-namespace Impl {
 
-template <class MemoryOrder>
-DESUL_INLINE_FUNCTION void host_atomic_thread_fence(MemoryOrder, MemoryScopeCaller) {}
+// clang-format off
+DESUL_INLINE_FUNCTION void atomic_thread_fence(MemoryOrderSeqCst , MemoryScopeCaller) {}
+DESUL_INLINE_FUNCTION void atomic_thread_fence(MemoryOrderAcqRel , MemoryScopeCaller) {}
+DESUL_INLINE_FUNCTION void atomic_thread_fence(MemoryOrderRelease, MemoryScopeCaller) {}
+DESUL_INLINE_FUNCTION void atomic_thread_fence(MemoryOrderAcquire, MemoryScopeCaller) {}
+DESUL_INLINE_FUNCTION void atomic_thread_fence(MemoryOrderRelaxed, MemoryScopeCaller) {}
+// clang-format on
 
-template <class MemoryOrder>
-DESUL_INLINE_FUNCTION void device_atomic_thread_fence(MemoryOrder, MemoryScopeCaller) {}
-
-}  // namespace Impl
 }  // namespace desul
 
 #endif
