@@ -11,7 +11,7 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #include <desul/atomics/Common.hpp>
 #include <desul/atomics/openmp/OpenMP_40.hpp>
 
-#if 0
+#if 0  // FIXME_OPENMP
 namespace desul {
 namespace Impl {
 
