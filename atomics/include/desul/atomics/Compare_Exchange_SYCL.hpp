@@ -82,7 +82,7 @@ std::enable_if_t<sizeof(T) == 8, T> device_atomic_exchange(T* const dest,
 template <class T, class MemoryOrder, class MemoryScope>
 std::enable_if_t<(sizeof(T) != 8) && (sizeof(T) != 4), T>
 device_atomic_compare_exchange(
-    T* const dest, T compare, T value, MemoryOrder, MemoryScope scope) {
+    T* const dest, T compare, T value, MemoryOrder, MemoryScope) {
   // FIXME_SYCL Use SYCL_EXT_ONEAPI_DEVICE_GLOBAL when available instead
 #ifdef DESUL_SYCL_DEVICE_GLOBAL_SUPPORTED
   // This is a way to avoid deadlock in a subgroup
@@ -121,7 +121,7 @@ device_atomic_compare_exchange(
 
 template <class T, class MemoryOrder, class MemoryScope>
 std::enable_if_t<(sizeof(T) != 8) && (sizeof(T) != 4), T> device_atomic_exchange(
-    T* const dest, T value, MemoryOrder, MemoryScope scope) {
+    T* const dest, T value, MemoryOrder, MemoryScope) {
   // FIXME_SYCL Use SYCL_EXT_ONEAPI_DEVICE_GLOBAL when available instead
 #ifdef DESUL_SYCL_DEVICE_GLOBAL_SUPPORTED
   // This is a way to avoid deadlock in a subgroup

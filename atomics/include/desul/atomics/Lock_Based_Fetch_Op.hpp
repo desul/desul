@@ -20,7 +20,7 @@ SPDX-License-Identifier: (BSD-3-Clause)
 // FIXME_SYCL Use SYCL_EXT_ONEAPI_DEVICE_GLOBAL when available instead
 #ifdef DESUL_SYCL_DEVICE_GLOBAL_SUPPORTED
 #include <desul/atomics/Lock_Based_Fetch_Op_SYCL.hpp>
-#else
+#elif defined(DESUL_HAVE_SYCL_ATOMICS)
 #include <desul/atomics/Lock_Based_Fetch_Op_Unimplemented.hpp>
 #endif
 
