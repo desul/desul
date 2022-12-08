@@ -39,7 +39,9 @@ using sycl_memory_scope = std::conditional_t<extended_namespace,
 
 //<editor-fold desc="SYCL memory order">
 // The default memory order for sycl::atomic_ref
-// can be seq_cst, acq_rel, or relaxed.
+// can be seq_cst, acq_rel, or relaxed according to the
+// "SYCL 2020 Specification (revision 6)", see
+// https://registry.khronos.org/SYCL/specs/sycl-2020/html/sycl-2020.html#sec:atomic-references.
 // Thus, we map MemoryOrderAcquire and MemoryOrderRelease to acq_rel.
 template <class MemoryOrder, bool extended_namespace = true>
 struct SYCLMemoryOrder;
