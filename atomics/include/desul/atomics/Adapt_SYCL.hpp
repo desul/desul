@@ -49,12 +49,12 @@ struct SYCLMemoryOrder<MemoryOrderSeqCst, extended_namespace> {
 template <bool extended_namespace>
 struct SYCLMemoryOrder<MemoryOrderAcquire, extended_namespace> {
   static constexpr sycl_memory_order<extended_namespace> value =
-      sycl_memory_order<extended_namespace>::acquire;
+      sycl_memory_order<extended_namespace>::acq_rel;
 };
 template <bool extended_namespace>
 struct SYCLMemoryOrder<MemoryOrderRelease, extended_namespace> {
   static constexpr sycl_memory_order<extended_namespace> value =
-      sycl_memory_order<extended_namespace>::release;
+      sycl_memory_order<extended_namespace>::acq_rel;
 };
 template <bool extended_namespace>
 struct SYCLMemoryOrder<MemoryOrderAcqRel, extended_namespace> {
