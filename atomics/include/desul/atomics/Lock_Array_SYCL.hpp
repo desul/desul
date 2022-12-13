@@ -38,7 +38,7 @@ extern int32_t* SYCL_SPACE_ATOMIC_LOCKS_NODE_h;
 /// The function is templated to make it a weak symbol to deal with Kokkos/RAJA
 ///   snapshotted version while also linking against pure Desul
 template <typename /*AlwaysInt*/ = int>
-void init_lock_arrays_sycl();
+void init_lock_arrays_sycl(sycl::queue q);
 
 /// \brief After this call, the g_host_cuda_lock_arrays variable has
 ///        all null pointers, and all array memory has been freed.
@@ -47,7 +47,7 @@ void init_lock_arrays_sycl();
 /// The function is templated to make it a weak symbol to deal with Kokkos/RAJA
 ///   snapshotted version while also linking against pure Desul
 template <typename /*AlwaysInt*/ = int>
-void finalize_lock_arrays_sycl();
+void finalize_lock_arrays_sycl(sycl::queue q);
 }  // namespace Impl
 }  // namespace desul
 

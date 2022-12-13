@@ -38,21 +38,27 @@ int32_t* SYCL_SPACE_ATOMIC_LOCKS_DEVICE_h = nullptr;
 int32_t* SYCL_SPACE_ATOMIC_LOCKS_NODE_h = nullptr;
 
 template <typename T>
-void init_lock_arrays_sycl() {
+void init_lock_arrays_sycl(sycl::queue q) {
   if (SYCL_SPACE_ATOMIC_LOCKS_DEVICE_h != nullptr) return;
-
-  sycl::queue q;
 
   SYCL_SPACE_ATOMIC_LOCKS_DEVICE_h =
       sycl::malloc_device<int32_t>(SYCL_SPACE_ATOMIC_MASK + 1, q);
   SYCL_SPACE_ATOMIC_LOCKS_NODE_h =
       sycl::malloc_host<int32_t>(SYCL_SPACE_ATOMIC_MASK + 1, q);
 
-  q.memcpy(SYCL_SPACE_ATOMIC_LOCKS_DEVICE,
-           &SYCL_SPACE_ATOMIC_LOCKS_DEVICE_h,
-           sizeof(int32_t*));
-  q.memcpy(
-      SYCL_SPACE_ATOMIC_LOCKS_NODE, &SYCL_SPACE_ATOMIC_LOCKS_NODE_h, sizeof(int32_t*));
+  // FIXME_SYCL Once supported, the following should be replaced by
+  // q.memcpy(SYCL_SPACE_ATOMIC_LOCKS_DEVICE,
+  //          &SYCL_SPACE_ATOMIC_LOCKS_DEVICE_h,
+  //          sizeof(int32_t*));
+  // q.memcpy(SYCL_SPACE_ATOMIC_LOCKS_NODE,
+  //          &SYCL_SPACE_ATOMIC_LOCKS_NODE_h,
+  //          sizeof(int32_t*));
+  auto device_ptr = SYCL_SPACE_ATOMIC_LOCKS_DEVICE_h;
+  auto node_ptr = SYCL_SPACE_ATOMIC_LOCKS_NODE_h;
+  q.single_task([=] {
+    SYCL_SPACE_ATOMIC_LOCKS_DEVICE.get() = device_ptr;
+    SYCL_SPACE_ATOMIC_LOCKS_NODE.get() = node_ptr;
+  });
 
   q.memset(SYCL_SPACE_ATOMIC_LOCKS_DEVICE_h,
            0,
@@ -65,18 +71,17 @@ void init_lock_arrays_sycl() {
 }
 
 template <typename T>
-void finalize_lock_arrays_sycl() {
+void finalize_lock_arrays_sycl(sycl::queue q) {
   if (SYCL_SPACE_ATOMIC_LOCKS_DEVICE_h == nullptr) return;
 
-  sycl::queue q;
   sycl::free(SYCL_SPACE_ATOMIC_LOCKS_DEVICE_h, q);
   sycl::free(SYCL_SPACE_ATOMIC_LOCKS_NODE_h, q);
   SYCL_SPACE_ATOMIC_LOCKS_DEVICE_h = nullptr;
   SYCL_SPACE_ATOMIC_LOCKS_NODE_h = nullptr;
 }
 
-template void init_lock_arrays_sycl<int>();
-template void finalize_lock_arrays_sycl<int>();
+template void init_lock_arrays_sycl<int>(sycl::queue);
+template void finalize_lock_arrays_sycl<int>(sycl::queue);
 
 }  // namespace Impl
 }  // namespace desul
