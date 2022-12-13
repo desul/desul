@@ -51,11 +51,15 @@ void init_lock_arrays_sycl(sycl::queue q);
 ///   snapshotted version while also linking against pure Desul
 template <typename /*AlwaysInt*/ = int>
 void finalize_lock_arrays_sycl(sycl::queue q);
-}  // namespace Impl
-}  // namespace desul
 
-namespace desul {
-namespace Impl {
+/**
+ * \brief Alias for sycl::device_global.
+ */
+template <class T>
+using sycl_device_global =
+  sycl::ext::oneapi::experimental::device_global<
+    T, decltype(sycl::ext::oneapi::experimental::properties(
+         sycl::ext::oneapi::experimental::device_image_scope))>;
 
 /**
  * \brief This global variable in SYCL space is what kernels use to get access
@@ -67,16 +71,12 @@ namespace Impl {
  * by initialize_host_sycl_lock_arrays and need not be modified afterwards.
  * FIXME_SYCL The compiler forces us to use device_image_scope. Drop this when possible.
  */
-SYCL_EXTERNAL extern sycl::ext::oneapi::experimental::device_global<
-    int32_t*,
-    decltype(sycl::ext::oneapi::experimental::properties(
-        sycl::ext::oneapi::experimental::device_image_scope))>
+SYCL_EXTERNAL extern sycl_device_global<
+    int32_t*>
     SYCL_SPACE_ATOMIC_LOCKS_DEVICE;
 
-SYCL_EXTERNAL extern sycl::ext::oneapi::experimental::device_global<
-    int32_t*,
-    decltype(sycl::ext::oneapi::experimental::properties(
-        sycl::ext::oneapi::experimental::device_image_scope))>
+SYCL_EXTERNAL extern sycl_device_global<
+    int32_t*>
     SYCL_SPACE_ATOMIC_LOCKS_NODE;
 
 #define SYCL_SPACE_ATOMIC_MASK 0x1FFFF
