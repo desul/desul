@@ -17,8 +17,9 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #ifdef DESUL_HAVE_HIP_ATOMICS
 #include <desul/atomics/Lock_Array_HIP.hpp>
 #endif
-// FIXME_SYCL Use SYCL_EXT_ONEAPI_DEVICE_GLOBAL when available instead
-#ifdef DESUL_SYCL_DEVICE_GLOBAL_SUPPORTED
+// Different from DESUL_HAVE_SYCL_ATOMICS because we need the declaration of
+// the sycl::device_global variables in both compile passes.
+#ifdef SYCL_LANGUAGE_VERSION
 #include <desul/atomics/Lock_Array_SYCL.hpp>
 #endif
 

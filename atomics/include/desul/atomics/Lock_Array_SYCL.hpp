@@ -24,6 +24,9 @@ SPDX-License-Identifier: (BSD-3-Clause)
 namespace desul {
 namespace Impl {
 
+// FIXME_SYCL Use SYCL_EXT_ONEAPI_DEVICE_GLOBAL when available instead
+#ifdef DESUL_SYCL_DEVICE_GLOBAL_SUPPORTED
+
 /**
  * \brief This global variable in Host space is the central definition of these
  * arrays.
@@ -137,6 +140,25 @@ inline void unlock_address_sycl(void* ptr, desul::MemoryScopeNode) {
       lock_node_ref(SYCL_SPACE_ATOMIC_LOCKS_NODE[offset]);
   lock_node_ref.exchange(0);
 }
+#else
+inline bool lock_address_sycl(void*, desul::MemoryScopeDevice) {
+  assert(false);
+  return false;
+}
+
+inline bool lock_address_sycl(void*, desul::MemoryScopeNode) {
+    assert(false);
+    return false;
+}
+
+inline void unlock_address_sycl(void*, desul::MemoryScopeDevice) {
+assert(false);
+}
+
+inline void unlock_address_sycl(void*, desul::MemoryScopeNode) {
+assert(false);
+}
+#endif
 }  // namespace Impl
 }  // namespace desul
 #endif
