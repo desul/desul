@@ -13,6 +13,7 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 #include "desul/atomics/Common.hpp"
 #include "desul/atomics/Macros.hpp"
+#include "desul/atomics/Adapt_SYCL.hpp"
 
 // FIXME_SYCL
 #if __has_include(<sycl/sycl.hpp>)
@@ -34,8 +35,8 @@ namespace Impl {
 extern int32_t* SYCL_SPACE_ATOMIC_LOCKS_DEVICE_h;
 extern int32_t* SYCL_SPACE_ATOMIC_LOCKS_NODE_h;
 
-/// \brief After this call, the g_host_cuda_lock_arrays variable has
-///        valid, initialized arrays.
+/// \brief After this call, the lock arrays used in [un]lock_address_sycl
+///        are initialized and ready to be used.
 ///
 /// This call is idempotent.
 /// The function is templated to make it a weak symbol to deal with Kokkos/RAJA
@@ -43,8 +44,8 @@ extern int32_t* SYCL_SPACE_ATOMIC_LOCKS_NODE_h;
 template <typename /*AlwaysInt*/ = int>
 void init_lock_arrays_sycl(sycl::queue q);
 
-/// \brief After this call, the g_host_cuda_lock_arrays variable has
-///        all null pointers, and all array memory has been freed.
+/// \brief After this call, the lock arrays used in [un]lock_address_sycl
+///        are freed and can't be used anymore.
 ///
 /// This call is idempotent.
 /// The function is templated to make it a weak symbol to deal with Kokkos/RAJA
@@ -53,23 +54,13 @@ template <typename /*AlwaysInt*/ = int>
 void finalize_lock_arrays_sycl(sycl::queue q);
 
 /**
- * \brief Alias for sycl::device_global.
- */
-template <class T>
-using sycl_device_global =
-  sycl::ext::oneapi::experimental::device_global<
-    T, decltype(sycl::ext::oneapi::experimental::properties(
-         sycl::ext::oneapi::experimental::device_image_scope))>;
-
-/**
  * \brief This global variable in SYCL space is what kernels use to get access
  * to the lock arrays.
  *
  * There is only one single instance of this global variable for the entire
  * executable, whose definition will be in Kokkos_SYCL_Locks.cpp (and whose
- * declaration here must then be extern.  This one instance will be initialized
+ * declaration here must be extern). This one instance will be initialized
  * by initialize_host_sycl_lock_arrays and need not be modified afterwards.
- * FIXME_SYCL The compiler forces us to use device_image_scope. Drop this when possible.
  */
 SYCL_EXTERNAL extern sycl_device_global<
     int32_t*>
@@ -86,7 +77,7 @@ SYCL_EXTERNAL extern sycl_device_global<
 /// This function tries to acquire the lock for the hash value derived
 /// from the provided ptr. If the lock is successfully acquired the
 /// function returns true. Otherwise it returns false.
-inline bool lock_address_sycl(void* ptr, desul::MemoryScopeDevice) {
+inline bool lock_address_sycl(void* ptr, MemoryScopeDevice) {
   size_t offset = size_t(ptr);
   offset = offset >> 2;
   offset = offset & SYCL_SPACE_ATOMIC_MASK;
@@ -98,7 +89,7 @@ inline bool lock_address_sycl(void* ptr, desul::MemoryScopeDevice) {
   return (0 == lock_device_ref.exchange(1));
 }
 
-inline bool lock_address_sycl(void* ptr, desul::MemoryScopeNode) {
+inline bool lock_address_sycl(void* ptr, MemoryScopeNode) {
   size_t offset = size_t(ptr);
   offset = offset >> 2;
   offset = offset & SYCL_SPACE_ATOMIC_MASK;
@@ -117,7 +108,7 @@ inline bool lock_address_sycl(void* ptr, desul::MemoryScopeNode) {
  * ptr. This function should only be called after previously successfully
  * acquiring a lock with lock_address.
  */
-inline void unlock_address_sycl(void* ptr, desul::MemoryScopeDevice) {
+inline void unlock_address_sycl(void* ptr, MemoryScopeDevice) {
   size_t offset = size_t(ptr);
   offset = offset >> 2;
   offset = offset & SYCL_SPACE_ATOMIC_MASK;
@@ -129,7 +120,7 @@ inline void unlock_address_sycl(void* ptr, desul::MemoryScopeDevice) {
   lock_device_ref.exchange(0);
 }
 
-inline void unlock_address_sycl(void* ptr, desul::MemoryScopeNode) {
+inline void unlock_address_sycl(void* ptr, MemoryScopeNode) {
   size_t offset = size_t(ptr);
   offset = offset >> 2;
   offset = offset & SYCL_SPACE_ATOMIC_MASK;
@@ -141,21 +132,21 @@ inline void unlock_address_sycl(void* ptr, desul::MemoryScopeNode) {
   lock_node_ref.exchange(0);
 }
 #else
-inline bool lock_address_sycl(void*, desul::MemoryScopeDevice) {
+inline bool lock_address_sycl(void*, MemoryScopeDevice) {
   assert(false);
-  return false;
+  return true;
 }
 
-inline bool lock_address_sycl(void*, desul::MemoryScopeNode) {
+inline bool lock_address_sycl(void*, MemoryScopeNode) {
     assert(false);
-    return false;
+    return true;
 }
 
-inline void unlock_address_sycl(void*, desul::MemoryScopeDevice) {
+inline void unlock_address_sycl(void*, MemoryScopeDevice) {
 assert(false);
 }
 
-inline void unlock_address_sycl(void*, desul::MemoryScopeNode) {
+inline void unlock_address_sycl(void*, MemoryScopeNode) {
 assert(false);
 }
 #endif
