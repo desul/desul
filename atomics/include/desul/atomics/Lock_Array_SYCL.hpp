@@ -11,9 +11,9 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 #include <cstdint>
 
+#include "desul/atomics/Adapt_SYCL.hpp"
 #include "desul/atomics/Common.hpp"
 #include "desul/atomics/Macros.hpp"
-#include "desul/atomics/Adapt_SYCL.hpp"
 
 // FIXME_SYCL
 #if __has_include(<sycl/sycl.hpp>)
@@ -62,13 +62,9 @@ void finalize_lock_arrays_sycl(sycl::queue q);
  * declaration here must be extern). This one instance will be initialized
  * by initialize_host_sycl_lock_arrays and need not be modified afterwards.
  */
-SYCL_EXTERNAL extern sycl_device_global<
-    int32_t*>
-    SYCL_SPACE_ATOMIC_LOCKS_DEVICE;
+SYCL_EXTERNAL extern sycl_device_global<int32_t*> SYCL_SPACE_ATOMIC_LOCKS_DEVICE;
 
-SYCL_EXTERNAL extern sycl_device_global<
-    int32_t*>
-    SYCL_SPACE_ATOMIC_LOCKS_NODE;
+SYCL_EXTERNAL extern sycl_device_global<int32_t*> SYCL_SPACE_ATOMIC_LOCKS_NODE;
 
 #define SYCL_SPACE_ATOMIC_MASK 0x1FFFF
 
@@ -138,17 +134,13 @@ inline bool lock_address_sycl(void*, MemoryScopeDevice) {
 }
 
 inline bool lock_address_sycl(void*, MemoryScopeNode) {
-    assert(false);
-    return true;
+  assert(false);
+  return true;
 }
 
-inline void unlock_address_sycl(void*, MemoryScopeDevice) {
-assert(false);
-}
+inline void unlock_address_sycl(void*, MemoryScopeDevice) { assert(false); }
 
-inline void unlock_address_sycl(void*, MemoryScopeNode) {
-assert(false);
-}
+inline void unlock_address_sycl(void*, MemoryScopeNode) { assert(false); }
 #endif
 }  // namespace Impl
 }  // namespace desul

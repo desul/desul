@@ -17,9 +17,7 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #ifdef DESUL_HAVE_HIP_ATOMICS
 #include <desul/atomics/Lock_Array_HIP.hpp>
 #endif
-// Different from DESUL_HAVE_SYCL_ATOMICS because we need the declaration of
-// the sycl::device_global variables in both compile passes.
-#ifdef SYCL_LANGUAGE_VERSION
+#ifdef DESUL_HAVE_SYCL_ATOMICS
 #include <desul/atomics/Lock_Array_SYCL.hpp>
 #endif
 
