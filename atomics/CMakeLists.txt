@@ -22,7 +22,8 @@ if(ENABLE_HIP)
   set(SOURCES_ARG ${DESUL_HIP_ATOMICS_SOURCES})
   set(DEPENDS_ARG DEPENDS_ON hip)
 endif()
-if(ENABLE_SYCL) # option does not actually yet exist on the BLT side
+option(ENABLE_SYCL "Enable CUDA support" OFF) # option does not actually yet exist on the BLT side
+if(ENABLE_SYCL)
   set(DESUL_ATOMICS_ENABLE_SYCL ON)
 endif()
 if(ENABLE_OPENMP)
