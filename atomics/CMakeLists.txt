@@ -11,15 +11,27 @@ ENDMACRO()
 
 # APPEND_GLOB(DESUL_ATOMIC_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 if(ENABLE_CUDA)
+  set(DESUL_ATOMICS_ENABLE_CUDA ON)
   set(DESUL_CUDA_ATOMICS_SOURCES src/Lock_Array_CUDA.cpp)
   set(SOURCES_ARG ${DESUL_CUDA_ATOMICS_SOURCES})
   set(DEPENDS_ARG DEPENDS_ON cuda)
 endif()
 if(ENABLE_HIP)
+  set(DESUL_ATOMICS_ENABLE_HIP ON)
   set(DESUL_HIP_ATOMICS_SOURCES src/Lock_Array_HIP.cpp)
   set(SOURCES_ARG ${DESUL_HIP_ATOMICS_SOURCES})
   set(DEPENDS_ARG DEPENDS_ON hip)
 endif()
+option(ENABLE_SYCL "Enable SYCL support" OFF) # option does not actually yet exist on the BLT side
+if(ENABLE_SYCL)
+  set(DESUL_ATOMICS_ENABLE_SYCL ON)
+endif()
+if(ENABLE_OPENMP)
+  set(DESUL_ATOMICS_ENABLE_OPENMP ON)
+endif()
+configure_file(
+  ${PROJECT_SOURCE_DIR}/atomics/Config.hpp.cmake.in
+  ${PROJECT_BINARY_DIR}/include/desul/atomics/Config.hpp)
 
 set(INCLUDES_ARG
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -66,7 +78,9 @@ install(TARGETS desul_atomics
 install(EXPORT desul_atomics
   DESTINATION lib/cmake/desul)
 
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/atomics/include/
+install(DIRECTORY
+  ${PROJECT_SOURCE_DIR}/atomics/include/
+  ${PROJECT_BINARY_DIR}/include
   DESTINATION include
   FILES_MATCHING
   PATTERN *.hpp
