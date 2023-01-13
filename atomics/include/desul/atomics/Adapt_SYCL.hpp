@@ -110,10 +110,10 @@ using sycl_atomic_ref = sycl::atomic_ref<T,
 #ifdef DESUL_SYCL_DEVICE_GLOBAL_SUPPORTED
 // FIXME_SYCL The compiler forces us to use device_image_scope. Drop this when possible.
 template <class T>
-using sycl_device_global =
-  sycl::ext::oneapi::experimental::device_global<
-    T, decltype(sycl::ext::oneapi::experimental::properties(
-         sycl::ext::oneapi::experimental::device_image_scope))>;
+using sycl_device_global = sycl::ext::oneapi::experimental::device_global<
+    T,
+    decltype(sycl::ext::oneapi::experimental::properties(
+        sycl::ext::oneapi::experimental::device_image_scope))>;
 #endif
 
 }  // namespace Impl
