@@ -87,5 +87,7 @@ install(DIRECTORY
   PATTERN *.inc
   PATTERN *.inc_*)
 
-add_subdirectory(unit_tests)
-add_subdirectory(performance_tests)
+if(BUILD_TESTING)
+  add_subdirectory(unit_tests)
+  add_subdirectory(performance_tests)
+endif()
