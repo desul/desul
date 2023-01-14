@@ -141,11 +141,13 @@ void finalize_lock_arrays_sycl(sycl::queue q) {
 
 inline bool lock_address_sycl(void*, MemoryScopeDevice) {
   assert(false);
+  // return true so that the CAS loops don't hang.
   return true;
 }
 
 inline bool lock_address_sycl(void*, MemoryScopeNode) {
   assert(false);
+  // return true so that the CAS loops don't hang.
   return true;
 }
 
