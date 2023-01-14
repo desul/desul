@@ -11,8 +11,6 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 #include <cinttypes>
 #include <desul/atomics/Lock_Array_SYCL.hpp>
-#include <sstream>
-#include <string>
 
 namespace desul {
 namespace Impl {
