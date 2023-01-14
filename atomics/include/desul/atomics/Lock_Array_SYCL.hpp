@@ -128,6 +128,17 @@ inline void unlock_address_sycl(void* ptr, MemoryScopeNode) {
   lock_node_ref.exchange(0);
 }
 #else
+
+template <typename /*AlwaysInt*/ = int>
+void init_lock_arrays_sycl(sycl::queue q) {
+  assert(false);
+}
+
+template <typename /*AlwaysInt*/ = int>
+void finalize_lock_arrays_sycl(sycl::queue q) {
+  assert(false);
+}
+
 inline bool lock_address_sycl(void*, MemoryScopeDevice) {
   assert(false);
   return true;
