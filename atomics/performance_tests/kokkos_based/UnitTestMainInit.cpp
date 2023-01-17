@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
 #endif
 
 #ifdef DESUL_HAVE_HIP_ATOMICS
-  DESUL_ENSURE_HIP_LOCK_ARRAYS_ON_DEVICE();
+  desul::ensure_hip_lock_arrays_on_device();
 #endif
 
   ::testing::InitGoogleTest(&argc, argv);
