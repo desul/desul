@@ -1,5 +1,5 @@
 if(DESUL_ENABLE_TESTS)
-find_package(Kokkos 3 REQUIRED)
+find_package(Kokkos 4 REQUIRED)
 blt_add_library(NAME kokkos_perf_test_main
                 SOURCES UnitTestMainInit.cpp
                 DEPENDS_ON desul_atomics gtest Kokkos::kokkos ${DESUL_BACKENDS})
