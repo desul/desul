@@ -144,8 +144,7 @@ my_abs(T val) {
 template <class T>
 KOKKOS_INLINE_FUNCTION typename std::enable_if<!std::is_unsigned<T>::value, T>::type
 my_abs(T val) {
-  using std::abs;
-  return abs(val);
+  return Kokkos::abs(val);
 }
 
 template <class T, int N>
