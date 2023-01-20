@@ -33,9 +33,15 @@ jobs:
         run: |
           git submodule init
           git submodule update
-      - name: Install Kokkos
+     - name: Checkout Kokkos
+        uses: actions/checkout@v2.2.0
+        with:
+          repository: kokkos/kokkos
+          # FIXME Use 4.0.00 or later when released
+          ref: b5bd709fd615a0a5bc78492f171307bdafa2f53a
+          path: kokkos_src
+     - name: Install Kokkos
         run: |
-          git clone --branch 3.4.01 --single-branch --depth 1 https://github.com/kokkos/kokkos.git kokkos_src
           cd kokkos_src
           mkdir -p build
           cd build
