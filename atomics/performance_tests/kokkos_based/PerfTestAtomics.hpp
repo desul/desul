@@ -241,7 +241,6 @@ double test_atomic_perf_random_location(
       KOKKOS_LAMBDA(const int i, int& count) {
         auto diff = result_device(i) - org_dst_values(i);
         auto sum = result_device(i) + org_dst_values(i);
-        using std::abs;
         if (my_abs(sum) > 0) {
           if (my_abs(diff) / my_abs(sum) > tolerance<Scalar>::value) {
             count++;
@@ -414,7 +413,6 @@ double test_atomic_perf_random_neighborhood(int N,
     for (int j = 0; j < org_indicies.extent(1); j++)
       combiner(&org_dst_values(org_indicies(i, j)), org_src_values(i));
   }
-  using std::abs;
   int errors = 0;
   Kokkos::parallel_reduce(
       "desul::Tests::PerfRandNeigh::Check",
