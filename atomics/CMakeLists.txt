@@ -25,6 +25,8 @@ endif()
 option(ENABLE_SYCL "Enable SYCL support" OFF) # option does not actually yet exist on the BLT side
 if(ENABLE_SYCL)
   set(DESUL_ATOMICS_ENABLE_SYCL ON)
+  set(DESUL_SYCL_ATOMICS_SOURCES src/Lock_Array_SYCL.cpp)
+  set(SOURCES_ARG ${DESUL_SYCL_ATOMICS_SOURCES})
 endif()
 if(ENABLE_OPENMP)
   set(DESUL_ATOMICS_ENABLE_OPENMP ON)
