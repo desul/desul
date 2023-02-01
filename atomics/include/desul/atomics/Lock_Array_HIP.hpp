@@ -46,7 +46,6 @@ void finalize_lock_arrays_hip();
 }  // namespace Impl
 }  // namespace desul
 
-#ifdef __HIPCC__
 namespace desul {
 namespace Impl {
 
@@ -120,7 +119,7 @@ __device__ inline void unlock_address_hip(void* ptr, desul::MemoryScopeNode) {
   offset = offset & HIP_SPACE_ATOMIC_MASK;
   atomicExch(&desul::Impl::HIP_SPACE_ATOMIC_LOCKS_NODE[offset], 0);
 }
-#endif
+
 }  // namespace Impl
 }  // namespace desul
 
@@ -150,7 +149,7 @@ inline static
 }
 }  // namespace Impl
 
-#if defined(DESUL_HIP_RDC) || (!defined(__HIPCC__))
+#if defined(DESUL_HIP_RDC)
 inline void ensure_hip_lock_arrays_on_device() {}
 #else
 static inline void ensure_hip_lock_arrays_on_device() {

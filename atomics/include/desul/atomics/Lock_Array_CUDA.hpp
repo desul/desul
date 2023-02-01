@@ -45,8 +45,6 @@ void finalize_lock_arrays_cuda();
 }  // namespace Impl
 }  // namespace desul
 
-#if defined(__CUDACC__)
-
 namespace desul {
 namespace Impl {
 
@@ -149,13 +147,11 @@ inline static
 }  // namespace Impl
 }  // namespace desul
 
-#endif /* defined( __CUDACC__ ) */
-
 #endif /* defined( DESUL_HAVE_CUDA_ATOMICS ) */
 
 namespace desul {
 
-#if defined(__CUDACC_RDC__) || (!defined(__CUDACC__))
+#if defined(__CUDACC_RDC__)
 inline void ensure_cuda_lock_arrays_on_device() {}
 #else
 static inline void ensure_cuda_lock_arrays_on_device() {
