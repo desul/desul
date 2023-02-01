@@ -9,12 +9,10 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #ifndef DESUL_ATOMICS_LOCK_ARRAY_CUDA_HPP_
 #define DESUL_ATOMICS_LOCK_ARRAY_CUDA_HPP_
 
+#include <cstdint>
+
 #include "desul/atomics/Common.hpp"
 #include "desul/atomics/Macros.hpp"
-
-#ifdef DESUL_HAVE_CUDA_ATOMICS
-
-#include <cstdint>
 
 namespace desul {
 namespace Impl {
@@ -135,8 +133,6 @@ inline static
 
 }  // namespace Impl
 }  // namespace desul
-
-#endif /* defined( DESUL_HAVE_CUDA_ATOMICS ) */
 
 namespace desul {
 
