@@ -42,12 +42,6 @@ void init_lock_arrays_cuda();
 template <typename /*AlwaysInt*/ = int>
 void finalize_lock_arrays_cuda();
 
-}  // namespace Impl
-}  // namespace desul
-
-namespace desul {
-namespace Impl {
-
 /// \brief This global variable in CUDA space is what kernels use
 ///        to get access to the lock arrays.
 ///
@@ -116,12 +110,7 @@ __device__ inline void unlock_address_cuda(void* ptr, desul::MemoryScopeNode) {
   atomicExch(&desul::Impl::CUDA_SPACE_ATOMIC_LOCKS_NODE[offset], 0);
 }
 
-}  // namespace Impl
-}  // namespace desul
-
 // Make lock_array_copied an explicit translation unit scope thingy
-namespace desul {
-namespace Impl {
 namespace {
 static int lock_array_copied = 0;
 }  // namespace
