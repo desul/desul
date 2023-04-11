@@ -16,11 +16,18 @@ if(ENABLE_CUDA)
   set(SOURCES_ARG ${DESUL_CUDA_ATOMICS_SOURCES})
   set(DEPENDS_ARG DEPENDS_ON cuda)
 endif()
+if(CUDA_SEPARABLE_COMPILATION) # for compatibility with BLT
+  set(DESUL_ATOMICS_ENABLE_CUDA_SEPARABLE_COMPILATION ON)
+endif()
 if(ENABLE_HIP)
   set(DESUL_ATOMICS_ENABLE_HIP ON)
   set(DESUL_HIP_ATOMICS_SOURCES src/Lock_Array_HIP.cpp)
   set(SOURCES_ARG ${DESUL_HIP_ATOMICS_SOURCES})
   set(DEPENDS_ARG DEPENDS_ON hip)
+endif()
+cmake_dependent_option(HIP_SEPARABLE_COMPILATION "Enable separate compilation of device code" OFF "ENABLE_HIP" OFF) # does not exist in BLT at the moment
+if(HIP_SEPARABLE_COMPILATION)
+  set(DESUL_ATOMICS_ENABLE_HIP_SEPARABLE_COMPILATION ON)
 endif()
 option(ENABLE_SYCL "Enable SYCL support" OFF) # option does not actually yet exist on the BLT side
 if(ENABLE_SYCL)
