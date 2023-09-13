@@ -8,8 +8,8 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #ifndef DESUL_ATOMICS_FETCH_OP_OPENACC_HPP_
 #define DESUL_ATOMICS_FETCH_OP_OPENACC_HPP_
 
-#include <desul/atomics/Common.hpp>
 #include <algorithm>
+#include <desul/atomics/Common.hpp>
 
 namespace desul {
 namespace Impl {
@@ -17,28 +17,40 @@ namespace Impl {
 #ifdef __NVCOMPILER
 #ifndef DESUL_CUDA_ARCH_IS_PRE_PASCAL
 template <class T, class R, class MS>
-using acc_enable_if_supported_arithmetic_type = std::enable_if_t<(std::is_same_v<T,int> \
-	|| std::is_same_v<T,unsigned int> || std::is_same_v<T,unsigned long long> \
-	|| std::is_same_v<T,float> || std::is_same_v<T,double>) \
-	&& (std::is_same_v<MS,MemoryScopeDevice> || std::is_same_v<MS,MemoryScopeCore>), R>;
+using acc_enable_if_supported_arithmetic_type = std::enable_if_t<
+    (std::is_same_v<T, int> || std::is_same_v<T, unsigned int> ||
+     std::is_same_v<T, unsigned long long> || std::is_same_v<T, float> ||
+     std::is_same_v<T, double>)&&(std::is_same_v<MS, MemoryScopeDevice> ||
+                                  std::is_same_v<MS, MemoryScopeCore>),
+    R>;
 #else
 template <class T, class R, class MS>
-using acc_enable_if_supported_arithmetic_type = std::enable_if_t<(std::is_same_v<T,int> \
-	|| std::is_same_v<T,unsigned int> || std::is_same_v<T,unsigned long long> \
-	|| std::is_same_v<T,float>) && (std::is_same_v<MS,MemoryScopeDevice> \
-	|| std::is_same_v<MS,MemoryScopeCore>), R>;
+using acc_enable_if_supported_arithmetic_type = std::enable_if_t<
+    (std::is_same_v<T, int> || std::is_same_v<T, unsigned int> ||
+     std::is_same_v<T, unsigned long long> ||
+     std::is_same_v<T, float>)&&(std::is_same_v<MS, MemoryScopeDevice> ||
+                                 std::is_same_v<MS, MemoryScopeCore>),
+    R>;
 #endif
 template <class T, class R, class MS>
-using acc_enable_if_supported_integral_type = std::enable_if_t<(std::is_same_v<T,int> \
-	|| std::is_same_v<T,unsigned int> || std::is_same_v<T,unsigned long long>) \
-	&& (std::is_same_v<MS,MemoryScopeDevice> || std::is_same_v<MS,MemoryScopeCore>), R>;
+using acc_enable_if_supported_integral_type = std::enable_if_t<
+    (std::is_same_v<T, int> || std::is_same_v<T, unsigned int> ||
+     std::is_same_v<T, unsigned long long>)&&(std::is_same_v<MS, MemoryScopeDevice> ||
+                                              std::is_same_v<MS, MemoryScopeCore>),
+    R>;
 #else
 template <class T, class R, class MS>
-using acc_enable_if_supported_arithmetic_type = std::enable_if_t<std::is_arithmetic<T>::value \
-	&& (std::is_same_v<MS,MemoryScopeDevice> || std::is_same_v<MS,MemoryScopeCore>), R>;
+using acc_enable_if_supported_arithmetic_type =
+    std::enable_if_t<std::is_arithmetic<T>::value &&
+                         (std::is_same_v<MS, MemoryScopeDevice> ||
+                          std::is_same_v<MS, MemoryScopeCore>),
+                     R>;
 template <class T, class R, class MS>
-using acc_enable_if_supported_integral_type = std::enable_if_t<std::is_integral<T>::value \
-	&& (std::is_same_v<MS,MemoryScopeDevice> || std::is_same_v<MS,MemoryScopeCore>), R>;
+using acc_enable_if_supported_integral_type =
+    std::enable_if_t<std::is_integral<T>::value &&
+                         (std::is_same_v<MS, MemoryScopeDevice> ||
+                          std::is_same_v<MS, MemoryScopeCore>),
+                     R>;
 #endif
 
 // clang-format off
