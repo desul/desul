@@ -57,6 +57,10 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #define DESUL_HAVE_OPENMP_ATOMICS
 #endif
 
+#if defined(DESUL_ATOMICS_ENABLE_OPENACC)
+#define DESUL_HAVE_OPENACC_ATOMICS
+#endif
+
 // ONLY use GNUC atomics if not explicitly say to use OpenMP atomics
 #if !defined(DESUL_HAVE_OPENMP_ATOMICS) && defined(__GNUC__)
 #define DESUL_HAVE_GCC_ATOMICS
@@ -121,6 +125,30 @@ static constexpr bool desul_impl_omp_on_host() { return false; }
 #define DESUL_IF_ON_HOST(CODE) \
   { DESUL_IMPL_STRIP_PARENS(CODE) }
 #endif
+#endif
+
+#if defined(DESUL_HAVE_OPENACC_ATOMICS)
+#include <openacc.h>
+#ifdef __NVCOMPILER
+//In NVHPC, acc_on_device() is not constexpr; therefore, the same
+//device atomic implementations are used for both host and device.
+#define DESUL_IF_ON_DEVICE(CODE) \
+  { DESUL_IMPL_STRIP_PARENS(CODE) }
+#define DESUL_IF_ON_HOST(CODE) \
+  {}
+#else
+#define DESUL_IF_ON_DEVICE(CODE)                     \
+  if constexpr (acc_on_device(acc_device_not_host)) {\
+    DESUL_IMPL_STRIP_PARENS(CODE)                    \
+  }
+#define DESUL_IF_ON_HOST(CODE)                       \
+  else {                                             \
+    DESUL_IMPL_STRIP_PARENS(CODE)                    \
+  }
+#endif
+#define DESUL_ACC_ROUTINE_DIRECTIVE _Pragma("acc routine seq")
+#else
+#define DESUL_ACC_ROUTINE_DIRECTIVE 
 #endif
 
 #if !defined(DESUL_IF_ON_HOST) && !defined(DESUL_IF_ON_DEVICE)
