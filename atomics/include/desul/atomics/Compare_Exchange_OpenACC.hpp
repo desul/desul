@@ -156,36 +156,24 @@ device_atomic_compare_exchange(
 
 #pragma acc routine seq
 template <class T, class MemoryScope>
-std::enable_if_t<std::is_floating_point<T>::value && (sizeof(T) == 4) &&
-                     (std::is_same_v<MemoryScope, MemoryScopeDevice> ||
-                      std::is_same_v<MemoryScope, MemoryScopeCore>),
-                 T>
+std::enable_if_t<(std::is_same_v<MemoryScope, MemoryScopeDevice> ||
+                  std::is_same_v<MemoryScope, MemoryScopeCore>),
+                 float>
 device_atomic_compare_exchange(
-    T* const dest, T compare, T value, MemoryOrderRelaxed, MemoryScope) {
-  static_assert(sizeof(float) == 4, "this function assumes an float is 32-bit");
-  float return_val = atomicCAS(reinterpret_cast<float*>(dest),
-                               reinterpret_cast<float&>(compare),
-                               reinterpret_cast<float&>(value));
-  return reinterpret_cast<T&>(return_val);
+    float* const dest, float compare, float value, MemoryOrderRelaxed, MemoryScope) {
+  return atomicCAS(dest, compare, value);
 }
 
 #ifndef DESUL_CUDA_ARCH_IS_PRE_PASCAL
-
 #pragma acc routine seq
 template <class T, class MemoryScope>
-std::enable_if_t<std::is_floating_point<T>::value && (sizeof(T) == 8) &&
-                     (std::is_same_v<MemoryScope, MemoryScopeDevice> ||
-                      std::is_same_v<MemoryScope, MemoryScopeCore>),
-                 T>
+std::enable_if_t<(std::is_same_v<MemoryScope, MemoryScopeDevice> ||
+                  std::is_same_v<MemoryScope, MemoryScopeCore>),
+                 double>
 device_atomic_compare_exchange(
-    T* const dest, T compare, T value, MemoryOrderRelaxed, MemoryScope) {
-  static_assert(sizeof(double) == 8, "this function assumes an double is 64-bit");
-  double return_val = atomicCAS(reinterpret_cast<double*>(dest),
-                                reinterpret_cast<double&>(compare),
-                                reinterpret_cast<double&>(value));
-  return reinterpret_cast<T&>(return_val);
+    double* const dest, double compare, double value, MemoryOrderRelaxed, MemoryScope) {
+  return atomicCAS(dest, compare, value);
 }
-
 #endif
 
 #else
