@@ -130,8 +130,8 @@ static constexpr bool desul_impl_omp_on_host() { return false; }
 #if defined(DESUL_HAVE_OPENACC_ATOMICS)
 #include <openacc.h>
 #ifdef __NVCOMPILER
-// In NVHPC, acc_on_device() is not constexpr; therefore, the same
-// device atomic implementations are used for both host and device.
+// FIXME_OPENACC We cannot determine in a constant expresion whether we are on host or
+// on device with NVHPC.  We use the device implementation on both sides.
 #define DESUL_IF_ON_DEVICE(CODE) \
   { DESUL_IMPL_STRIP_PARENS(CODE) }
 #define DESUL_IF_ON_HOST(CODE) \
