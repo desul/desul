@@ -13,181 +13,122 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 #include <desul/atomics/Common.hpp>
 #include <desul/atomics/Thread_Fence_OpenACC.hpp>
+#include <type_traits>
 
 namespace desul {
 namespace Impl {
 
-#pragma acc routine seq
-template <class T, class MemoryOrder, class MemoryScope>
-std::enable_if_t<!std::is_arithmetic<T>::value, T> device_atomic_exchange(
-    T* dest, T value, MemoryOrder, MemoryScope scope) {
-  if (acc_on_device(acc_device_not_host)) {
-    printf(
-        "DESUL error in device_atomic_exchange(): Not supported atomic "
-        "operation in the OpenACC backend\n");
-  }
-  // FIXME_OPENACC OpenACC lock APIs are not implemented.
-  //  Acquire a lock for the address
-  // while (!lock_address_openacc((void*)dest, scope)) {
-  // }
-  // device_atomic_thread_fence(MemoryOrderAcquire(), scope);
-  T return_val = *dest;
-  *dest = value;
-  // device_atomic_thread_fence(MemoryOrderRelease(), scope);
-  // unlock_address_openacc((void*)dest, scope);
-  return return_val;
-}
-
 #ifdef __NVCOMPILER
 
 #pragma acc routine seq
 template <class T, class MemoryOrder, class MemoryScope>
-std::enable_if_t<std::is_arithmetic<T>::value, T> device_atomic_exchange(
-    T* dest, T value, MemoryOrder, MemoryScope scope) {
-  if (acc_on_device(acc_device_not_host)) {
-    printf(
-        "DESUL error in device_atomic_exchange(): Not supported atomic "
-        "operation in the OpenACC backend\n");
-  }
-  // FIXME_OPENACC OpenACC lock APIs are not implemented.
-  //  Acquire a lock for the address
-  // while (!lock_address_openacc((void*)dest, scope)) {
-  // }
-  // device_atomic_thread_fence(MemoryOrderAcquire(), scope);
-  T return_val = *dest;
-  *dest = value;
-  // device_atomic_thread_fence(MemoryOrderRelease(), scope);
-  // unlock_address_openacc((void*)dest, scope);
-  return return_val;
-}
-
-#pragma acc routine seq
-template <class T, class MemoryScope>
-std::enable_if_t<std::is_arithmetic<T>::value &&
-                     ((sizeof(T) == 4) || (sizeof(T) == 8)) &&
-                     (std::is_same_v<MemoryScope, MemoryScopeDevice> ||
-                      std::is_same_v<MemoryScope, MemoryScopeCore>),
-                 T>
-device_atomic_exchange(T* dest, T value, MemoryOrderRelaxed, MemoryScope) {
-  T return_val;
+T device_atomic_exchange(T* dest, T value, MemoryOrder, MemoryScope /*scope*/) {
+  if constexpr (std::is_arithmetic_v<T> && ((sizeof(T) == 4) || (sizeof(T) == 8))) {
+    T return_val;
 #pragma acc atomic capture
-  {
-    return_val = *dest;
-    *dest = value;
-  }
-  return return_val;
-}
-
-#else
-
-#pragma acc routine seq
-template <class T, class MemoryOrder, class MemoryScope>
-std::enable_if_t<std::is_arithmetic<T>::value, T> device_atomic_exchange(T* dest,
-                                                                         T value,
-                                                                         MemoryOrder,
-                                                                         MemoryScope) {
-  T return_val;
-#pragma acc atomic capture
-  {
-    return_val = *dest;
-    *dest = value;
-  }
-  return return_val;
-}
-
-#endif
-
-#ifdef __NVCOMPILER
-
-#pragma acc routine seq
-template <class T, class MemoryOrder, class MemoryScope>
-T device_atomic_compare_exchange(
-    T* dest, T compare, T value, MemoryOrder, MemoryScope scope) {
-  T current_val = *dest;
-  if (acc_on_device(acc_device_not_host)) {
+    {
+      return_val = *dest;
+      *dest = value;
+    }
+    return return_val;
+  } else {
+    // FIXME_OPENACC
     printf(
-        "DESUL error in device_atomic_compare_exchange(): Not supported atomic "
-        "operation in the OpenACC backend\n");
-  }
-  // Acquire a lock for the address
-  // while (!lock_address_openacc((void*)dest, scope)) {
-  //}
-  // device_atomic_thread_fence(MemoryOrderAcquire(), scope);
-  if (current_val == compare) {
+        "DESUL error in device_atomic_exchange(): Not supported atomic operation in "
+        "the OpenACC backend\n");
+    //  Acquire a lock for the address
+    // while (!lock_address_openacc((void*)dest, scope)) {
+    // }
+    // device_atomic_thread_fence(MemoryOrderAcquire(), scope);
+    T return_val = *dest;
     *dest = value;
     // device_atomic_thread_fence(MemoryOrderRelease(), scope);
+    // unlock_address_openacc((void*)dest, scope);
+    return return_val;
   }
-  // unlock_address_openacc((void*)dest, scope);
-  return current_val;
 }
-
-#pragma acc routine seq
-template <class T, class MemoryScope>
-std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 4) &&
-                     (std::is_same_v<MemoryScope, MemoryScopeDevice> ||
-                      std::is_same_v<MemoryScope, MemoryScopeCore>),
-                 T>
-device_atomic_compare_exchange(
-    T* const dest, T compare, T value, MemoryOrderRelaxed, MemoryScope) {
-  static_assert(sizeof(unsigned int) == 4,
-                "this function assumes an unsigned int is 32-bit");
-  unsigned int return_val = atomicCAS(reinterpret_cast<unsigned int*>(dest),
-                                      reinterpret_cast<unsigned int&>(compare),
-                                      reinterpret_cast<unsigned int&>(value));
-  return reinterpret_cast<T&>(return_val);
-}
-
-#pragma acc routine seq
-template <class T, class MemoryScope>
-std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 8) &&
-                     (std::is_same_v<MemoryScope, MemoryScopeDevice> ||
-                      std::is_same_v<MemoryScope, MemoryScopeCore>),
-                 T>
-device_atomic_compare_exchange(
-    T* const dest, T compare, T value, MemoryOrderRelaxed, MemoryScope) {
-  static_assert(sizeof(unsigned long long int) == 8,
-                "this function assumes an unsigned long long int is 64-bit");
-  unsigned long long int return_val =
-      atomicCAS(reinterpret_cast<unsigned long long int*>(dest),
-                reinterpret_cast<unsigned long long int&>(compare),
-                reinterpret_cast<unsigned long long int&>(value));
-  return reinterpret_cast<T&>(return_val);
-}
-
-#pragma acc routine seq
-template <class T, class MemoryScope>
-std::enable_if_t<(std::is_same_v<MemoryScope, MemoryScopeDevice> ||
-                  std::is_same_v<MemoryScope, MemoryScopeCore>),
-                 float>
-device_atomic_compare_exchange(
-    float* const dest, float compare, float value, MemoryOrderRelaxed, MemoryScope) {
-  return atomicCAS(dest, compare, value);
-}
-
-#ifndef DESUL_CUDA_ARCH_IS_PRE_PASCAL
-#pragma acc routine seq
-template <class T, class MemoryScope>
-std::enable_if_t<(std::is_same_v<MemoryScope, MemoryScopeDevice> ||
-                  std::is_same_v<MemoryScope, MemoryScopeCore>),
-                 double>
-device_atomic_compare_exchange(
-    double* const dest, double compare, double value, MemoryOrderRelaxed, MemoryScope) {
-  return atomicCAS(dest, compare, value);
-}
-#endif
-
-#else
 
 #pragma acc routine seq
 template <class T, class MemoryOrder, class MemoryScope>
 T device_atomic_compare_exchange(
     T* dest, T compare, T value, MemoryOrder, MemoryScope scope) {
-  T current_val = *dest;
-  if (acc_on_device(acc_device_not_host)) {
+  if constexpr (std::is_integral_v<T> && (sizeof(T) == 4)) {
+    static_assert(sizeof(unsigned int) == 4);
+    unsigned int return_val = atomicCAS(reinterpret_cast<unsigned int*>(dest),
+                                        reinterpret_cast<unsigned int&>(compare),
+                                        reinterpret_cast<unsigned int&>(value));
+    return reinterpret_cast<T&>(return_val);
+  } else if constexpr (std::is_integral_v<T> && (sizeof(T) == 8)) {
+    static_assert(sizeof(unsigned long long int) == 8);
+    unsigned long long int return_val =
+        atomicCAS(reinterpret_cast<unsigned long long int*>(dest),
+                  reinterpret_cast<unsigned long long int&>(compare),
+                  reinterpret_cast<unsigned long long int&>(value));
+    return reinterpret_cast<T&>(return_val);
+#ifdef DESUL_CUDA_ARCH_IS_PRE_PASCAL
+  } else if constexpr (std::is_same_v<T, float>) {
+#else
+  } else if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>) {
+#endif
+    return atomicCAS(dest, compare, value);
+  } else {
+    // FIXME_OPENACC
+    T current_val = *dest;
     printf(
         "DESUL error in device_atomic_compare_exchange(): Not supported atomic "
         "operation in the OpenACC backend\n");
+    // Acquire a lock for the address
+    // while (!lock_address_openacc((void*)dest, scope)) {
+    //}
+    // device_atomic_thread_fence(MemoryOrderAcquire(), scope);
+    if (current_val == compare) {
+      *dest = value;
+      // device_atomic_thread_fence(MemoryOrderRelease(), scope);
+    }
+    // unlock_address_openacc((void*)dest, scope);
+    return current_val;
   }
+}
+
+#else  // not NVHPC
+
+#pragma acc routine seq
+template <class T, class MemoryOrder, class MemoryScope>
+T device_atomic_exchange(T* dest, T value, MemoryOrder, MemoryScope) {
+  if constexpr (std::is_arithmetic_v<T>) {
+    T return_val;
+#pragma acc atomic capture
+    {
+      return_val = *dest;
+      *dest = value;
+    }
+    return return_val;
+  } else {
+    // FIXME_OPENACC
+    printf(
+        "DESUL error in device_atomic_exchange(): Not supported atomic operation in "
+        "the OpenACC backend\n");
+    //  Acquire a lock for the address
+    // while (!lock_address_openacc((void*)dest, scope)) {
+    // }
+    // device_atomic_thread_fence(MemoryOrderAcquire(), scope);
+    T return_val = *dest;
+    *dest = value;
+    // device_atomic_thread_fence(MemoryOrderRelease(), scope);
+    // unlock_address_openacc((void*)dest, scope);
+    return return_val;
+  }
+}
+
+#pragma acc routine seq
+template <class T, class MemoryOrder, class MemoryScope>
+T device_atomic_compare_exchange(
+    T* dest, T compare, T value, MemoryOrder, MemoryScope scope) {
+  // FIXME_OPENACC
+  printf(
+      "DESUL error in device_atomic_compare_exchange(): Not supported atomic operation "
+      "in the OpenACC backend\n");
+  T current_val = *dest;
   // Acquire a lock for the address
   // while (!lock_address_openacc((void*)dest, scope)) {
   //}
