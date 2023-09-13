@@ -15,23 +15,16 @@ namespace desul {
 namespace Impl {
 
 #ifdef __NVCOMPILER
+template <class T, class R, class MS>
+using acc_enable_if_supported_arithmetic_type =
+    std::enable_if_t<(std::is_same_v<T, int> || std::is_same_v<T, unsigned int> ||
+                      std::is_same_v<T, unsigned long long> || std::is_same_v<T, float>
 #ifndef DESUL_CUDA_ARCH_IS_PRE_PASCAL
-template <class T, class R, class MS>
-using acc_enable_if_supported_arithmetic_type = std::enable_if_t<
-    (std::is_same_v<T, int> || std::is_same_v<T, unsigned int> ||
-     std::is_same_v<T, unsigned long long> || std::is_same_v<T, float> ||
-     std::is_same_v<T, double>)&&(std::is_same_v<MS, MemoryScopeDevice> ||
-                                  std::is_same_v<MS, MemoryScopeCore>),
-    R>;
-#else
-template <class T, class R, class MS>
-using acc_enable_if_supported_arithmetic_type = std::enable_if_t<
-    (std::is_same_v<T, int> || std::is_same_v<T, unsigned int> ||
-     std::is_same_v<T, unsigned long long> ||
-     std::is_same_v<T, float>)&&(std::is_same_v<MS, MemoryScopeDevice> ||
-                                 std::is_same_v<MS, MemoryScopeCore>),
-    R>;
+                      || std::is_same_v<T, double>
 #endif
+                      )&&(std::is_same_v<MS, MemoryScopeDevice> ||
+                          std::is_same_v<MS, MemoryScopeCore>),
+                     R>;
 template <class T, class R, class MS>
 using acc_enable_if_supported_integral_type = std::enable_if_t<
     (std::is_same_v<T, int> || std::is_same_v<T, unsigned int> ||
