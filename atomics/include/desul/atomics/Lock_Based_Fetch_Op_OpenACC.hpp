@@ -60,7 +60,7 @@ inline T device_atomic_oper_fetch(const Oper& op,
                                   MemoryScope scope) {
   if (acc_on_device(acc_device_not_host)) {
     printf(
-        "Kokkos Error in device_atomic_fetch_oper(): Not supported atomic "
+        "Kokkos Error in device_atomic_oper_fetch(): Not supported atomic "
         "operation in the OpenACC backend\n");
   }
   // Acquire a lock for the address
