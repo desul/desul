@@ -69,10 +69,10 @@ T device_atomic_compare_exchange(
     return atomicCAS(dest, compare, value);
   } else {
     // FIXME_OPENACC
-    T current_val = *dest;
     printf(
         "DESUL error in device_atomic_compare_exchange(): Not supported atomic "
         "operation in the OpenACC backend\n");
+    T current_val = *dest;
     // Acquire a lock for the address
     // while (!lock_address_openacc((void*)dest, scope)) {
     //}
