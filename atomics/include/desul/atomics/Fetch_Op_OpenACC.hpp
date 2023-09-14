@@ -8,8 +8,9 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #ifndef DESUL_ATOMICS_FETCH_OP_OPENACC_HPP_
 #define DESUL_ATOMICS_FETCH_OP_OPENACC_HPP_
 
-#include <algorithm>
+#include <algorithm>  // min, max
 #include <desul/atomics/Common.hpp>
+#include <type_traits>
 
 namespace desul {
 namespace Impl {
