@@ -405,11 +405,9 @@ acc_enable_if_supported_arithmetic_type<T, void> device_atomic_store(T* const pt
                                                                      const T val,
                                                                      MemoryOrderRelease,
                                                                      MemoryScope) {
-  if (acc_on_device(acc_device_not_host)) {
-    printf(
-        "DESUL error in device_atomic_exchange(): Not supported atomic "
-        "operation in the OpenACC backend\n");
-  }
+  printf(
+      "DESUL error in device_atomic_exchange(): Not supported atomic operation in the "
+      "OpenACC backend\n");
 #pragma acc atomic write
   *ptr = val;
 }
@@ -430,12 +428,10 @@ template <class T, class MemoryScope>
 acc_enable_if_supported_arithmetic_type<T, T> device_atomic_load(const T* const ptr,
                                                                  MemoryOrderAcquire,
                                                                  MemoryScope) {
+  printf(
+      "DESUL error in device_atomic_exchange(): Not supported atomic operation in the "
+      "OpenACC backend\n");
   T retval;
-  if (acc_on_device(acc_device_not_host)) {
-    printf(
-        "DESUL error in device_atomic_exchange(): Not supported atomic "
-        "operation in the OpenACC backend\n");
-  }
 #pragma acc atomic read
   retval = *ptr;
   return retval;
