@@ -16,34 +16,35 @@ namespace desul {
 namespace Impl {
 
 #ifdef __NVCOMPILER
-template <class T, class R>
-using acc_enable_if_supported_arithmetic_type =
-    std::enable_if_t<(std::is_same_v<T, int> || std::is_same_v<T, unsigned int> ||
-                      std::is_same_v<T, unsigned long long> || std::is_same_v<T, float>
+
+template <class T>
+inline constexpr bool is_openacc_integral_type_v =
+    std::is_same_v<T, int> || std::is_same_v<T, unsigned int> ||
+    std::is_same_v<T, unsigned long long>;
+
+template <class T>
+inline constexpr bool is_openacc_arithmetic_type_v =
+    is_openacc_integral_type_v || std::is_same_v<T, float>
 #ifndef DESUL_CUDA_ARCH_IS_PRE_PASCAL
-                      || std::is_same_v<T, double>
+    || std::is_same_v<T, double>
 #endif
-                      ),
-                     R>;
-template <class T, class R>
-using acc_enable_if_supported_integral_type =
-    std::enable_if_t<(std::is_same_v<T, int> || std::is_same_v<T, unsigned int> ||
-                      std::is_same_v<T, unsigned long long>),
-                     R>;
+    ;
+
 #else
-template <class T, class R>
-using acc_enable_if_supported_arithmetic_type =
-    std::enable_if_t<std::is_arithmetic_v<T>, R>;
-template <class T, class R>
-using acc_enable_if_supported_integral_type =
-    std::enable_if_t<std::is_integral_v<T>, R>;
+
+template <class T>
+inline constexpr bool is_openacc_integral_type_v = std::is_integral_v<T>;
+
+template <class T>
+inline constexpr bool is_openacc_arithmetic_type_v = std::is_arithmetic_v<T>;
+
 #endif
 
 //<editor-fold
 // desc="device_atomic_fetch_{add,sub,mul,div,lshift,rshift,mod,max,min,and,or,xor}">
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_arithmetic_type<T, T> device_atomic_fetch_add(
+std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_fetch_add(
     T* ptr, const T val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T old;
 #pragma acc atomic capture
@@ -56,7 +57,7 @@ acc_enable_if_supported_arithmetic_type<T, T> device_atomic_fetch_add(
 
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_arithmetic_type<T, T> device_atomic_fetch_inc(
+std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_fetch_inc(
     T* ptr, MemoryOrderRelaxed, MemoryScopeDevice) {
   T old;
 #pragma acc atomic capture
@@ -69,7 +70,7 @@ acc_enable_if_supported_arithmetic_type<T, T> device_atomic_fetch_inc(
 
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_arithmetic_type<T, T> device_atomic_fetch_sub(
+std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_fetch_sub(
     T* ptr, const T val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T old;
 #pragma acc atomic capture
@@ -82,7 +83,7 @@ acc_enable_if_supported_arithmetic_type<T, T> device_atomic_fetch_sub(
 
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_arithmetic_type<T, T> device_atomic_fetch_dec(
+std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_fetch_dec(
     T* ptr, MemoryOrderRelaxed, MemoryScopeDevice) {
   T old;
 #pragma acc atomic capture
@@ -95,7 +96,7 @@ acc_enable_if_supported_arithmetic_type<T, T> device_atomic_fetch_dec(
 
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_arithmetic_type<T, T> device_atomic_fetch_mul(
+std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_fetch_mul(
     T* ptr, const T val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T old;
 #pragma acc atomic capture
@@ -108,7 +109,7 @@ acc_enable_if_supported_arithmetic_type<T, T> device_atomic_fetch_mul(
 
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_arithmetic_type<T, T> device_atomic_fetch_div(
+std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_fetch_div(
     T* ptr, const T val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T old;
 #pragma acc atomic capture
@@ -121,7 +122,7 @@ acc_enable_if_supported_arithmetic_type<T, T> device_atomic_fetch_div(
 
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_integral_type<T, T> device_atomic_fetch_lshift(
+std::enable_if_t<is_openacc_integral_type_v<T>, T> device_atomic_fetch_lshift(
     T* ptr, const unsigned int val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T old;
 #pragma acc atomic capture
@@ -134,7 +135,7 @@ acc_enable_if_supported_integral_type<T, T> device_atomic_fetch_lshift(
 
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_integral_type<T, T> device_atomic_fetch_rshift(
+std::enable_if_t<is_openacc_integral_type_v<T>, T> device_atomic_fetch_rshift(
     T* ptr, const unsigned int val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T old;
 #pragma acc atomic capture
@@ -148,7 +149,7 @@ acc_enable_if_supported_integral_type<T, T> device_atomic_fetch_rshift(
 #ifdef __NVCOMPILER
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_arithmetic_type<T, T> device_atomic_fetch_max(
+std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_fetch_max(
     T* ptr, const T val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T old;
   old = atomicMax(ptr, val);
@@ -159,7 +160,7 @@ acc_enable_if_supported_arithmetic_type<T, T> device_atomic_fetch_max(
 #ifdef __NVCOMPILER
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_arithmetic_type<T, T> device_atomic_fetch_min(
+std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_fetch_min(
     T* ptr, const T val, MemoryOrderRelaxed, MemoryScopeDevice) {
   int old;
   old = atomicMin(ptr, val);
@@ -169,10 +170,8 @@ acc_enable_if_supported_arithmetic_type<T, T> device_atomic_fetch_min(
 
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_integral_type<T, T> device_atomic_fetch_and(T* ptr,
-                                                                    const T val,
-                                                                    MemoryOrderRelaxed,
-                                                                    MemoryScopeDevice) {
+std::enable_if_t<is_openacc_integral_type_v<T>, T> device_atomic_fetch_and(
+    T* ptr, const T val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T old;
 #pragma acc atomic capture
   {
@@ -184,10 +183,8 @@ acc_enable_if_supported_integral_type<T, T> device_atomic_fetch_and(T* ptr,
 
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_integral_type<T, T> device_atomic_fetch_or(T* ptr,
-                                                                   const T val,
-                                                                   MemoryOrderRelaxed,
-                                                                   MemoryScopeDevice) {
+std::enable_if_t<is_openacc_integral_type_v<T>, T> device_atomic_fetch_or(
+    T* ptr, const T val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T old;
 #pragma acc atomic capture
   {
@@ -199,10 +196,8 @@ acc_enable_if_supported_integral_type<T, T> device_atomic_fetch_or(T* ptr,
 
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_integral_type<T, T> device_atomic_fetch_xor(T* ptr,
-                                                                    const T val,
-                                                                    MemoryOrderRelaxed,
-                                                                    MemoryScopeDevice) {
+std::enable_if_t<is_openacc_integral_type_v<T>, T> device_atomic_fetch_xor(
+    T* ptr, const T val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T old;
 #pragma acc atomic capture
   {
@@ -217,7 +212,7 @@ acc_enable_if_supported_integral_type<T, T> device_atomic_fetch_xor(T* ptr,
 // desc="device_atomic_{add,sub,mul,div,lshift,rshift,mod,max,min,and,or,xor}_fetch">
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_arithmetic_type<T, T> device_atomic_add_fetch(
+std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_add_fetch(
     T* ptr, const T val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T tmp;
 #pragma acc atomic capture
@@ -230,7 +225,7 @@ acc_enable_if_supported_arithmetic_type<T, T> device_atomic_add_fetch(
 
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_arithmetic_type<T, T> device_atomic_inc_fetch(
+std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_inc_fetch(
     T* ptr, MemoryOrderRelaxed, MemoryScopeDevice) {
   T tmp;
 #pragma acc atomic capture
@@ -243,7 +238,7 @@ acc_enable_if_supported_arithmetic_type<T, T> device_atomic_inc_fetch(
 
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_arithmetic_type<T, T> device_atomic_sub_fetch(
+std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_sub_fetch(
     T* ptr, const T val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T tmp;
 #pragma acc atomic capture
@@ -256,7 +251,7 @@ acc_enable_if_supported_arithmetic_type<T, T> device_atomic_sub_fetch(
 
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_arithmetic_type<T, T> device_atomic_dec_fetch(
+std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_dec_fetch(
     T* ptr, MemoryOrderRelaxed, MemoryScopeDevice) {
   T tmp;
 #pragma acc atomic capture
@@ -269,7 +264,7 @@ acc_enable_if_supported_arithmetic_type<T, T> device_atomic_dec_fetch(
 
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_arithmetic_type<T, T> device_atomic_mul_fetch(
+std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_mul_fetch(
     T* ptr, const T val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T tmp;
 #pragma acc atomic capture
@@ -282,7 +277,7 @@ acc_enable_if_supported_arithmetic_type<T, T> device_atomic_mul_fetch(
 
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_arithmetic_type<T, T> device_atomic_div_fetch(
+std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_div_fetch(
     T* ptr, const T val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T tmp;
 #pragma acc atomic capture
@@ -295,7 +290,7 @@ acc_enable_if_supported_arithmetic_type<T, T> device_atomic_div_fetch(
 
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_integral_type<T, T> device_atomic_lshift_fetch(
+std::enable_if_t<is_openacc_integral_type_v<T>, T> device_atomic_lshift_fetch(
     T* ptr, const unsigned int val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T tmp;
 #pragma acc atomic capture
@@ -308,7 +303,7 @@ acc_enable_if_supported_integral_type<T, T> device_atomic_lshift_fetch(
 
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_integral_type<T, T> device_atomic_rshift_fetch(
+std::enable_if_t<is_openacc_integral_type_v<T>, T> device_atomic_rshift_fetch(
     T* ptr, const unsigned int val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T tmp;
 #pragma acc atomic capture
@@ -322,7 +317,7 @@ acc_enable_if_supported_integral_type<T, T> device_atomic_rshift_fetch(
 #ifdef __NVCOMPILER
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_arithmetic_type<T, T> device_atomic_max_fetch(
+std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_max_fetch(
     T* ptr, const T val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T tmp;
   tmp = atomicMax(ptr, val);
@@ -334,7 +329,7 @@ acc_enable_if_supported_arithmetic_type<T, T> device_atomic_max_fetch(
 #ifdef __NVCOMPILER
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_arithmetic_type<T, T> device_atomic_min_fetch(
+std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_min_fetch(
     T* ptr, const T val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T tmp;
   tmp = atomicMin(ptr, val);
@@ -345,10 +340,8 @@ acc_enable_if_supported_arithmetic_type<T, T> device_atomic_min_fetch(
 
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_integral_type<T, T> device_atomic_and_fetch(T* ptr,
-                                                                    const T val,
-                                                                    MemoryOrderRelaxed,
-                                                                    MemoryScopeDevice) {
+std::enable_if_t<is_openacc_integral_type_v<T>, T> device_atomic_and_fetch(
+    T* ptr, const T val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T tmp;
 #pragma acc atomic capture
   {
@@ -360,10 +353,8 @@ acc_enable_if_supported_integral_type<T, T> device_atomic_and_fetch(T* ptr,
 
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_integral_type<T, T> device_atomic_or_fetch(T* ptr,
-                                                                   const T val,
-                                                                   MemoryOrderRelaxed,
-                                                                   MemoryScopeDevice) {
+std::enable_if_t<is_openacc_integral_type_v<T>, T> device_atomic_or_fetch(
+    T* ptr, const T val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T tmp;
 #pragma acc atomic capture
   {
@@ -375,10 +366,8 @@ acc_enable_if_supported_integral_type<T, T> device_atomic_or_fetch(T* ptr,
 
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_integral_type<T, T> device_atomic_xor_fetch(T* ptr,
-                                                                    const T val,
-                                                                    MemoryOrderRelaxed,
-                                                                    MemoryScopeDevice) {
+std::enable_if_t<is_openacc_integral_type_v<T>, T> device_atomic_xor_fetch(
+    T* ptr, const T val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T tmp;
 #pragma acc atomic capture
   {
@@ -392,7 +381,7 @@ acc_enable_if_supported_integral_type<T, T> device_atomic_xor_fetch(T* ptr,
 //<editor-fold desc="device_atomic_{store,load}">
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_arithmetic_type<T, void> device_atomic_store(
+std::enable_if_t<is_openacc_arithmetic_type_v<T>, void> device_atomic_store(
     T* const ptr, const T val, MemoryOrderRelaxed, MemoryScopeDevice) {
 #pragma acc atomic write
   *ptr = val;
@@ -400,7 +389,7 @@ acc_enable_if_supported_arithmetic_type<T, void> device_atomic_store(
 
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_arithmetic_type<T, void> device_atomic_store(
+std::enable_if_t<is_openacc_arithmetic_type_v<T>, void> device_atomic_store(
     T* const ptr, const T val, MemoryOrderRelease, MemoryScopeDevice) {
   printf(
       "DESUL error in device_atomic_store(MemoryOrderRelease): Not supported atomic "
@@ -411,9 +400,8 @@ acc_enable_if_supported_arithmetic_type<T, void> device_atomic_store(
 
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_arithmetic_type<T, T> device_atomic_load(const T* const ptr,
-                                                                 MemoryOrderRelaxed,
-                                                                 MemoryScopeDevice) {
+std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_load(
+    const T* const ptr, MemoryOrderRelaxed, MemoryScopeDevice) {
   T retval;
 #pragma acc atomic read
   retval = *ptr;
@@ -422,9 +410,8 @@ acc_enable_if_supported_arithmetic_type<T, T> device_atomic_load(const T* const 
 
 #pragma acc routine seq
 template <class T>
-acc_enable_if_supported_arithmetic_type<T, T> device_atomic_load(const T* const ptr,
-                                                                 MemoryOrderAcquire,
-                                                                 MemoryScopeDevice) {
+std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_load(
+    const T* const ptr, MemoryOrderAcquire, MemoryScopeDevice) {
   printf(
       "DESUL error in device_atomic_load(MemoryOrderAcquire): Not supported atomic "
       "operation in the OpenACC backend\n");
