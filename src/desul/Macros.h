@@ -4,9 +4,9 @@
 #if defined(__CUDACC__) || defined(__HIPCC__)
 #define DESUL_GPUCC
 #define DESUL_HOST_DEVICE __host__ __device__
-#else // defined(CARE_GPUCC)
+#else
 #define DESUL_HOST_DEVICE
-#endif // defined(CARE_GPUCC)
+#endif
 
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
 #define DESUL_DEVICE_COMPILE
