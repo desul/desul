@@ -332,8 +332,8 @@ TEST(array, tuple_size)
 
 TEST(array, tuple_element)
 {
-   constexpr bool element0 = std::is_same_v<double, std::tuple_element<0, desul::array<double, 5>>>;
-   constexpr bool element4 = std::is_same_v<double, std::tuple_element<4, desul::array<double, 5>>>;
+   constexpr bool element0 = std::is_same_v<double, std::tuple_element_t<0, desul::array<double, 5>>>;
+   constexpr bool element4 = std::is_same_v<double, std::tuple_element_t<4, desul::array<double, 5>>>;
 
    EXPECT_TRUE(element0);
    EXPECT_TRUE(element4);
