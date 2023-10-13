@@ -8,7 +8,7 @@
 #define DESUL_HOST_DEVICE
 #endif
 
-#if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
+#if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__) || defined(__SYCL_DEVICE_ONLY__)
 #define DESUL_DEVICE_COMPILE
 #endif
 
