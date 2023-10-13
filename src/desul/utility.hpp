@@ -5,6 +5,8 @@
 #include <type_traits>
 
 namespace desul {
+#if 0
+   // TODO: Implement make_integer_sequence (may be able to pull from camp)
    template <class T, T... Ints>
    struct integer_sequence {
       using value_type = T;
@@ -17,8 +19,6 @@ namespace desul {
    template <std::size_t... Ints>
    using index_sequence = integer_sequence<std::size_t, Ints...>;
 
-#if 0
-   // TODO: Implement make_integer_sequence (may be able to pull from camp)
    template <class T, T N>
    using make_integer_sequence = integer_sequence<T, /* a sequence 0, 1, 2, ..., N-1 */>;
 
@@ -35,10 +35,22 @@ namespace desul {
    }
 
    template <class T>
-   DESUL_HOST_DEVICE void swap(T& lhs, T& rhs) {
-      T tmp = move(lhs);
-      lhs = move(rhs);
-      rhs = move(tmp);
+   DESUL_HOST_DEVICE constexpr void swap(T& a, T& b) noexcept(
+                                                        std::is_nothrow_move_constructible<T>::value &&
+                                                        std::is_nothrow_move_assignable<T>::value
+                                                     )
+   {
+      T tmp = move(a);
+      a = move(b);
+      b = move(tmp);
+   }
+
+   template <class T, std::size_t N>
+   DESUL_HOST_DEVICE constexpr void swap(T (&a)[N], T (&b)[N]) noexcept(std::is_nothrow_swappable_v<T>)
+   {
+      for (std::size_t i = 0; i < N; ++i) {
+         desul::swap(a[i], b[i]);
+      }
    }
 } // namespace desul
 

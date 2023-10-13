@@ -58,22 +58,22 @@ namespace desul {
       }
 
       DESUL_HOST_DEVICE constexpr reference front() {
-         static_assert(size() > 0, "Calling desul::array::front on an empty array is not allowed.");
+         static_assert(N > 0, "Calling desul::array::front on an empty array is not allowed.");
          return elements[0];
       }
 
       DESUL_HOST_DEVICE constexpr const_reference front() const {
-         static_assert(size() > 0, "Calling desul::array::front on an empty array is not allowed.");
+         static_assert(N > 0, "Calling desul::array::front on an empty array is not allowed.");
          return elements[0];
       }
 
       DESUL_HOST_DEVICE constexpr reference back() {
-         static_assert(size() > 0, "Calling desul::array::back on an empty array is not allowed.");
+         static_assert(N > 0, "Calling desul::array::back on an empty array is not allowed.");
          return elements[size() - 1];
       }
 
       DESUL_HOST_DEVICE constexpr const_reference back() const {
-         static_assert(size() > 0, "Calling desul::array::back on an empty array is not allowed.");
+         static_assert(N > 0, "Calling desul::array::back on an empty array is not allowed.");
          return elements[size() - 1];
       }
 
