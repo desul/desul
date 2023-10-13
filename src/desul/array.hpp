@@ -5,11 +5,7 @@
 #include "desul/utility.hpp"
 
 #include <cstddef>
-
-#if !defined(DESUL_GPUCC)
 #include <stdexcept>
-#endif
-
 #include <type_traits>
 #include <utility>
 
