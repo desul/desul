@@ -11,8 +11,6 @@ blt_add_library(NAME desul
                 HEADERS ${desul_headers}
                 DEPENDS_ON ${desul_depends})
 
-target_include_directories(desul INTERFACE ${PROJECT_SOURCE_DIR}/src)
-
 install(TARGETS desul
         EXPORT desul-targets
         DESTINATION lib
