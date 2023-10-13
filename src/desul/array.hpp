@@ -11,6 +11,7 @@
 #endif
 
 #include <type_traits>
+#include <utility>
 
 namespace desul {
    ///
@@ -279,25 +280,25 @@ namespace desul {
    }
 #endif
 
-   template <class T, std::size_t N>
-   struct tuple_size<array<T, N>> :
-      std::integral_constant<std::size_t, N>
-   { };
-
-   template <class T>
-   inline constexpr std::size_t tuple_size_v = tuple_size<T>::value;
-
-   template <std::size_t I, class T>
-   struct tuple_element;
-    
-   template <std::size_t I, class T, std::size_t N>
-   struct tuple_element<I, array<T,N>> {
-      using type = T;
-   };
-
+   ///
+   /// Deduction guide
+   ///
    template <class T, class... U>
    array(T, U...) -> array<T, 1 + sizeof...(U)>;
 } // namespace desul
+
+// For structured bindings
+namespace std {
+   template <class T, std::size_t N>
+   struct tuple_size<desul::array<T, N>> :
+      std::integral_constant<std::size_t, N>
+   { };
+
+   template <std::size_t I, class T, std::size_t N>
+   struct tuple_element<I, desul::array<T, N>> {
+      using type = T;
+   };
+}
 
 #endif // !defined(DESUL_ARRAY_H)
 

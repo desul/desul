@@ -323,8 +323,8 @@ TEST(array, to_array)
 
 TEST(array, tuple_size)
 {
-   constexpr std::size_t size = desul::tuple_size<desul::array<double, 7>>::value;
-   constexpr std::size_t size_v = desul::tuple_size_v<desul::array<double, 11>>;
+   constexpr std::size_t size = std::tuple_size<desul::array<double, 7>>::value;
+   constexpr std::size_t size_v = std::tuple_size_v<desul::array<double, 11>>;
 
    EXPECT_EQ(size, 7);
    EXPECT_EQ(size_v, 11);
@@ -332,15 +332,13 @@ TEST(array, tuple_size)
 
 TEST(array, tuple_element)
 {
-   constexpr bool element0 = std::is_same_v<double, desul::tuple_element<0, desul::array<double, 5>>>;
-   constexpr bool element4 = std::is_same_v<double, desul::tuple_element<4, desul::array<double, 5>>>;
+   constexpr bool element0 = std::is_same_v<double, std::tuple_element<0, desul::array<double, 5>>>;
+   constexpr bool element4 = std::is_same_v<double, std::tuple_element<4, desul::array<double, 5>>>;
 
    EXPECT_TRUE(element0);
    EXPECT_TRUE(element4);
 }
 
-#if 0
-// TODO: Fix structured binding
 TEST(array, structured_binding)
 {
    desul::array<int, 2> a{-1, 1};
@@ -351,7 +349,6 @@ TEST(array, structured_binding)
    a1 = 3;
    EXPECT_EQ(a[1], 3);
 }
-#endif
 
 TEST(array, deduction_guide)
 {

@@ -30,20 +30,12 @@ namespace desul {
 #endif
 
    template <class T>
-   struct tuple_size;
-
-   template <class T>
-   struct tuple_size<const T>
-    : std::integral_constant<std::size_t, tuple_size<T>::value>
-   {};
-
-   template <class T>
    DESUL_HOST_DEVICE constexpr std::remove_reference_t<T>&& move(T&& t) noexcept {
       return static_cast<typename std::remove_reference<T>::type&&>(t);
    }
 
    template <class T>
-   DESUL_HOST_DEVICE void swap(T& lhs, T&rhs) {
+   DESUL_HOST_DEVICE void swap(T& lhs, T& rhs) {
       T tmp = move(lhs);
       lhs = move(rhs);
       rhs = move(tmp);
