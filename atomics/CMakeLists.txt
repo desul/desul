@@ -89,7 +89,7 @@ install(EXPORT desul_atomics
 
 install(DIRECTORY
   ${PROJECT_SOURCE_DIR}/atomics/include/
-  ${PROJECT_BINARY_DIR}/include
+  ${PROJECT_BINARY_DIR}/include/
   DESTINATION include
   FILES_MATCHING
   PATTERN *.hpp
