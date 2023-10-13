@@ -11,7 +11,7 @@ blt_add_library(NAME desul
                 HEADERS ${desul_headers}
                 DEPENDS_ON ${desul_depends})
 
-target_include_directories(desul PRIVATE ${PROJECT_SOURCE_DIR}/src)
+target_include_directories(desul INTERFACE ${PROJECT_SOURCE_DIR}/src)
 
 install(TARGETS desul
         EXPORT desul-targets
@@ -19,8 +19,9 @@ install(TARGETS desul
         INCLUDES DESTINATION include/desul)
 
 install(FILES ${desul_headers}
-        DESTINATION include/care)
+        DESTINATION include/desul)
 
-install(EXPORT desul-targets NAMESPACE desul)
+install(EXPORT desul-targets
+        NAMESPACE desul
+        DESTINATION lib/cmake/desul)
 
-blt_export_tpl_targets(EXPORT desul-targets NAMESPACE desul)
