@@ -323,14 +323,20 @@ TEST(array, to_array)
 
 TEST(array, tuple_size)
 {
-   EXPECT_EQ(desul::tuple_size<desul::array<double, 7>>::value, 7);
-   EXPECT_EQ(desul::tuple_size_v<desul::array<double, 11>>, 11);
+   constexpr std::size_t size = desul::tuple_size<desul::array<double, 7>>::value;
+   constexpr std::size_t size_v = desul::tuple_size_v<desul::array<double, 11>>;
+
+   EXPECT_EQ(size, 7);
+   EXPECT_EQ(size_v, 11);
 }
 
 TEST(array, tuple_element)
 {
-   EXPECT_TRUE(std::is_same_v<double, desul::tuple_element<0, desul::array<double, 5>>::type);
-   EXPECT_TRUE(std::is_same_v<double, desul::tuple_element<6, desul::array<double, 5>>::type);
+   constexpr bool element0 = std::is_same_v<double, desul::tuple_element<0, desul::array<double, 5>>>;
+   constexpr bool element4 = std::is_same_v<double, desul::tuple_element<4, desul::array<double, 5>>>;
+
+   EXPECT_TRUE(element0);
+   EXPECT_TRUE(element4);
 }
 
 TEST(array, structured_binding)
