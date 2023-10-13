@@ -283,8 +283,8 @@ TEST(array, get_rvalue_reference)
 {
    desul::array<int, 2> a = {1, 12};
    int&& a0 = desul::get<0>(desul::move(a));
-   EXPECT_EQ(a0, 3);
-   EXPECT_EQ(a[0], 3);
+   EXPECT_EQ(a0, 1);
+   EXPECT_EQ(a[0], 1);
 
    const desul::array<int, 2> b{6, 8};
    const int&& b1 = desul::get<1>(desul::move(b));
