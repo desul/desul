@@ -19,6 +19,8 @@ namespace desul {
    /// 
    /// Differences from std::array are listed below:
    /// - No __device__ "at" method (exceptions are not GPU friendly)
+   /// - Calling front or back is a compile error when size() == 0
+   ///   (instead of undefined behavior at run time)
    /// - No reverse iterators have been implemented yet
    ///
    template <class T, std::size_t N>
@@ -60,18 +62,22 @@ namespace desul {
       }
 
       DESUL_HOST_DEVICE constexpr reference front() {
+         static_assert(size() > 0, "Calling desul::array::front on an empty array is not allowed.");
          return elements[0];
       }
 
       DESUL_HOST_DEVICE constexpr const_reference front() const {
+         static_assert(size() > 0, "Calling desul::array::front on an empty array is not allowed.");
          return elements[0];
       }
 
       DESUL_HOST_DEVICE constexpr reference back() {
+         static_assert(size() > 0, "Calling desul::array::back on an empty array is not allowed.");
          return elements[size() - 1];
       }
 
       DESUL_HOST_DEVICE constexpr const_reference back() const {
+         static_assert(size() > 0, "Calling desul::array::back on an empty array is not allowed.");
          return elements[size() - 1];
       }
 
