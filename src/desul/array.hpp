@@ -301,6 +301,9 @@ namespace desul {
    struct tuple_element<I, array<T,N>> {
       using type = T;
    };
+
+   template <class T, class... U>
+   array(T, U...) -> array<T, 1 + sizeof...(U)>;
 } // namespace desul
 
 #endif // !defined(DESUL_ARRAY_H)
