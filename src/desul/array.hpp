@@ -9,6 +9,7 @@
 #define DESUL_ARRAY_HPP
 
 #include "desul/Macros.h"
+#include "desul/utility.hpp"
 
 #include <cstddef>
 
@@ -17,7 +18,6 @@
 #endif
 
 #include <type_traits>
-#include <utility>
 
 namespace desul {
    ///
@@ -118,7 +118,7 @@ namespace desul {
       }
 
       DESUL_HOST_DEVICE constexpr size_type size() const noexcept {
-         return size();
+         return N;
       }
 
       DESUL_HOST_DEVICE constexpr size_type max_size() const noexcept {
@@ -133,7 +133,7 @@ namespace desul {
 
       DESUL_HOST_DEVICE constexpr void swap(array& other) noexcept(std::is_nothrow_swappable_v<T>) {
          for (std::size_t i = 0; i < size(); ++i) {
-            swap(elements[i], other[i]);
+            desul::swap(elements[i], other[i]);
          }
       }
 

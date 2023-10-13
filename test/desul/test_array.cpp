@@ -167,8 +167,8 @@ TEST(array, empty)
    desul::array<double, 0> a{};
    EXPECT_TRUE(a.empty());
 
-   desul::array<double, 1> a{1.0};
-   EXPECT_FALSE(a.empty());
+   desul::array<double, 1> b{1.0};
+   EXPECT_FALSE(b.empty());
 }
 
 TEST(array, size)
@@ -272,22 +272,22 @@ TEST(array, greater_than_or_equal)
 TEST(array, get_lvalue_reference)
 {
    desul::array<int, 2> a = {1, 12};
-   get<0>(a) = 3;
+   desul::get<0>(a) = 3;
    EXPECT_EQ(a[0], 3);
 
    const desul::array<int, 2>& b = a;
-   EXPECT_EQ(get<0>(b), 3);
+   EXPECT_EQ(desul::get<0>(b), 3);
 }
 
 TEST(array, get_rvalue_reference)
 {
    desul::array<int, 2> a = {1, 12};
-   int&& a0 = get<0>(desul::move(a));
+   int&& a0 = desul::get<0>(desul::move(a));
    EXPECT_EQ(a0, 3);
    EXPECT_EQ(a[0], 3);
 
    const desul::array<int, 2> b{6, 8};
-   const int&& b1 = get<1>(desul::move(b));
+   const int&& b1 = desul::get<1>(desul::move(b));
    EXPECT_EQ(b1, 8);
    EXPECT_EQ(b[1], 8);
 }
