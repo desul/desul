@@ -253,6 +253,8 @@ namespace desul {
       lhs.swap(rhs);
    }
 
+   // TODO: When make_index_sequence is available, use the implementation
+   //       from cppreference.
    template <class T, std::size_t N>
    DESUL_HOST_DEVICE constexpr array<std::remove_cv_t<T>, N> to_array(T (&a)[N]) {
       array<std::remove_cv_t<T>, N> result;
@@ -274,37 +276,6 @@ namespace desul {
 
       return result;
    }
-
-#if 0
-   // TODO: Test if this implementation is faster when make_integer_sequence
-   //       is implemented.
-   namespace detail
-   {
-      template <class T, std::size_t N, std::size_t... I>
-      DESUL_HOST_DEVICE constexpr array<std::remove_cv_t<T>, N>
-         to_array_impl(T (&a)[N], index_sequence<I...>)
-      {
-         return {{a[I]...}};
-      }
-
-      template <class T, std::size_t N, std::size_t... I>
-      DESUL_HOST_DEVICE constexpr array<std::remove_cv_t<T>, N>
-         to_array_impl(T (&&a)[N], index_sequence<I...>)
-      {
-         return {{move(a[I])...}};
-      }
-   }
-    
-   template <class T, std::size_t N>
-   DESUL_HOST_DEVICE constexpr array<std::remove_cv_t<T>, N> to_array(T (&a)[N]) {
-      return detail::to_array_impl(a, make_index_sequence<N>{});
-   }
-
-   template <class T, std::size_t N>
-   DESUL_HOST_DEVICE constexpr array<std::remove_cv_t<T>, N> to_array(T (&&a)[N]) {
-      return detail::to_array_impl(std::move(a), make_index_sequence<N>{});
-   }
-#endif
 
    ///
    /// Deduction guide
