@@ -14,6 +14,10 @@ if(ENABLE_CUDA)
   set(DESUL_ATOMICS_ENABLE_CUDA ON)
   set(DESUL_CUDA_ATOMICS_SOURCES src/Lock_Array_CUDA.cpp)
   set(SOURCES_ARG ${DESUL_CUDA_ATOMICS_SOURCES})
+  # FIXME_BLT
+  if(TARGET cuda AND NOT TARGET blt::cuda)
+    add_library(blt::cuda ALIAS cuda)
+  endif()
   set(DEPENDS_ARG DEPENDS_ON blt::cuda)
 endif()
 if(CUDA_SEPARABLE_COMPILATION) # for compatibility with BLT
