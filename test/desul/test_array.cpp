@@ -1,4 +1,5 @@
 #include "desul/array.hpp"
+#include "Test.hpp"
 
 #include "gtest/gtest.h"
 
@@ -10,6 +11,14 @@ TEST(array, initialization)
    EXPECT_EQ(a[1], 2);
    EXPECT_EQ(a[2], 10);
 }
+
+DESUL_TEST_BEGIN(array, initialization) {
+   desul::array<int, 3> a{1, 2, 10};
+
+   return a[0] == 1 &&
+          a[1] == 2 &&
+          a[2] == 10;
+} DESUL_TEST_END(array, initialization)
 
 TEST(array, copy_initialization)
 {
