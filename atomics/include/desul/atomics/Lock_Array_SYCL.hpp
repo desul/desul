@@ -69,7 +69,7 @@ void finalize_lock_arrays_sycl(sycl::queue q);
  * Kokkos_SYCL_Locks.cpp translation unit cannot initialize the instances in other
  * translation units, we must update this SYCL global variable based on the Host global
  * variable prior to running any kernels that will use it. That is the purpose of the
- * ensure_cuda_lock_arrays_on_device function.
+ * ensure_sycl_lock_arrays_on_device function.
  */
 #ifdef DESUL_ATOMICS_ENABLE_SYCL_SEPARABLE_COMPILATION
 SYCL_EXTERNAL extern
