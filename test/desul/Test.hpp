@@ -4,6 +4,9 @@
 #include "desul/Macros.h"
 #include "gtest/gtest.h"
 
+// TODO: Add set up and tear down macros
+//       For CUDA set up, create a stream
+
 ///
 /// Host test set up macro
 ///
