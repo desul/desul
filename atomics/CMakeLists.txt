@@ -14,7 +14,11 @@ if(ENABLE_CUDA)
   set(DESUL_ATOMICS_ENABLE_CUDA ON)
   set(DESUL_CUDA_ATOMICS_SOURCES src/Lock_Array_CUDA.cpp)
   set(SOURCES_ARG ${DESUL_CUDA_ATOMICS_SOURCES})
-  set(DEPENDS_ARG DEPENDS_ON cuda)
+  # FIXME_BLT
+  if(TARGET cuda AND NOT TARGET blt::cuda)
+    add_library(blt::cuda ALIAS cuda)
+  endif()
+  set(DEPENDS_ARG DEPENDS_ON blt::cuda)
 endif()
 if(CUDA_SEPARABLE_COMPILATION) # for compatibility with BLT
   set(DESUL_ATOMICS_ENABLE_CUDA_SEPARABLE_COMPILATION ON)
@@ -23,7 +27,7 @@ if(ENABLE_HIP)
   set(DESUL_ATOMICS_ENABLE_HIP ON)
   set(DESUL_HIP_ATOMICS_SOURCES src/Lock_Array_HIP.cpp)
   set(SOURCES_ARG ${DESUL_HIP_ATOMICS_SOURCES})
-  set(DEPENDS_ARG DEPENDS_ON hip)
+  set(DEPENDS_ARG DEPENDS_ON blt::hip)
 endif()
 cmake_dependent_option(HIP_SEPARABLE_COMPILATION "Enable separate compilation of device code" OFF "ENABLE_HIP" OFF) # does not exist in BLT at the moment
 if(HIP_SEPARABLE_COMPILATION)
@@ -34,6 +38,10 @@ if(ENABLE_SYCL)
   set(DESUL_ATOMICS_ENABLE_SYCL ON)
   set(DESUL_SYCL_ATOMICS_SOURCES src/Lock_Array_SYCL.cpp)
   set(SOURCES_ARG ${DESUL_SYCL_ATOMICS_SOURCES})
+endif()
+cmake_dependent_option(SYCL_SEPARABLE_COMPILATION "Enable separate compilation of device code" OFF "ENABLE_SYCL" OFF) # does not exist in BLT at the moment
+if(SYCL_SEPARABLE_COMPILATION)
+  set(DESUL_ATOMICS_ENABLE_SYCL_SEPARABLE_COMPILATION ON)
 endif()
 option(ENABLE_OPENACC "Enable OpenACC support" OFF) # option does not actually yet exist on the BLT side
 if(ENABLE_OPENACC)
@@ -93,7 +101,7 @@ install(EXPORT desul_atomics
 
 install(DIRECTORY
   ${PROJECT_SOURCE_DIR}/atomics/include/
-  ${PROJECT_BINARY_DIR}/include
+  ${PROJECT_BINARY_DIR}/include/
   DESTINATION include
   FILES_MATCHING
   PATTERN *.hpp
