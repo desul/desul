@@ -43,6 +43,10 @@ cmake_dependent_option(SYCL_SEPARABLE_COMPILATION "Enable separate compilation o
 if(SYCL_SEPARABLE_COMPILATION)
   set(DESUL_ATOMICS_ENABLE_SYCL_SEPARABLE_COMPILATION ON)
 endif()
+option(ENABLE_OPENACC "Enable OpenACC support" OFF) # option does not actually yet exist on the BLT side
+if(ENABLE_OPENACC)
+  set(DESUL_ATOMICS_ENABLE_OPENACC ON)
+endif()
 if(ENABLE_OPENMP)
   set(DESUL_ATOMICS_ENABLE_OPENMP ON)
 endif()
