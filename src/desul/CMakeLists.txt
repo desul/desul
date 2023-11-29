@@ -1,5 +1,5 @@
 set(desul_headers
-    Macros.h
+    Macros.hpp
     array.hpp
     utility.hpp)
 

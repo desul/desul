@@ -1,7 +1,7 @@
 #if !defined(DESUL_UTILITY_HPP)
 #define DESUL_UTILITY_HPP
 
-#include "desul/Macros.h"
+#include "desul/Macros.hpp"
 
 #include <cstddef>
 #include <type_traits>

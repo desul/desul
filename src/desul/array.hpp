@@ -1,7 +1,7 @@
 #if !defined(DESUL_ARRAY_HPP)
 #define DESUL_ARRAY_HPP
 
-#include "desul/Macros.h"
+#include "desul/Macros.hpp"
 #include "desul/utility.hpp"
 
 #include <cstddef>
@@ -281,7 +281,7 @@ namespace desul {
    /// Deduction guide
    ///
    template <class T, class... U>
-   array(T, U...) -> array<T, 1 + sizeof...(U)>;
+   DESUL_HOST_DEVICE array(T, U...) -> array<T, 1 + sizeof...(U)>;
 } // namespace desul
 
 // For structured bindings

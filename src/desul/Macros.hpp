@@ -1,6 +1,10 @@
 #ifndef DESUL_MACROS_H
 #define DESUL_MACROS_H
 
+#if defined(__HIPCC__)
+#include "hip/hip_runtime.h"
+#endif
+
 // SYCL needs no specifiers on functions
 // TODO: Determine how to handle OpenACC and OpenMP target offload
 #if defined(__CUDACC__) || \

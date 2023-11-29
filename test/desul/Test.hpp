@@ -1,7 +1,7 @@
 #ifndef DESUL_TEST_HPP
 #define DESUL_TEST_HPP
 
-#include "desul/Macros.h"
+#include "desul/Macros.hpp"
 #include "gtest/gtest.h"
 
 // TODO: Add set up and tear down macros
@@ -45,6 +45,46 @@ TEST(cuda_ ## DESUL_SUITE_NAME, DESUL_TEST_NAME) { \
 #endif
 
 ///
+/// HIP test set up macro
+///
+#if defined(__HIPCC__)
+#define DESUL_HIP_TEST(DESUL_SUITE_NAME, DESUL_TEST_NAME) \
+namespace desul { \
+   namespace test { \
+      namespace DESUL_SUITE_NAME { \
+         __global__ void DESUL_TEST_NAME ## _hip_kernel(bool* passed) { \
+            *passed = DESUL_TEST_NAME(); \
+         } \
+      } \
+   } \
+} \
+\
+TEST(hip_ ## DESUL_SUITE_NAME, DESUL_TEST_NAME) { \
+   bool passed = false; \
+   bool* pinnedBuffer; \
+   auto result = hipHostMalloc((void**) &pinnedBuffer, sizeof(bool)); \
+   \
+   if (result == hipSuccess) { \
+      desul::test::DESUL_SUITE_NAME::DESUL_TEST_NAME ## _hip_kernel<<<1, 1>>>(pinnedBuffer); \
+      result = hipDeviceSynchronize(); \
+      \
+      if (result == hipSuccess) { \
+         passed = *pinnedBuffer; \
+         result = hipHostFree(&pinnedBuffer); \
+         \
+         if (result != hipSuccess) { \
+            passed = false; \
+         } \
+      } \
+   } \
+   \
+   EXPECT_TRUE(passed); \
+}
+#else
+#define DESUL_HIP_TEST(DESUL_SUITE_NAME, DESUL_TEST_NAME)
+#endif
+
+///
 /// Macros to test all enabled programming models
 ///
 #define DESUL_TEST_BEGIN(DESUL_SUITE_NAME, DESUL_TEST_NAME) \
@@ -59,6 +99,7 @@ namespace desul { \
    } \
 } \
 DESUL_HOST_TEST(DESUL_SUITE_NAME, DESUL_TEST_NAME) \
-DESUL_CUDA_TEST(DESUL_SUITE_NAME, DESUL_TEST_NAME)
+DESUL_CUDA_TEST(DESUL_SUITE_NAME, DESUL_TEST_NAME) \
+DESUL_HIP_TEST(DESUL_SUITE_NAME, DESUL_TEST_NAME)
 
 #endif // DESUL_TEST_HPP

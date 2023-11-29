@@ -2,6 +2,7 @@ set(desul_headers Test.hpp)
 
 set(desul_test_dependencies desul gtest)
 blt_list_append(TO desul_test_dependencies ELEMENTS cuda IF ENABLE_CUDA)
+blt_list_append(TO desul_test_dependencies ELEMENTS blt::hip IF ENABLE_HIP)
 
 blt_add_executable(NAME test_array
                    SOURCES test_array.cpp
