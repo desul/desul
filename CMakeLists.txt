@@ -19,7 +19,7 @@ set(DESUL_DEPENDENT_OPTIONS
 foreach (option ${DESUL_DEPENDENT_OPTIONS})
    if (${DESUL_${option}})
       if (NOT ${option})
-         message(FATAL_ERROR "DESUL_${option} set to On, but ${option} is Off. Please set ${option} to On enable this feature.")
+         message(FATAL_ERROR "DESUL_${option} set to ON, but ${option} is OFF. Please set ${option} to ON enable this feature.")
       endif ()
    endif ()
 endforeach ()
@@ -27,11 +27,11 @@ endforeach ()
 
 include(CMakeDependentOption)
 option(ENABLE_SYCL "Enable SYCL support" OFF) # option does not actually yet exist on the BLT side
-cmake_dependent_option(DESUL_ENABLE_CUDA "Build with CUDA support" On "ENABLE_CUDA" Off)
-cmake_dependent_option(DESUL_ENABLE_HIP "Build with HIP support" On "ENABLE_HIP" Off)
-cmake_dependent_option(DESUL_ENABLE_OPENMP "Build with OpenMP support" On "ENABLE_OPENMP" Off)
-cmake_dependent_option(DESUL_ENABLE_SYCL "Build with SYCL support" On "ENABLE_SYCL" Off)
-cmake_dependent_option(DESUL_ENABLE_TESTS "Build tests" On "ENABLE_TESTS" Off)
+cmake_dependent_option(DESUL_ENABLE_CUDA "Build with CUDA support" ON "ENABLE_CUDA" OFF)
+cmake_dependent_option(DESUL_ENABLE_HIP "Build with HIP support" ON "ENABLE_HIP" OFF)
+cmake_dependent_option(DESUL_ENABLE_OPENMP "Build with OpenMP support" ON "ENABLE_OPENMP" OFF)
+cmake_dependent_option(DESUL_ENABLE_SYCL "Build with SYCL support" ON "ENABLE_SYCL" OFF)
+cmake_dependent_option(DESUL_ENABLE_TESTS "Build tests" ON "ENABLE_TESTS" OFF)
 
 include(cmake/blt_boilerplate.cmake)
 
