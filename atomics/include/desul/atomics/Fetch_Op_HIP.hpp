@@ -11,8 +11,6 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 #include "desul/atomics/Adapt_GCC.hpp"
 
-namespace desul {
-namespace Impl {
 #if __has_builtin(__hip_atomic_fetch_add) && __has_builtin(__hip_atomic_fetch_min) && \
     __has_builtin(__hip_atomic_fetch_max)
 // The above intrinsics are the minimum set needed to implement the math
@@ -30,6 +28,9 @@ namespace Impl {
     defined(DESUL_HAVE_HIP_ATOMIC_MATH_DETAIL)
 #include "desul/atomics/Adapt_HIP.hpp"
 #endif
+
+namespace desul {
+namespace Impl {
 
 #ifdef DESUL_HAVE_HIP_ATOMIC_MATH_DETAIL
 template <typename T, typename MemoryOrder, typename MemoryScope>
