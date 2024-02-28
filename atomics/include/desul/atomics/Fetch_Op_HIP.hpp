@@ -157,6 +157,28 @@ inline __device__ unsigned long long device_atomic_fetch_dec(unsigned long long*
 // clang-format on
 #endif
 
+#ifdef DESUL_HAVE_HIP_ATOMIC_BIT_DETAIL
+template <typename T, typename MemoryOrder, typename MemoryScope>
+inline __device__ std::enable_if_t<std::is_integral<T>::value, T>
+device_atomic_fetch_and(T* ptr, T val, MemoryOrder, MemoryScope) {
+  return __hip_atomic_fetch_and(
+      ptr, val, DesulToBuiltin<MemoryOrder>::value, DesulToBuiltin<MemoryScope>::value);
+}
+
+template <typename T, typename MemoryOrder, typename MemoryScope>
+inline __device__ std::enable_if_t<std::is_integral<T>::value, T>
+device_atomic_fetch_or(T* ptr, T val, MemoryOrder, MemoryScope) {
+  return __hip_atomic_fetch_or(
+      ptr, val, DesulToBuiltin<MemoryOrder>::value, DesulToBuiltin<MemoryScope>::value);
+}
+
+template <typename T, typename MemoryOrder, typename MemoryScope>
+inline __device__ std::enable_if_t<std::is_integral<T>::value, T>
+device_atomic_fetch_xor(T* ptr, T val, MemoryOrder, MemoryScope) {
+  return __hip_atomic_fetch_xor(
+      ptr, val, DesulToBuiltin<MemoryOrder>::value, DesulToBuiltin<MemoryScope>::value);
+}
+#else
 // clang-format off
 inline __device__                int device_atomic_fetch_and(               int* ptr,                int val, MemoryOrderRelaxed, MemoryScopeDevice) { return atomicAnd(ptr,  val); }
 inline __device__       unsigned int device_atomic_fetch_and(      unsigned int* ptr,       unsigned int val, MemoryOrderRelaxed, MemoryScopeDevice) { return atomicAnd(ptr,  val); }
@@ -169,7 +191,10 @@ inline __device__ unsigned long long device_atomic_fetch_or (unsigned long long*
 inline __device__                int device_atomic_fetch_xor(               int* ptr,                int val, MemoryOrderRelaxed, MemoryScopeDevice) { return atomicXor(ptr,  val); }
 inline __device__       unsigned int device_atomic_fetch_xor(      unsigned int* ptr,       unsigned int val, MemoryOrderRelaxed, MemoryScopeDevice) { return atomicXor(ptr,  val); }
 inline __device__ unsigned long long device_atomic_fetch_xor(unsigned long long* ptr, unsigned long long val, MemoryOrderRelaxed, MemoryScopeDevice) { return atomicXor(ptr,  val); }
+// clang-format on
+#endif
 
+// clang-format off
 inline __device__       unsigned int device_atomic_fetch_inc_mod(  unsigned int* ptr,       unsigned int val, MemoryOrderRelaxed, MemoryScopeDevice) { return atomicInc(ptr,  val); }
 inline __device__       unsigned int device_atomic_fetch_dec_mod(  unsigned int* ptr,       unsigned int val, MemoryOrderRelaxed, MemoryScopeDevice) { return atomicDec(ptr,  val); }
 // clang-format on
@@ -203,9 +228,12 @@ inline __device__       unsigned int device_atomic_fetch_dec_mod(  unsigned int*
 DESUL_IMPL_HIP_DEVICE_ATOMIC_FETCH_OP_INTEGRAL(min)
 DESUL_IMPL_HIP_DEVICE_ATOMIC_FETCH_OP_INTEGRAL(max)
 #endif
+
+#ifndef DESUL_HAVE_HIP_ATOMIC_BIT_DETAIL
 DESUL_IMPL_HIP_DEVICE_ATOMIC_FETCH_OP_INTEGRAL(and)
 DESUL_IMPL_HIP_DEVICE_ATOMIC_FETCH_OP_INTEGRAL(or)
 DESUL_IMPL_HIP_DEVICE_ATOMIC_FETCH_OP_INTEGRAL(xor)
+#endif
 
 #ifndef DESUL_HAVE_HIP_ATOMIC_MATH_DETAIL
 DESUL_IMPL_HIP_DEVICE_ATOMIC_FETCH_OP_FLOATING_POINT(add)
