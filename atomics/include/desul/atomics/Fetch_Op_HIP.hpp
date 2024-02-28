@@ -11,6 +11,20 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 namespace desul {
 namespace Impl {
+#if __has_builtin(__hip_atomic_fetch_add) \
+ && __has_builtin(__hip_atomic_fetch_min) \
+ && __has_builtin(__hip_atomic_fetch_max)
+    // The above intrinsics are the minimum set needed to implement the math
+    // operators:
+    //  fetch_add, fetch_sub, fetch_min, fetch_max, fetch_inc, fetch_dec
+    #define DESUL_HAVE_HIP_ATOMIC_MATH_DETAIL
+#endif
+#if __has_builtin(__hip_atomic_fetch_and) \
+ && __has_builtin(__hip_atomic_fetch_or) \
+ && __has_builtin(__hip_atomic_fetch_xor)
+    // The above intrinsics are needed for bitwise operations on integral types.
+    #define DESUL_HAVE_HIP_ATOMIC_BIT_DETAIL
+#endif
 
 template <typename MemoryTag>
 struct DesulToBuiltin;
@@ -143,6 +157,9 @@ DESUL_IMPL_HIP_DEVICE_ATOMIC_FETCH_OP(dec_mod, unsigned int)
 #undef DESUL_IMPL_HIP_DEVICE_ATOMIC_FETCH_OP_FLOATING_POINT
 #undef DESUL_IMPL_HIP_DEVICE_ATOMIC_FETCH_OP_INTEGRAL
 #undef DESUL_IMPL_HIP_DEVICE_ATOMIC_FETCH_OP
+
+#undef DESUL_HAVE_HIP_ATOMIC_MATH_DETAIL
+#undef DESUL_HAVE_HIP_ATOMIC_BIT_DETAIL
 
 }  // namespace Impl
 }  // namespace desul
