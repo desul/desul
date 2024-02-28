@@ -9,6 +9,8 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #ifndef DESUL_ATOMICS_FECH_OP_HIP_HPP_
 #define DESUL_ATOMICS_FECH_OP_HIP_HPP_
 
+#include "desul/atomics/Adapt_GCC.hpp"
+
 namespace desul {
 namespace Impl {
 #if __has_builtin(__hip_atomic_fetch_add) && __has_builtin(__hip_atomic_fetch_min) && \
@@ -26,27 +28,6 @@ namespace Impl {
 
 template <typename MemoryTag>
 struct DesulToBuiltin;
-
-template <>
-struct DesulToBuiltin<MemoryOrderRelaxed> {
-  constexpr static auto value = __ATOMIC_RELAXED;
-};
-template <>
-struct DesulToBuiltin<MemoryOrderRelease> {
-  constexpr static auto value = __ATOMIC_RELEASE;
-};
-template <>
-struct DesulToBuiltin<MemoryOrderAcquire> {
-  constexpr static auto value = __ATOMIC_ACQUIRE;
-};
-template <>
-struct DesulToBuiltin<MemoryOrderAcqRel> {
-  constexpr static auto value = __ATOMIC_ACQ_REL;
-};
-template <>
-struct DesulToBuiltin<MemoryOrderSeqCst> {
-  constexpr static auto value = __ATOMIC_SEQ_CST;
-};
 
 template <>
 struct DesulToBuiltin<MemoryScopeCaller> {
@@ -70,7 +51,7 @@ template <typename T, typename MemoryOrder, typename MemoryScope>
 inline __device__ std::enable_if_t<std::is_arithmetic<T>::value, T>
 device_atomic_fetch_add(T* ptr, T val, MemoryOrder, MemoryScope) {
   return __hip_atomic_fetch_add(
-      ptr, val, DesulToBuiltin<MemoryOrder>::value, DesulToBuiltin<MemoryScope>::value);
+      ptr, val, GCCMemoryOrder<MemoryOrder>::value, DesulToBuiltin<MemoryScope>::value);
 }
 
 template <typename T, typename MemoryOrder, typename MemoryScope>
@@ -78,11 +59,11 @@ inline __device__ std::enable_if_t<std::is_arithmetic<T>::value, T>
 device_atomic_fetch_sub(T* ptr, T val, MemoryOrder, MemoryScope) {
 #if __has_builtin(__hip_atomic_fetch_sub)
   return __hip_atomic_fetch_sub(
-      ptr, val, DesulToBuiltin<MemoryOrder>::value, DesulToBuiltin<MemoryScope>::value);
+      ptr, val, GCCMemoryOrder<MemoryOrder>::value, DesulToBuiltin<MemoryScope>::value);
 #else
   return __hip_atomic_fetch_add(ptr,
                                 -val,
-                                DesulToBuiltin<MemoryOrder>::value,
+                                GCCMemoryOrder<MemoryOrder>::value,
                                 DesulToBuiltin<MemoryScope>::value);
 #endif
 }
@@ -91,14 +72,14 @@ template <typename T, typename MemoryOrder, typename MemoryScope>
 inline __device__ std::enable_if_t<std::is_arithmetic<T>::value, T>
 device_atomic_fetch_min(T* ptr, T val, MemoryOrder, MemoryScope) {
   return __hip_atomic_fetch_min(
-      ptr, val, DesulToBuiltin<MemoryOrder>::value, DesulToBuiltin<MemoryScope>::value);
+      ptr, val, GCCMemoryOrder<MemoryOrder>::value, DesulToBuiltin<MemoryScope>::value);
 }
 
 template <typename T, typename MemoryOrder, typename MemoryScope>
 inline __device__ std::enable_if_t<std::is_arithmetic<T>::value, T>
 device_atomic_fetch_max(T* ptr, T val, MemoryOrder, MemoryScope) {
   return __hip_atomic_fetch_max(
-      ptr, val, DesulToBuiltin<MemoryOrder>::value, DesulToBuiltin<MemoryScope>::value);
+      ptr, val, GCCMemoryOrder<MemoryOrder>::value, DesulToBuiltin<MemoryScope>::value);
 }
 
 template <typename T, typename MemoryOrder, typename MemoryScope>
@@ -106,7 +87,7 @@ inline __device__ std::enable_if_t<std::is_arithmetic<T>::value, T>
 device_atomic_fetch_inc(T* ptr, MemoryOrder, MemoryScope) {
   return __hip_atomic_fetch_add(ptr,
                                 T{1},
-                                DesulToBuiltin<MemoryOrder>::value,
+                                GCCMemoryOrder<MemoryOrder>::value,
                                 DesulToBuiltin<MemoryScope>::value);
 }
 
@@ -116,12 +97,12 @@ device_atomic_fetch_dec(T* ptr, MemoryOrder, MemoryScope) {
 #if __has_builtin(__hip_atomic_fetch_sub)
   return __hip_atomic_fetch_sub(ptr,
                                 T{1},
-                                DesulToBuiltin<MemoryOrder>::value,
+                                GCCMemoryOrder<MemoryOrder>::value,
                                 DesulToBuiltin<MemoryScope>::value);
 #else
   return __hip_atomic_fetch_add(ptr,
                                 -(T{1}),
-                                DesulToBuiltin<MemoryOrder>::value,
+                                GCCMemoryOrder<MemoryOrder>::value,
                                 DesulToBuiltin<MemoryScope>::value);
 #endif
 }
@@ -162,21 +143,21 @@ template <typename T, typename MemoryOrder, typename MemoryScope>
 inline __device__ std::enable_if_t<std::is_integral<T>::value, T>
 device_atomic_fetch_and(T* ptr, T val, MemoryOrder, MemoryScope) {
   return __hip_atomic_fetch_and(
-      ptr, val, DesulToBuiltin<MemoryOrder>::value, DesulToBuiltin<MemoryScope>::value);
+      ptr, val, GCCMemoryOrder<MemoryOrder>::value, DesulToBuiltin<MemoryScope>::value);
 }
 
 template <typename T, typename MemoryOrder, typename MemoryScope>
 inline __device__ std::enable_if_t<std::is_integral<T>::value, T>
 device_atomic_fetch_or(T* ptr, T val, MemoryOrder, MemoryScope) {
   return __hip_atomic_fetch_or(
-      ptr, val, DesulToBuiltin<MemoryOrder>::value, DesulToBuiltin<MemoryScope>::value);
+      ptr, val, GCCMemoryOrder<MemoryOrder>::value, DesulToBuiltin<MemoryScope>::value);
 }
 
 template <typename T, typename MemoryOrder, typename MemoryScope>
 inline __device__ std::enable_if_t<std::is_integral<T>::value, T>
 device_atomic_fetch_xor(T* ptr, T val, MemoryOrder, MemoryScope) {
   return __hip_atomic_fetch_xor(
-      ptr, val, DesulToBuiltin<MemoryOrder>::value, DesulToBuiltin<MemoryScope>::value);
+      ptr, val, GCCMemoryOrder<MemoryOrder>::value, DesulToBuiltin<MemoryScope>::value);
 }
 #else
 // clang-format off
