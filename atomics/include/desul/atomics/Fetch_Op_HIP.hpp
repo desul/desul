@@ -12,6 +12,47 @@ SPDX-License-Identifier: (BSD-3-Clause)
 namespace desul {
 namespace Impl {
 
+template <typename MemoryTag>
+struct DesulToBuiltin;
+
+template <>
+struct DesulToBuiltin<MemoryOrderRelaxed> {
+  constexpr static auto value = __ATOMIC_RELAXED;
+};
+template <>
+struct DesulToBuiltin<MemoryOrderRelease> {
+  constexpr static auto value = __ATOMIC_RELEASE;
+};
+template <>
+struct DesulToBuiltin<MemoryOrderAcquire> {
+  constexpr static auto value = __ATOMIC_ACQUIRE;
+};
+template <>
+struct DesulToBuiltin<MemoryOrderAcqRel> {
+  constexpr static auto value = __ATOMIC_ACQ_REL;
+};
+template <>
+struct DesulToBuiltin<MemoryOrderSeqCst> {
+  constexpr static auto value = __ATOMIC_SEQ_CST;
+};
+
+template <>
+struct DesulToBuiltin<MemoryScopeCaller> {
+  constexpr static auto value = __HIP_MEMORY_SCOPE_SINGLETHREAD;
+};
+template <>
+struct DesulToBuiltin<MemoryScopeCore> {
+  constexpr static auto value = __HIP_MEMORY_SCOPE_WORKGROUP;
+};
+template <>
+struct DesulToBuiltin<MemoryScopeDevice> {
+  constexpr static auto value = __HIP_MEMORY_SCOPE_AGENT;
+};
+template <>
+struct DesulToBuiltin<MemoryScopeNode> {
+  constexpr static auto value = __HIP_MEMORY_SCOPE_SYSTEM;
+};
+
 // clang-format off
 inline __device__                int device_atomic_fetch_add(               int* ptr,                int val, MemoryOrderRelaxed, MemoryScopeDevice) { return atomicAdd(ptr,  val); }
 inline __device__       unsigned int device_atomic_fetch_add(      unsigned int* ptr,       unsigned int val, MemoryOrderRelaxed, MemoryScopeDevice) { return atomicAdd(ptr,  val); }
