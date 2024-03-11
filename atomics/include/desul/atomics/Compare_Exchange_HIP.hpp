@@ -9,6 +9,8 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #ifndef DESUL_ATOMICS_COMPARE_EXCHANGE_HIP_HPP_
 #define DESUL_ATOMICS_COMPARE_EXCHANGE_HIP_HPP_
 
+#include <desul/atomics/Adapt_GCC.hpp>
+#include <desul/atomics/Adapt_HIP.hpp>
 #include <desul/atomics/Common.hpp>
 #include <desul/atomics/Lock_Array_HIP.hpp>
 #include <desul/atomics/Thread_Fence_HIP.hpp>
@@ -16,6 +18,45 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 namespace desul {
 namespace Impl {
+
+#if __has_builtin(__hip_atomic_compare_exchange_strong)
+// Convert "success" memory ordering to a valid "failure" memory ordering.
+template <typename MemoryOrder>
+struct GCCMemoryOrderCASFail {
+  static constexpr int value = GCCMemoryOrder<MemoryOrder>::value;
+};
+
+template <>
+struct GCCMemoryOrderCASFail<MemoryOrderAcqRel> {
+  static constexpr int value = __ATOMIC_ACQUIRE;
+};
+
+template <>
+struct GCCMemoryOrderCASFail<MemoryOrderRelease> {
+  static constexpr int value = __ATOMIC_RELAXED;
+};
+
+template <typename T, typename MemoryOrder, typename MemoryScope>
+__device__ std::enable_if_t<atomic_always_lock_free(sizeof(T)), T>
+device_atomic_compare_exchange(
+    T* const dest, T compare, T value, MemoryOrder, MemoryScope) {
+#if __has_builtin(__atomic_always_lock_free)
+  static_assert(__atomic_always_lock_free(sizeof(T), 0),
+                "Compiler does not expect this type to be lock-free.");
+#endif
+  auto memory_order_success = GCCMemoryOrder<MemoryOrder>::value;
+  auto memory_order_failure = GCCMemoryOrderCASFail<MemoryOrder>::value;
+
+  __hip_atomic_compare_exchange_strong(dest,
+                                       &compare,
+                                       value,
+                                       memory_order_success,
+                                       memory_order_failure,
+                                       HIPMemoryScope<MemoryScope>::value);
+  return compare;
+}
+
+#else
 
 template <class T, class MemoryScope>
 __device__ std::enable_if_t<sizeof(T) == 4, T> device_atomic_compare_exchange(
@@ -70,6 +111,32 @@ device_atomic_compare_exchange(
   return return_val;
 }
 
+template <class T, class MemoryScope>
+__device__ std::enable_if_t<sizeof(T) == 4 || sizeof(T) == 8, T>
+device_atomic_compare_exchange(
+    T* const dest, T compare, T value, MemoryOrderSeqCst, MemoryScope) {
+  device_atomic_thread_fence(MemoryOrderAcquire(), MemoryScope());
+  T return_val = device_atomic_compare_exchange(
+      dest, compare, value, MemoryOrderRelaxed(), MemoryScope());
+  device_atomic_thread_fence(MemoryOrderRelease(), MemoryScope());
+  return return_val;
+}
+#endif
+
+#if __has_builtin(__hip_atomic_exchange)
+template <typename T, typename MemoryOrder, typename MemoryScope>
+__device__ std::enable_if_t<atomic_always_lock_free(sizeof(T)), T>
+device_atomic_exchange(T* const dest, T value, MemoryOrder, MemoryScope) {
+#if __has_builtin(__atomic_always_lock_free)
+  static_assert(__atomic_always_lock_free(sizeof(T), 0),
+                "Compiler does not expect this type to be lock-free.");
+#endif
+  return __hip_atomic_exchange(dest,
+                               value,
+                               GCCMemoryOrder<MemoryOrder>::value,
+                               HIPMemoryScope<MemoryScope>::value);
+}
+#else
 template <class T, class MemoryScope>
 __device__ std::enable_if_t<sizeof(T) == 4, T> device_atomic_exchange(
     T* const dest, T value, MemoryOrderRelaxed, MemoryScope) {
@@ -127,17 +194,7 @@ __device__ std::enable_if_t<sizeof(T) == 4 || sizeof(T) == 8, T> device_atomic_e
   device_atomic_thread_fence(MemoryOrderRelease(), MemoryScope());
   return reinterpret_cast<T&>(return_val);
 }
-
-template <class T, class MemoryScope>
-__device__ std::enable_if_t<sizeof(T) == 4 || sizeof(T) == 8, T>
-device_atomic_compare_exchange(
-    T* const dest, T compare, T value, MemoryOrderSeqCst, MemoryScope) {
-  device_atomic_thread_fence(MemoryOrderAcquire(), MemoryScope());
-  T return_val = device_atomic_compare_exchange(
-      dest, compare, value, MemoryOrderRelaxed(), MemoryScope());
-  device_atomic_thread_fence(MemoryOrderRelease(), MemoryScope());
-  return return_val;
-}
+#endif
 
 template <class T, class MemoryOrder, class MemoryScope>
 __device__ std::enable_if_t<(sizeof(T) != 8) && (sizeof(T) != 4), T>
