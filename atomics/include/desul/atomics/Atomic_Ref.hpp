@@ -27,11 +27,11 @@ class AtomicRef {
   DESUL_FUNCTION explicit AtomicRef(T& obj) : ptr_(&obj) {}
 
   DESUL_FUNCTION T operator=(T desired) const noexcept {
-    this->store(desired);
+    store(desired);
     return desired;
   }
 
-  DESUL_FUNCTION operator T() const noexcept { return this->load(); }
+  DESUL_FUNCTION operator T() const noexcept { return load(); }
 
   DESUL_FUNCTION T load() const noexcept {
     return desul::atomic_load(ptr_, MemoryOrder(), MemoryScope());
