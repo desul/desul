@@ -1,7 +1,7 @@
 ﻿cmake_minimum_required (VERSION 3.10)
 
 project(desul
-  LANGUAGES CXX
+  LANGUAGES CXX C
   VERSION 0.1.0)
 
 # Default to C++14 if not set TODO: check to ensure this is the minimum
