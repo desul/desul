@@ -14,14 +14,14 @@ SPDX-License-Identifier: (BSD-3-Clause)
 namespace desul {
 namespace Impl {
 
-#define DESUL_IMPL_HIP_ATOMIC_FETCH_OP(FETCH_OP, T)                          \
-  template <class MemoryOrder, class MemoryScope>                        \
+#define DESUL_IMPL_HIP_ATOMIC_FETCH_OP(FETCH_OP, T)                     \
+  template <class MemoryOrder, class MemoryScope>                       \
   __device__ inline T device_atomic_##FETCH_OP(                         \
-      T* ptr, T val, MemoryOrder, MemoryScope) {                         \
+      T* ptr, T val, MemoryOrder, MemoryScope) {                        \
     return __hip_atomic_##FETCH_OP(ptr,                                 \
-                                    val,                                 \
-                                    HIPMemoryOrder<MemoryOrder>::value,  \
-                                    HIPMemoryScope<MemoryScope>::value); \
+                                   val,                                 \
+                                   HIPMemoryOrder<MemoryOrder>::value,  \
+                                   HIPMemoryScope<MemoryScope>::value); \
   }
 
 #define DESUL_IMPL_HIP_ATOMIC_FETCH_OP_INTEGRAL(FETCH_OP) \

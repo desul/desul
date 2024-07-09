@@ -69,20 +69,20 @@ inline __device__       unsigned int device_atomic_fetch_inc_mod(  unsigned int*
 inline __device__       unsigned int device_atomic_fetch_dec_mod(  unsigned int* ptr,       unsigned int val, MemoryOrderRelaxed, MemoryScopeDevice) { return atomicDec(ptr,  val); }
 // clang-format on
 
-#define DESUL_IMPL_CUDA_DEVICE_ATOMIC_FETCH_OP(FETCH_OP, TYPE)                          \
-  template <class MemoryOrder>                                                      \
-  __device__ TYPE device_atomic_##FETCH_OP(                                        \
-      TYPE* ptr, TYPE val, MemoryOrder, MemoryScopeDevice) {                        \
-    __threadfence();                                                                \
-    TYPE return_val = device_atomic_##FETCH_OP(                                    \
-        ptr, val, MemoryOrderRelaxed(), MemoryScopeDevice());                       \
-    __threadfence();                                                                \
-    return return_val;                                                              \
-  }                                                                                 \
-  template <class MemoryOrder>                                                      \
-  __device__ TYPE device_atomic_##FETCH_OP(                                        \
-      TYPE* ptr, TYPE val, MemoryOrder, MemoryScopeCore) {                          \
-    return device_atomic_##FETCH_OP(ptr, val, MemoryOrder(), MemoryScopeDevice()); \
+#define DESUL_IMPL_CUDA_DEVICE_ATOMIC_FETCH_OP(FETCH_OP, TYPE)                         \
+  template <class MemoryOrder>                                                         \
+  __device__ TYPE device_atomic_##FETCH_OP(                                            \
+      TYPE* ptr, TYPE val, MemoryOrder, MemoryScopeDevice) {                           \
+    __threadfence();                                                                   \
+    TYPE return_val =                                                                  \
+        device_atomic_##FETCH_OP(ptr, val, MemoryOrderRelaxed(), MemoryScopeDevice()); \
+    __threadfence();                                                                   \
+    return return_val;                                                                 \
+  }                                                                                    \
+  template <class MemoryOrder>                                                         \
+  __device__ TYPE device_atomic_##FETCH_OP(                                            \
+      TYPE* ptr, TYPE val, MemoryOrder, MemoryScopeCore) {                             \
+    return device_atomic_##FETCH_OP(ptr, val, MemoryOrder(), MemoryScopeDevice());     \
   }
 
 #define DESUL_IMPL_CUDA_DEVICE_ATOMIC_FETCH_OP_INTEGRAL(FETCH_OP) \
