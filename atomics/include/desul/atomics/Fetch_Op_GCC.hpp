@@ -22,8 +22,8 @@ namespace Impl {
     return __atomic_fetch##U_OP  (dest, value, GCCMemoryOrder<MEMORY_ORDER>::value);                                              \
   }                                                                                                                              \
   template <class T>                                                                                                          \
-  std::enable_if_t<std::is_integral<T>::value, T> host_atomic##U_OP##_fetch(T* const dest, T value, MEMORY_ORDER, MEMORY_SCOPE) { \
-    return __atomic##U_OP##_fetch(dest, value, GCCMemoryOrder<MEMORY_ORDER>::value);                                              \
+  std::enable_if_t<std::is_integral<T>::value, T> host_atomic_##OP_U##fetch(T* const dest, T value, MEMORY_ORDER, MEMORY_SCOPE) { \
+    return __atomic_##OP_U##fetch(dest, value, GCCMemoryOrder<MEMORY_ORDER>::value);                                              \
   }
 
 #define DESUL_IMPL_GCC_HOST_ATOMIC_FETCH_OP_INTEGRAL(U_OP) \

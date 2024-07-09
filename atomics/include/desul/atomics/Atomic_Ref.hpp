@@ -52,7 +52,7 @@ class AtomicRef {
     return desul::atomic_fetch##U_OP(ptr_, arg, MemoryOrder(), MemoryScope());   \
   }                                                                              \
   DESUL_FUNCTION T OP_U##fetch(T arg) const noexcept {                           \
-    return desul::atomic##U_OP##_fetch(ptr_, arg, MemoryOrder(), MemoryScope()); \
+    return desul::atomic_##OP_U##fetch(ptr_, arg, MemoryOrder(), MemoryScope()); \
   }
 
 #define DESUL_IMPL_DEFINE_ATOMIC_COMPOUND_ASSIGNMENT_OP(COMPD_ASGMT, OP_U) \

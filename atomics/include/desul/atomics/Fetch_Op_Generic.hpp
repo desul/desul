@@ -26,7 +26,7 @@ namespace Impl {
         OP_U##operator<T, const T>(), dest, val, order, scope);            \
   }                                                                        \
   template <class T, class MemoryOrder, class MemoryScope>                 \
-  ANNOTATION T HOST_OR_DEVICE##_atomic##U_OP##_fetch(                      \
+  ANNOTATION T HOST_OR_DEVICE##_atomic_##OP_U##fetch(                      \
       T* const dest, const T val, MemoryOrder order, MemoryScope scope) {  \
     return HOST_OR_DEVICE##_atomic_oper_fetch(                             \
         OP_U##operator<T, const T>(), dest, val, order, scope);            \
