@@ -52,13 +52,7 @@ int main(int argc, char *argv[]) {
   Kokkos::initialize(argc, argv);
   desul::Impl::init_lock_arrays();
 
-#ifdef DESUL_HAVE_CUDA_ATOMICS
-  desul::ensure_cuda_lock_arrays_on_device();
-#endif
-
-#ifdef DESUL_HAVE_HIP_ATOMICS
-  desul::ensure_hip_lock_arrays_on_device();
-#endif
+  desul::Impl::ensure_lock_arrays_on_device();
 
   ::testing::InitGoogleTest(&argc, argv);
 
