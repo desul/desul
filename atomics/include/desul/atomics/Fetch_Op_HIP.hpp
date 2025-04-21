@@ -10,6 +10,7 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #define DESUL_ATOMICS_FECH_OP_HIP_HPP_
 
 #include <desul/atomics/Adapt_HIP.hpp>
+#include <desul/atomics/Operator_Function_Objects.hpp>
 
 namespace desul {
 namespace Impl {
@@ -22,6 +23,12 @@ namespace Impl {
                                    val,                                 \
                                    HIPMemoryOrder<MemoryOrder>::value,  \
                                    HIPMemoryScope<MemoryScope>::value); \
+  }                                                                     \
+  template <class MemoryOrder, class MemoryScope>                       \
+  __device__ inline T device_atomic_##OP##_fetch(                       \
+      T* ptr, T val, MemoryOrder order, MemoryScope scope) {            \
+    return OP##_fetch_operator<T, T>::apply(                            \
+        device_atomic_fetch_##OP(ptr, val, order, scope), val);         \
   }
 
 #define DESUL_IMPL_HIP_ATOMIC_FETCH_OP_INTEGRAL(OP) \
@@ -59,6 +66,12 @@ DESUL_IMPL_HIP_ATOMIC_FETCH_OP_FLOATING_POINT(add)
                                   -val,                                \
                                   HIPMemoryOrder<MemoryOrder>::value,  \
                                   HIPMemoryScope<MemoryScope>::value); \
+  }                                                                    \
+  template <class MemoryOrder, class MemoryScope>                      \
+  __device__ inline T device_atomic_sub_fetch(                         \
+      T* ptr, T val, MemoryOrder order, MemoryScope scope) {           \
+    return sub_fetch_operator<T, T>::apply(                            \
+        device_atomic_fetch_sub(ptr, val, order, scope), val);         \
   }
 
 DESUL_IMPL_HIP_ATOMIC_FETCH_SUB(int)
@@ -86,6 +99,16 @@ DESUL_IMPL_HIP_ATOMIC_FETCH_SUB(double)
                                   -1,                                             \
                                   HIPMemoryOrder<MemoryOrder>::value,             \
                                   HIPMemoryScope<MemoryScope>::value);            \
+  }                                                                               \
+  template <class MemoryOrder, class MemoryScope>                                 \
+  __device__ inline T device_atomic_inc_fetch(                                    \
+      T* ptr, MemoryOrder order, MemoryScope scope) {                             \
+    return device_atomic_fetch_inc(ptr, order, scope) + 1;                        \
+  }                                                                               \
+  template <class MemoryOrder, class MemoryScope>                                 \
+  __device__ inline T device_atomic_dec_fetch(                                    \
+      T* ptr, MemoryOrder order, MemoryScope scope) {                             \
+    return device_atomic_fetch_dec(ptr, order, scope) - 1;                        \
   }
 
 DESUL_IMPL_HIP_ATOMIC_FETCH_INC(int)
