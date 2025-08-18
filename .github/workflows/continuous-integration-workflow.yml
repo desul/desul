@@ -60,6 +60,7 @@ jobs:
             -DCMAKE_CXX_COMPILER=${{ matrix.cxx }} \
             -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }} \
             -DCMAKE_PREFIX_PATH=/tmp/kokkos-install \
+            -DENABLE_TESTS=ON \
             ..
           make
       - name: Test DESUL
