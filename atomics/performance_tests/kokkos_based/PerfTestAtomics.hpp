@@ -185,6 +185,7 @@ struct TestAtomicPerformance_RandomLocation {
     indicies = indicies_t("desul::Tests::PerfRandLoc::indicies", N);
     src_values = src_values_t("desul::Tests::PerfRandLoc::indicies", N);
     dst_values = dst_values_t("desul::Tests::PerfRandLoc::indicies", K);
+    combiner = combiner_;
 
     auto h_indicies = Kokkos::create_mirror_view(indicies);
     auto h_src_values = Kokkos::create_mirror_view(src_values);
@@ -219,7 +220,10 @@ double test_atomic_perf_random_location(
       Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), test.dst_values);
 
   Kokkos::Timer timer;
-  Kokkos::parallel_for("desul::Tests::PerfRandLoc", N, test);
+  Kokkos::parallel_for(
+      "desul::Tests::PerfRandLoc",
+      Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(exec_space, 0, N),
+      test);
   Kokkos::fence();
   double time = timer.seconds();
 
@@ -235,8 +239,8 @@ double test_atomic_perf_random_location(
   int errors = 0;
   Kokkos::parallel_reduce(
       "desul::Tests::PerfRandLoc::Check",
-      Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0,
-                                                             result_device.extent(0)),
+      Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(
+          exec_space, 0, result_device.extent(0)),
       KOKKOS_LAMBDA(const int i, int& count) {
         auto diff = result_device(i) - org_dst_values(i);
         auto sum = result_device(i) + org_dst_values(i);
@@ -361,6 +365,7 @@ struct TestAtomicPerformance_RandomNeighs {
     indicies = indicies_t("desul::Tests::PerfRandLoc::indicies", N, K);
     src_values = src_values_t("desul::Tests::PerfRandLoc::indicies", N);
     dst_values = dst_values_t("desul::Tests::PerfRandLoc::indicies", N);
+    combiner = combiner_;
 
     auto h_indicies = Kokkos::create_mirror_view(indicies);
     auto h_src_values = Kokkos::create_mirror_view(src_values);
@@ -400,7 +405,10 @@ double test_atomic_perf_random_neighborhood(int N,
       Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), test.dst_values);
 
   Kokkos::Timer timer;
-  Kokkos::parallel_for("desul::Tests::PerfRandNeigh", N, test);
+  Kokkos::parallel_for(
+      "desul::Tests::PerfRandNeigh",
+      Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(exec_space, 0, N),
+      test);
   Kokkos::fence();
   double time = timer.seconds();
 
@@ -415,8 +423,8 @@ double test_atomic_perf_random_neighborhood(int N,
   int errors = 0;
   Kokkos::parallel_reduce(
       "desul::Tests::PerfRandNeigh::Check",
-      Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0,
-                                                             result_device.extent(0)),
+      Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(
+          exec_space, 0, result_device.extent(0)),
       KOKKOS_LAMBDA(const int i, int& count) {
         auto diff = result_device(i) - org_dst_values(i);
         auto sum = result_device(i) + org_dst_values(i);

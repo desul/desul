@@ -58,6 +58,7 @@ jobs:
           cd build
           cmake \
             -DCMAKE_CXX_COMPILER=${{ matrix.cxx }} \
+            -DCMAKE_CXX_COMPILER_FLAGS="-Wall -Wextra -Werror" \
             -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }} \
             -DCMAKE_PREFIX_PATH=/tmp/kokkos-install \
             -DENABLE_TESTS=ON \
