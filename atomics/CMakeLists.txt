@@ -39,6 +39,9 @@ endif()
 if(DESUL_ENABLE_OPENMP)
   set(DESUL_ATOMICS_ENABLE_OPENMP ON)
 endif()
+if (BUILD_SHARED_LIBS)
+  set(DESUL_BUILD_SHARED_LIBS ON)
+endif()
 configure_file(
   ${PROJECT_SOURCE_DIR}/atomics/Config.hpp.cmake.in
   ${PROJECT_BINARY_DIR}/include/desul/atomics/Config.hpp)
@@ -57,6 +60,9 @@ target_include_directories (desul_atomics PUBLIC
   $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
   $<INSTALL_INTERFACE:include>
   )
+if (BUILD_SHARED_LIBS)
+  target_compile_definitions(desul_atomics PRIVATE DESUL_EXPORT_SYMBOLS)
+endif()
 
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
