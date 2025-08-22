@@ -89,11 +89,11 @@
 #define MEMORY_SCOPE desul::MemoryScopeDevice
 namespace Test {
 TEST(atomic, kokkos_perf_random_loc_add_uint64_t) {
-  desul::ensure_cuda_lock_arrays_on_device();
+  desul::Impl::ensure_lock_arrays_on_device();
   test_atomic_perf_random_loc<uint64_t,atomic_add_opp,Kokkos::DefaultExecutionSpace,Kokkos::DefaultExecutionSpace::memory_space>(10000000);
 }
 TEST(atomic, kokkos_perf_random_neigh_add_uint64_t) {
-  desul::ensure_cuda_lock_arrays_on_device();
+  desul::Impl::ensure_lock_arrays_on_device();
   test_atomic_perf_random_neighs<uint64_t,atomic_add_opp,Kokkos::DefaultExecutionSpace,Kokkos::DefaultExecutionSpace::memory_space>(1000000);
 }
 
