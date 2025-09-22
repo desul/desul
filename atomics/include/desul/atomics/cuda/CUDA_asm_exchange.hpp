@@ -1,13 +1,18 @@
 #include <limits>
+
+#include <cuda.h>
+#if (CUDA_VERSION >= 12080) && not defined(DESUL_CUDA_ARCH_IS_PRE_HOPPER)
+#define DESUL_HAVE_CUDA_128BIT_CAS
+#endif
+
 namespace desul {
 namespace Impl {
-#include <cuda.h>  // to get CUDA_VERSION
 
 #include <desul/atomics/cuda/cuda_cc7_asm_exchange.inc>
 
-#if (CUDA_VERSION >= 12080) && not defined(DESUL_CUDA_ARCH_IS_PRE_HOPPER)
+#ifdef DESUL_HAVE_CUDA_128BIT_CAS
 // Hopper (CC90) and above has some 128 bit atomic support
 #include <desul/atomics/cuda/cuda_cc9_asm_exchange.inc>
 #endif
-}  // namespace Impl
+}
 }  // namespace desul
