@@ -60,7 +60,7 @@ template <class T, class DEVICE_TYPE>
 struct ZeroFunctor {
   typedef DEVICE_TYPE execution_space;
   typedef typename Kokkos::View<T, execution_space> type;
-  typedef typename Kokkos::View<T, execution_space>::HostMirror h_type;
+  typedef typename Kokkos::View<T, execution_space>::host_mirror_type h_type;
 
   type data;
 
@@ -76,7 +76,7 @@ template <class T, class DEVICE_TYPE>
 struct InitFunctor {
   typedef DEVICE_TYPE execution_space;
   typedef typename Kokkos::View<T, execution_space> type;
-  typedef typename Kokkos::View<T, execution_space>::HostMirror h_type;
+  typedef typename Kokkos::View<T, execution_space>::host_mirror_type h_type;
 
   type data;
   T init_value;
