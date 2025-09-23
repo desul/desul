@@ -1,5 +1,4 @@
 
-// Non returning atomic operation (ptx red instruction) only exists for relaxed and release memorder
 #define __DESUL_IMPL_CUDA_ASM_MEMORY_SCOPE MemoryScopeDevice
 #define __DESUL_IMPL_CUDA_ASM_MEMORY_SCOPE_ASM ".gpu"
 #include "desul/atomics/cuda/cuda_cc9_asm_exchange_memorder.inc"
