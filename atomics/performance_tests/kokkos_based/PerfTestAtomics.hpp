@@ -237,7 +237,7 @@ double test_atomic_perf_random_location(
   int errors = 0;
   Kokkos::parallel_reduce(
       "desul::Tests::PerfRandLoc::Check",
-      Kokkos::RangePolicy(exec_space, 0, result_device.extent(0)),
+      Kokkos::RangePolicy(DefaultHostExecutionSpace(), 0, result_device.extent(0)),
       KOKKOS_LAMBDA(const int i, int& count) {
         auto diff = result_device(i) - org_dst_values(i);
         auto sum = result_device(i) + org_dst_values(i);
@@ -418,7 +418,7 @@ double test_atomic_perf_random_neighborhood(int N,
   int errors = 0;
   Kokkos::parallel_reduce(
       "desul::Tests::PerfRandNeigh::Check",
-      Kokkos::RangePolicy(exec_space, 0, result_device.extent(0)),
+      Kokkos::RangePolicy(DefaultHostExecutionSpace(), 0, result_device.extent(0)),
       KOKKOS_LAMBDA(const int i, int& count) {
         auto diff = result_device(i) - org_dst_values(i);
         auto sum = result_device(i) + org_dst_values(i);
