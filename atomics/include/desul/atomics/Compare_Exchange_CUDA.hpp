@@ -143,10 +143,8 @@ namespace Impl {
 
 #ifdef DESUL_HAVE_CUDA_128BIT_CAS
 template <class T, class MemoryScope>
-__device__ std::enable_if_t<sizeof(T) == 16, T> device_atomic_exchange(T* const dest,
-                                                                      T value,
-                                                                      MemoryOrderSeqCst,
-                                                                      MemoryScope) {
+__device__ std::enable_if_t<sizeof(T) == 16, T> device_atomic_exchange(
+    T* const dest, T value, MemoryOrderSeqCst, MemoryScope) {
   device_atomic_thread_fence(MemoryOrderAcquire(), MemoryScope());
   T return_val =
       device_atomic_exchange(dest, value, MemoryOrderRelaxed(), MemoryScope());
@@ -209,9 +207,10 @@ __device__ std::enable_if_t<sizeof(T) == 8, T> device_atomic_compare_exchange(
 template <class T, class MemoryOrder, class MemoryScope>
 __device__ std::enable_if_t<(sizeof(T) != 8) && (sizeof(T) != 4)
 #ifdef DESUL_HAVE_CUDA_128BIT_CAS
-  && (sizeof(T) != 16)
+                                && (sizeof(T) != 16)
 #endif
-  , T>
+                                ,
+                            T>
 device_atomic_compare_exchange(
     T* const dest, T compare, T value, MemoryOrder, MemoryScope scope) {
   // This is a way to avoid deadlock in a warp or wave front
@@ -243,9 +242,10 @@ device_atomic_compare_exchange(
 template <class T, class MemoryOrder, class MemoryScope>
 __device__ std::enable_if_t<(sizeof(T) != 8) && (sizeof(T) != 4)
 #ifdef DESUL_HAVE_CUDA_128BIT_CAS
-  && (sizeof(T) != 16)
+                                && (sizeof(T) != 16)
 #endif
-  , T>
+                                ,
+                            T>
 device_atomic_exchange(T* const dest, T value, MemoryOrder, MemoryScope scope) {
   // This is a way to avoid deadlock in a warp or wave front
   T return_val;
