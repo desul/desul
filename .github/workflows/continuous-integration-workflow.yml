@@ -28,13 +28,13 @@ jobs:
       options: --security-opt seccomp=unconfined
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Update submodules
         run: |
           git submodule init
           git submodule update
       - name: Checkout Kokkos
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: kokkos/kokkos
           # FIXME Use 4.0.00 or later when released
