@@ -53,7 +53,7 @@ template <class T,
           class MemoryOrder,
           class MemoryScope,
           std::enable_if_t<!host_atomic_always_lock_free<T>, int> = 0>
-inline T host_atomic_fetch_oper(const _store_fetch_operator<T, const T>& op,
+inline T host_atomic_fetch_oper(const store_fetch_operator<T, const T>& op,
                                 T* const dest,
                                 dont_deduce_this_parameter_t<const T> val,
                                 MemoryOrder /*order*/,
