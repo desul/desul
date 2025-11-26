@@ -56,7 +56,7 @@ T device_atomic_fetch_oper(const Oper& op,
   return return_val;
 }
 
-template < class T,
+template <class T,
           class MemoryOrder,
           class MemoryScope,
           std::enable_if_t<!device_atomic_always_lock_free<T>, int> = 0>
