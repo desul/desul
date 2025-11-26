@@ -21,6 +21,7 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #endif
 #include <desul/atomics/Lock_Array.hpp>
 #include <desul/atomics/Thread_Fence.hpp>
+#include <desul/atomics/Operator_Function_Objects.hpp>
 #include <type_traits>
 
 namespace desul {
@@ -46,6 +47,26 @@ inline T host_atomic_fetch_oper(const Oper& op,
   host_atomic_thread_fence(MemoryOrderRelease(), scope);
   unlock_address((void*)dest, scope);
   return return_val;
+}
+
+template <class T,
+          class MemoryOrder,
+          class MemoryScope,
+          std::enable_if_t<!host_atomic_always_lock_free<T>, int> = 0>
+inline T host_atomic_fetch_oper(const _store_fetch_operator<T,const T>& op,
+                                T* const dest,
+                                dont_deduce_this_parameter_t<const T> val,
+                                MemoryOrder /*order*/,
+                                MemoryScope scope) {
+  // Acquire a lock for the address
+  while (!lock_address((void*)dest, scope)) {
+  }
+
+  host_atomic_thread_fence(MemoryOrderAcquire(), scope);
+  *dest = op.apply(T{}, val);
+  host_atomic_thread_fence(MemoryOrderRelease(), scope);
+  unlock_address((void*)dest, scope);
+  return T{}; // atomic store never returns
 }
 
 }  // namespace Impl

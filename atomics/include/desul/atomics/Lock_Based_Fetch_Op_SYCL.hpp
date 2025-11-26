@@ -56,6 +56,42 @@ T device_atomic_fetch_oper(const Oper& op,
   return return_val;
 }
 
+template < class T,
+          class MemoryOrder,
+          class MemoryScope,
+          std::enable_if_t<!device_atomic_always_lock_free<T>, int> = 0>
+T device_atomic_fetch_oper(const _store_fetch_operator& op,
+                           T* const dest,
+                           dont_deduce_this_parameter_t<const T> val,
+                           MemoryOrder /*order*/,
+                           MemoryScope scope) {
+  // This is a way to avoid deadlock in a subgroup
+  T return_val{};
+  int done = 0;
+#if defined(__INTEL_LLVM_COMPILER) && __INTEL_LLVM_COMPILER >= 20250000
+  auto sg = sycl::ext::oneapi::this_work_item::get_sub_group();
+#else
+  auto sg = sycl::ext::oneapi::experimental::this_sub_group();
+#endif
+  using sycl::ext::oneapi::group_ballot;
+  using sycl::ext::oneapi::sub_group_mask;
+  sub_group_mask active = group_ballot(sg, 1);
+  sub_group_mask done_active = group_ballot(sg, 0);
+  while (active != done_active) {
+    if (!done) {
+      if (lock_address_sycl((void*)dest, scope)) {
+        device_atomic_thread_fence(MemoryOrderAcquire(), scope);
+        *dest = op.apply(return_val, val);
+        device_atomic_thread_fence(MemoryOrderRelease(), scope);
+        unlock_address_sycl((void*)dest, scope);
+        done = 1;
+      }
+    }
+    done_active = group_ballot(sg, done);
+  }
+  return return_val;
+}
+
 }  // namespace Impl
 }  // namespace desul
 

@@ -45,6 +45,31 @@ inline T device_atomic_fetch_oper(const Oper& op,
   return return_val;
 }
 
+template <class T,
+          class MemoryOrder,
+          class MemoryScope,
+          std::enable_if_t<!device_atomic_always_lock_free<T>, int> = 0>
+inline T device_atomic_fetch_oper(const _store_fetch_operator& op,
+                                  T* const dest,
+                                  dont_deduce_this_parameter_t<const T> val,
+                                  MemoryOrder /*order*/,
+                                  MemoryScope scope) {
+  if (acc_on_device(acc_device_not_host)) {
+    printf(
+        "DESUL error in device_atomic_fetch_oper(): Not supported atomic operation in "
+        "the OpenACC backend\n");
+  }
+  // Acquire a lock for the address
+  while (!lock_address((void*)dest, scope)) {
+  }
+
+  device_atomic_thread_fence(MemoryOrderAcquire(), scope);
+  *dest = op.apply(T{}, val);
+  device_atomic_thread_fence(MemoryOrderRelease(), scope);
+  unlock_address((void*)dest, scope);
+  return T{};
+}
+
 }  // namespace Impl
 }  // namespace desul
 
