@@ -37,36 +37,11 @@ __device__ T device_atomic_fetch_oper(const Oper& op,
     if (!done) {
       if (lock_address_hip((void*)dest, scope)) {
         device_atomic_thread_fence(MemoryOrderAcquire(), scope);
-        return_val = *dest;
-        *dest = op.apply(return_val, val);
-        device_atomic_thread_fence(MemoryOrderRelease(), scope);
-        unlock_address_hip((void*)dest, scope);
-        done = 1;
-      }
-    }
-    done_active = __ballot(done);
-  }
-  return return_val;
-}
-
-template <class T,
-          class MemoryOrder,
-          class MemoryScope,
-          std::enable_if_t<!device_atomic_always_lock_free<T>, int> = 0>
-__device__ T device_atomic_fetch_oper(const store_fetch_operator& op,
-                                      T* const dest,
-                                      dont_deduce_this_parameter_t<const T> val,
-                                      MemoryOrder /*order*/,
-                                      MemoryScope scope) {
-  // This is a way to avoid deadlock in a warp or wave front
-  T return_val{};
-  int done = 0;
-  unsigned long long int active = __ballot(1);
-  unsigned long long int done_active = 0;
-  while (active != done_active) {
-    if (!done) {
-      if (lock_address_hip((void*)dest, scope)) {
-        device_atomic_thread_fence(MemoryOrderAcquire(), scope);
+        if constexpr (std::is_same_v<Oper, store_fetch_operator>)
+          return_val = T{};  // To avoid reading from a potentially uninitialized value
+                             // in the case of store, we default construct
+        else
+          return_val = *dest;
         *dest = op.apply(return_val, val);
         device_atomic_thread_fence(MemoryOrderRelease(), scope);
         unlock_address_hip((void*)dest, scope);
