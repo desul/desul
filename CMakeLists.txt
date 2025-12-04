@@ -4,7 +4,8 @@ project(desul
   LANGUAGES CXX C
   VERSION 0.1.0)
 
-# Default to C++14 if not set TODO: check to ensure this is the minimum
+# Default to C++17 if not set and enforce the minimum requirement below after
+# setting up BLT below
 if (NOT BLT_CXX_STD)
     set(BLT_CXX_STD "c++17" CACHE STRING "")
 endif()
@@ -34,6 +35,9 @@ cmake_dependent_option(DESUL_ENABLE_SYCL "Build with SYCL support" ON "ENABLE_SY
 cmake_dependent_option(DESUL_ENABLE_TESTS "Build tests" ON "ENABLE_TESTS" OFF)
 
 include(cmake/blt_boilerplate.cmake)
+if (CMAKE_CXX_STRANDARD LESS 17)
+  message(FATAL_ERROR "desul requires a minimum of C++17")
+endif()
 
 add_subdirectory(atomics)
 
