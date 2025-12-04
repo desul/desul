@@ -6,7 +6,7 @@ project(desul
 
 # Default to C++14 if not set TODO: check to ensure this is the minimum
 if (NOT BLT_CXX_STD)
-    set(BLT_CXX_STD "c++14" CACHE STRING "")
+    set(BLT_CXX_STD "c++17" CACHE STRING "")
 endif()
 
 set(DESUL_DEPENDENT_OPTIONS
