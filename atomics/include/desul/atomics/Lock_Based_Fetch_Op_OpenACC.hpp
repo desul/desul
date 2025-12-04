@@ -38,11 +38,8 @@ inline T device_atomic_fetch_oper(const Oper& op,
   }
 
   device_atomic_thread_fence(MemoryOrderAcquire(), scope);
-  T return_val;
-  if constexpr (std::is_same_v<Oper, store_fetch_operator<T, const T>>)
-    return_val = T{};  // To avoid reading from a potentially uninitialized value
-                       // in the case of store, we default construct
-  else
+  T return_val{};
+  if constexpr (!std::is_same_v<Oper, store_fetch_operator<T, const T>>)
     return_val = *dest;
   *dest = op.apply(return_val, val);
   device_atomic_thread_fence(MemoryOrderRelease(), scope);

@@ -29,7 +29,7 @@ T device_atomic_fetch_oper(const Oper& op,
                            MemoryOrder /*order*/,
                            MemoryScope scope) {
   // This is a way to avoid deadlock in a subgroup
-  T return_val;
+  T return_val{};
   int done = 0;
 #if defined(__INTEL_LLVM_COMPILER) && __INTEL_LLVM_COMPILER >= 20250000
   auto sg = sycl::ext::oneapi::this_work_item::get_sub_group();
@@ -44,10 +44,7 @@ T device_atomic_fetch_oper(const Oper& op,
     if (!done) {
       if (lock_address_sycl((void*)dest, scope)) {
         device_atomic_thread_fence(MemoryOrderAcquire(), scope);
-        if constexpr (std::is_same_v<Oper, store_fetch_operator<T, const T>>)
-          return_val = T{};  // To avoid reading from a potentially uninitialized value
-                             // in the case of store, we default construct
-        else
+        if constexpr (!std::is_same_v<Oper, store_fetch_operator<T, const T>>)
           return_val = *dest;
         *dest = op.apply(return_val, val);
         device_atomic_thread_fence(MemoryOrderRelease(), scope);
