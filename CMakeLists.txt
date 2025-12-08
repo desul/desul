@@ -35,7 +35,7 @@ cmake_dependent_option(DESUL_ENABLE_SYCL "Build with SYCL support" ON "ENABLE_SY
 cmake_dependent_option(DESUL_ENABLE_TESTS "Build tests" ON "ENABLE_TESTS" OFF)
 
 include(cmake/blt_boilerplate.cmake)
-if (CMAKE_CXX_STRANDARD LESS 17)
+if (CMAKE_CXX_STANDARD LESS 17)
   message(FATAL_ERROR "desul requires a minimum of C++17")
 endif()
 
