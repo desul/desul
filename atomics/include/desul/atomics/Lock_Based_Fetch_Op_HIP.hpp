@@ -38,7 +38,7 @@ __device__ T device_atomic_fetch_oper(const Oper& op,
     if (!done) {
       if (lock_address_hip((void*)dest, scope)) {
         device_atomic_thread_fence(MemoryOrderAcquire(), scope);
-        if constexpr (!std::is_same_v<Oper, store_fetch_operator<T, const T>>)
+        if constexpr (!std::is_same_v<Oper, _store_fetch_operator<T, const T>>)
           return_val = *dest;
         *dest = op.apply(return_val, val);
         device_atomic_thread_fence(MemoryOrderRelease(), scope);

@@ -43,7 +43,7 @@ inline T host_atomic_fetch_oper(const Oper& op,
 
   host_atomic_thread_fence(MemoryOrderAcquire(), scope);
   T return_val{};
-  if constexpr (!std::is_same_v<Oper, store_fetch_operator<T, const T>>)
+  if constexpr (!std::is_same_v<Oper, _store_fetch_operator<T, const T>>)
     return_val = *dest;
   *dest = op.apply(return_val, val);
   host_atomic_thread_fence(MemoryOrderRelease(), scope);
