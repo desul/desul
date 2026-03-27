@@ -58,7 +58,7 @@ DESUL_IMPL_GCC_HOST_ATOMIC_FETCH_OP(_or, std::is_integral)
 DESUL_IMPL_GCC_HOST_ATOMIC_FETCH_OP(_nand, std::is_integral)
 
 #if defined(__clang__)
-#if (__clang_major__ * 100 + __clang_minor__) >= 2210
+#if (__clang_major__ * 100 + __clang_minor__) >= 2201
 DESUL_IMPL_GCC_HOST_ATOMIC_FETCH_OP(_min, arithmetic_not_long_double)
 DESUL_IMPL_GCC_HOST_ATOMIC_FETCH_OP(_max, arithmetic_not_long_double)
 #else
