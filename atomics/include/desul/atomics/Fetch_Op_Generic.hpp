@@ -12,6 +12,7 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #include <desul/atomics/Common.hpp>
 #include <desul/atomics/Lock_Based_Fetch_Op.hpp>
 #include <desul/atomics/Lock_Free_Fetch_Op.hpp>
+#include <desul/atomics/Lock_Free_Fetch_Op_HIP.hpp>
 #include <desul/atomics/Operator_Function_Objects.hpp>
 #include <type_traits>
 

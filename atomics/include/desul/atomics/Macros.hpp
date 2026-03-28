@@ -11,6 +11,13 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 #include <desul/atomics/Config.hpp>
 
+#if !defined(DESUL_HAS_BUILTIN)
+#  if defined(__has_builtin)
+#    define DESUL_HAS_BUILTIN(x) __has_builtin(x)
+#  else
+#    define DESUL_HAS_BUILTIN(x) 0
+#  endif
+#endif
 // Intercept incompatible relocatable device code mode which leads to ODR violations
 #ifdef DESUL_ATOMICS_ENABLE_CUDA
 #if (defined(__clang__) && defined(__CUDA__) && defined(__CLANG_RDC__)) || \
@@ -31,6 +38,13 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #endif
 
 #ifdef DESUL_ATOMICS_ENABLE_HIP
+
+#define HAS_HIP_ATOMIC_BUILT_IN(OP) constexpr bool atomic_has_builtin_##OP() { \
+  return (DESUL_HAS_BUILTIN(__hip_atomic_##OP) != 0); }
+
+HAS_HIP_ATOMIC_BUILT_IN(load)
+HAS_HIP_ATOMIC_BUILT_IN(store)
+
 #if (defined(DESUL_ATOMICS_ENABLE_HIP_SEPARABLE_COMPILATION) &&  \
      !defined(__CLANG_RDC__)) ||                                 \
     (!defined(DESUL_ATOMICS_ENABLE_HIP_SEPARABLE_COMPILATION) && \
