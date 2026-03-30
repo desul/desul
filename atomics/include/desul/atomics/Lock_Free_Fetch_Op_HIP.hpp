@@ -26,7 +26,7 @@ template <class Oper,
             class T,
             class MemoryOrder,
             class MemoryScope,
-            std::enable_if_t<atomic_always_lock_free(sizeof(T)) && atomic_has_builtin_load(), int> = 0>
+            std::enable_if_t<device_atomic_always_lock_free<T> && atomic_has_builtin_load(), int> = 0>
    __device__ T device_atomic_fetch_oper(
       const Oper& op,
       T* const dest,
@@ -37,7 +37,7 @@ template <class Oper,
     static constexpr auto hip_mem_order = HIPMemoryOrder<MemoryOrder>::value;
     static constexpr auto hip_mem_scope = HIPMemoryScope<MemoryScope>::value;
     cas_t oldval = __hip_atomic_load(reinterpret_cast<cas_t*>(dest), hip_mem_order, hip_mem_scope);
-    cas_t assume;
+    cas_t assume = oldval;
     do {
       assume = oldval;
       if (check_early_exit(op, reinterpret_cast<T&>(oldval), val))
