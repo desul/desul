@@ -10,6 +10,7 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #define DESUL_ATOMICS_FECH_OP_HIP_HPP_
 
 #include <desul/atomics/Adapt_HIP.hpp>
+#include <type_traits>
 
 namespace desul {
 namespace Impl {
@@ -22,6 +23,20 @@ namespace Impl {
                                    val,                                 \
                                    HIPMemoryOrder<MemoryOrder>::value,  \
                                    HIPMemoryScope<MemoryScope>::value); \
+  }
+
+template <typename T, class MemoryOrder, class MemoryScope>
+  __device__ inline T device_atomic_load_intrinsic(
+      const T* const ptr, MemoryOrder, MemoryScope) {
+    return __hip_atomic_load(ptr, HIPMemoryOrder<MemoryOrder>::value,
+                                  HIPMemoryScope<MemoryScope>::value);
+  }
+
+template <typename T, class MemoryOrder, class MemoryScope>
+  __device__ inline void device_atomic_store_intrinsic(
+       T* const dest, const T val, MemoryOrder, MemoryScope) {
+    __hip_atomic_store(dest, val, HIPMemoryOrder<MemoryOrder>::value,
+                                  HIPMemoryScope<MemoryScope>::value);
   }
 
 #define DESUL_IMPL_HIP_ATOMIC_FETCH_OP_INTEGRAL(OP) \
@@ -43,8 +58,69 @@ DESUL_IMPL_HIP_ATOMIC_FETCH_OP_INTEGRAL(and)
 DESUL_IMPL_HIP_ATOMIC_FETCH_OP_INTEGRAL(or)
 DESUL_IMPL_HIP_ATOMIC_FETCH_OP_INTEGRAL(xor)
 DESUL_IMPL_HIP_ATOMIC_FETCH_OP_FLOATING_POINT(add)
-DESUL_IMPL_HIP_ATOMIC_FETCH_OP_FLOATING_POINT(min)
-DESUL_IMPL_HIP_ATOMIC_FETCH_OP_FLOATING_POINT(max)
+
+template <typename T, class MemoryOrder, class MemoryScope, std::enable_if_t<std::is_floating_point_v<T>> = true>
+__device__ inline T device_atomic_fetch_min(T* ptr,
+                                            T val,
+                                            MemoryOrder,
+                                            MemoryScope) {
+  static constexpr auto hip_mem_order = HIPMemoryOrder<MemoryOrder>::value;
+  static constexpr auto hip_mem_scope = HIPMemoryScope<MemoryScope>::value;
+  using unsigned_int_t = std::conditional_t<std::is_same_v<double, T>, uint64_t, uint32_t>;
+  constexpr unsigned_int_t bitwise_negative_zero = std::is_same_v<double, T> ?
+                                        0x8000000000000000ULL : 0x80000000U;
+
+#if defined(__has_builtin) && __has_builtin(__hip_atomic_load)
+  // When the memory ordering is relaxed,
+  if constexpr (hip_mem_order == __ATOMIC_RELAXED) {
+    union u_hold_t {
+      T a;
+      unsigned_int_t b;
+    };
+    u_hold_t u_val{val};
+    const bool val_is_neg_zero = bitwise_negative_zero == u_val.b;
+
+    const T old = __hip_atomic_load(ptr, hip_mem_order, hip_mem_scope);
+    // we want to avoid dispatching the intrinsic in the case where *ptr <= val
+    // If the old value is 0.0f, and ptr is -0.0f, we must update +0.0->-0.0,
+    // so check manually for this case.
+    if (!(old > val) && !(val_is_neg_zero && old == 0.0f)) {
+      return old;
+    }
+  }
+#endif
+  return __hip_atomic_fetch_min(ptr, val, hip_mem_order, hip_mem_scope);
+}
+
+template <typename T, class MemoryOrder, class MemoryScope, std::enable_if_t<std::is_floating_point_v<T>> = true>
+__device__ inline T device_atomic_fetch_max(T* ptr,
+                                            T val,
+                                            MemoryOrder,
+                                            MemoryScope) {
+  static constexpr auto hip_mem_order = HIPMemoryOrder<MemoryOrder>::value;
+  static constexpr auto hip_mem_scope = HIPMemoryScope<MemoryScope>::value;
+  using unsigned_int_t = std::conditional_t<std::is_same_v<double, T>, uint64_t, uint32_t>;
+  constexpr unsigned_int_t bitwise_negative_zero = std::is_same_v<double, T> ?
+                                               0x8000000000000000ULL : 0x80000000U;
+#if defined(__has_builtin) && __has_builtin(__hip_atomic_load)
+  if constexpr (hip_mem_order == __ATOMIC_RELAXED) {
+    const T old = __hip_atomic_load(ptr, hip_mem_order, hip_mem_scope);
+    union u_hold_t {
+      T a;
+      unsigned_int_t b;
+    };
+    u_hold_t u_old{old};
+    const bool old_is_neg_zero = bitwise_negative_zero == u_old.b;
+    // we want to avoid dispatching the intrinsic in the case where *ptr >= val
+    // If the old value is 0.0f, and ptr is -0.0f, we must update +0.0->-0.0,
+    // so check manually for this case.
+    if (!(old < val) && !(old_is_neg_zero && val == 0.0f)) {
+      return old;
+    }
+  }
+#endif
+  return __hip_atomic_fetch_max(ptr, val, hip_mem_order, hip_mem_scope);
+}
 
 #undef DESUL_IMPL_HIP_ATOMIC_FETCH_OP_FLOATING_POINT
 #undef DESUL_IMPL_HIP_ATOMIC_FETCH_OP_INTEGRAL

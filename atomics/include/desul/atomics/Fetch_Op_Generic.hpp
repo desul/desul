@@ -12,8 +12,6 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #include <desul/atomics/Common.hpp>
 #include <desul/atomics/Lock_Based_Fetch_Op.hpp>
 #include <desul/atomics/Lock_Free_Fetch_Op.hpp>
-#include <desul/atomics/Lock_Free_Fetch_Op_HIP.hpp>
-#include <desul/atomics/Operator_Function_Objects.hpp>
 #include <type_traits>
 
 namespace desul {
@@ -98,6 +96,9 @@ DESUL_IMPL_ATOMIC_FETCH_OP_SHIFT_HOST_AND_DEVICE(_rshift)
   template <class T, class MemoryOrder, class MemoryScope>                            \
   ANNOTATION T HOST_OR_DEVICE##_atomic_load(                                          \
       const T* const dest, MemoryOrder order, MemoryScope scope) {                    \
+    if constexpr (atomic_has_builtin_load()) {                                        \
+      DESUL_IF_ON_DEVICE(return device_atomic_load_intrinsic(dest, order, scope); )   \
+    }                                                                                 \
     return HOST_OR_DEVICE##_atomic_fetch_oper(                                        \
         _load_fetch_operator<T, const T>(), const_cast<T*>(dest), T(), order, scope); \
   }                                                                                   \
@@ -105,6 +106,9 @@ DESUL_IMPL_ATOMIC_FETCH_OP_SHIFT_HOST_AND_DEVICE(_rshift)
   template <class T, class MemoryOrder, class MemoryScope>                            \
   ANNOTATION void HOST_OR_DEVICE##_atomic_store(                                      \
       T* const dest, const T val, MemoryOrder order, MemoryScope scope) {             \
+    if constexpr (atomic_has_builtin_store()) {                                       \
+      DESUL_IF_ON_DEVICE(return device_atomic_store_intrinsic(dest, val, order, scope); )  \
+    }                                                                                 \
     (void)HOST_OR_DEVICE##_atomic_fetch_oper(                                         \
         _store_fetch_operator<T, const T>(), dest, val, order, scope);                \
   }

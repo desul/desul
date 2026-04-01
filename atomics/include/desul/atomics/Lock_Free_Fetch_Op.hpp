@@ -56,7 +56,7 @@ namespace Impl {
             class T,
             class MemoryOrder,
             class MemoryScope,
-            std::enable_if_t<device_atomic_always_lock_free<T> && !atomic_has_builtin_load(), int> = 0>
+            std::enable_if_t<device_atomic_always_lock_free<T>, int> = 0>
     __device__ T device_atomic_fetch_oper(
       const Oper& op,
       T* const dest,
