@@ -23,6 +23,15 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #if (defined(__clang__) && defined(__CUDA__) && defined(__CLANG_RDC__)) || \
     defined(__CUDACC_RDC__)
 #define DESUL_IMPL_CUDA_RDC
+
+// We define a macro here to ensure compatibility between backends
+// in device code.  CUDA doesn't have builtins for load/store
+#define HAS_CUDA_ATOMIC_BUILT_IN(OP) constexpr bool atomic_has_builtin_##OP() { \
+  return false; }
+
+HAS_CUDA_ATOMIC_BUILT_IN(load)
+HAS_CUDA_ATOMIC_BUILT_IN(store)
+
 #endif
 
 #if (defined(DESUL_ATOMICS_ENABLE_CUDA_SEPARABLE_COMPILATION) &&  \

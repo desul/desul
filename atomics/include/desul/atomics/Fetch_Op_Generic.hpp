@@ -12,6 +12,7 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #include <desul/atomics/Common.hpp>
 #include <desul/atomics/Lock_Based_Fetch_Op.hpp>
 #include <desul/atomics/Lock_Free_Fetch_Op.hpp>
+#include <desul/atomics/Operator_Function_Objects.hpp>
 #include <type_traits>
 
 namespace desul {
@@ -36,14 +37,37 @@ namespace Impl {
     (void)HOST_OR_DEVICE##_atomic_fetch##_OP(dest, val, order, scope);     \
   }
 
+#define DESUL_IMPL_ATOMIC_FETCH_OP_INTRINSIC_MAX_MIN(ANNOTATION, _OP)        \
+template <class T, class MemoryOrder, class MemoryScope>                     \
+__device__ T device_atomic_fetch##_OP(                                       \
+    T* const dest, const T val, MemoryOrder order, MemoryScope scope) {      \
+  if constexpr (atomic_has_builtin_load())                                   \
+      return device_atomic##_OP##_intrinsic(dest, val, order, scope);        \
+  return device_atomic_fetch_oper(                                           \
+      _OP##_fetch_operator<T, const T>(), dest, val, order, scope);          \
+}                                                                            \
+template <class T, class MemoryOrder, class MemoryScope>                     \
+__device__ T device_atomic##_OP##_fetch(                                     \
+    T* const dest, const T val, MemoryOrder order, MemoryScope scope) {      \
+  return _OP##_fetch_operator<T, const T>::apply(                            \
+      device_atomic_fetch##_OP(dest, val, order, scope), val);               \
+}                                                                            \
+template <class T, class MemoryOrder, class MemoryScope>                     \
+__device__ void device_atomic##_OP(                                          \
+    T* const dest, const T val, MemoryOrder order, MemoryScope scope) {      \
+  (void)device_atomic_fetch##_OP(dest, val, order, scope);                   \
+}
+
 #define DESUL_IMPL_ATOMIC_FETCH_OP_HOST_AND_DEVICE(_OP)           \
   DESUL_IMPL_ATOMIC_FETCH_OP(DESUL_IMPL_HOST_FUNCTION, host, _OP) \
   DESUL_IMPL_ATOMIC_FETCH_OP(DESUL_IMPL_DEVICE_FUNCTION, device, _OP)
 
 DESUL_IMPL_ATOMIC_FETCH_OP_HOST_AND_DEVICE(_add)
 DESUL_IMPL_ATOMIC_FETCH_OP_HOST_AND_DEVICE(_sub)
-DESUL_IMPL_ATOMIC_FETCH_OP_HOST_AND_DEVICE(_max)
-DESUL_IMPL_ATOMIC_FETCH_OP_HOST_AND_DEVICE(_min)
+DESUL_IMPL_ATOMIC_FETCH_OP(DESUL_IMPL_HOST_FUNCTION, host, _min)
+DESUL_IMPL_ATOMIC_FETCH_OP(DESUL_IMPL_HOST_FUNCTION, host, _max)
+DESUL_IMPL_ATOMIC_FETCH_OP_INTRINSIC_MAX_MIN(DESUL_IMPL_DEVICE_FUNCTION, _min)
+DESUL_IMPL_ATOMIC_FETCH_OP_INTRINSIC_MAX_MIN(DESUL_IMPL_DEVICE_FUNCTION, _max)
 DESUL_IMPL_ATOMIC_FETCH_OP_HOST_AND_DEVICE(_mul)
 DESUL_IMPL_ATOMIC_FETCH_OP_HOST_AND_DEVICE(_div)
 DESUL_IMPL_ATOMIC_FETCH_OP_HOST_AND_DEVICE(_mod)
