@@ -39,7 +39,7 @@ namespace Impl {
 
 #define DESUL_IMPL_ATOMIC_FETCH_OP_INTRINSIC_MAX_MIN(ANNOTATION, _OP)        \
 template <class T, class MemoryOrder, class MemoryScope>                     \
-__device__ T device_atomic_fetch##_OP(                                       \
+DESUL_IMPL_DEVICE_FUNCTION T device_atomic_fetch##_OP(                                       \
     T* const dest, const T val, MemoryOrder order, MemoryScope scope) {      \
   if constexpr (atomic_has_builtin_load())                                   \
       return device_atomic##_OP##_intrinsic(dest, val, order, scope);        \
@@ -47,13 +47,13 @@ __device__ T device_atomic_fetch##_OP(                                       \
       _OP##_fetch_operator<T, const T>(), dest, val, order, scope);          \
 }                                                                            \
 template <class T, class MemoryOrder, class MemoryScope>                     \
-__device__ T device_atomic##_OP##_fetch(                                     \
+DESUL_IMPL_DEVICE_FUNCTION T device_atomic##_OP##_fetch(                                     \
     T* const dest, const T val, MemoryOrder order, MemoryScope scope) {      \
   return _OP##_fetch_operator<T, const T>::apply(                            \
       device_atomic_fetch##_OP(dest, val, order, scope), val);               \
 }                                                                            \
 template <class T, class MemoryOrder, class MemoryScope>                     \
-__device__ void device_atomic##_OP(                                          \
+DESUL_IMPL_DEVICE_FUNCTION void device_atomic##_OP(                                          \
     T* const dest, const T val, MemoryOrder order, MemoryScope scope) {      \
   (void)device_atomic_fetch##_OP(dest, val, order, scope);                   \
 }

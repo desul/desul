@@ -25,7 +25,7 @@ struct _max_fetch_operator {
   }
   DESUL_FORCEINLINE_FUNCTION
   static constexpr bool check_early_exit(Scalar1 const& val1, Scalar2 const& val2) {
-    return val1 >= val2;
+    return val1 > val2;
   }
 };
 

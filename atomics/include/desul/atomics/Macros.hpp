@@ -26,8 +26,12 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 // We define a macro here to ensure compatibility between backends
 // in device code.  CUDA doesn't have builtins for load/store
-#define HAS_CUDA_ATOMIC_BUILT_IN(OP) constexpr bool atomic_has_builtin_##OP() { \
-  return false; }
+#define HAS_CUDA_ATOMIC_BUILT_IN(OP)                           \
+namespace desul {                                              \
+  namespace Impl {                                             \
+    constexpr bool atomic_has_builtin_##OP() { return false; } \
+  }                                                            \
+}
 
 HAS_CUDA_ATOMIC_BUILT_IN(load)
 HAS_CUDA_ATOMIC_BUILT_IN(store)
@@ -48,8 +52,14 @@ HAS_CUDA_ATOMIC_BUILT_IN(store)
 
 #ifdef DESUL_ATOMICS_ENABLE_HIP
 
-#define HAS_HIP_ATOMIC_BUILT_IN(OP) constexpr bool atomic_has_builtin_##OP() { \
-  return (DESUL_HAS_BUILTIN(__hip_atomic_##OP) != 0); }
+#define HAS_HIP_ATOMIC_BUILT_IN(OP)                            \
+namespace desul {                                              \
+  namespace Impl {                                             \
+    constexpr bool atomic_has_builtin_##OP() {                 \
+      return (DESUL_HAS_BUILTIN(__hip_atomic_##OP) != 0);      \
+    }                                                          \
+  }                                                            \
+}
 
 HAS_HIP_ATOMIC_BUILT_IN(load)
 HAS_HIP_ATOMIC_BUILT_IN(store)
