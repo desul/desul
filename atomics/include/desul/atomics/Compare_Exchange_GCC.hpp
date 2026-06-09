@@ -10,24 +10,13 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #define DESUL_ATOMICS_COMPARE_EXCHANGE_GCC_HPP_
 
 #include <desul/atomics/Common.hpp>
+#include <desul/atomics/Lock_Free_Types_GCC.hpp>
 #include <desul/atomics/Lock_Array.hpp>
 #include <desul/atomics/Thread_Fence_GCC.hpp>
 #include <type_traits>
 
 namespace desul {
 namespace Impl {
-
-template <class T>
-inline constexpr bool host_atomic_always_lock_free<T, void> =
-#ifndef DESUL_HAVE_LIBATOMIC
-    ((sizeof(T) == 1 && alignof(T) == 1) || (sizeof(T) == 2 && alignof(T) == 2) ||
-     (sizeof(T) == 4 && alignof(T) == 4) || (sizeof(T) == 8 && alignof(T) == 8)
-#ifdef DESUL_HAVE_16BYTE_LOCK_FREE_ATOMICS_HOST
-     || (sizeof(T) == 16 && alignof(T) == 16)
-#endif
-         ) &&
-#endif
-    std::is_trivially_copyable<T>::value;
 
 // clang-format off
 // Disable warning for large atomics on clang 7 and up (checked with godbolt)
