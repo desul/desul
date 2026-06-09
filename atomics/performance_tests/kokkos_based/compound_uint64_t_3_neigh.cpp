@@ -47,7 +47,7 @@
 #ifndef KOKKOS_ENABLE_OPENMPTARGET
 #define MEMORY_SPACE DefaultExecutionSpace::memory_space
 #define EXECUTION_SPACE DefaultExecutionSpace
-#define SCALAR compound_type<uint64_t,3>
+#define SCALAR compound_type<uint64_t, 3>
 #define SCALAR_NAME compound_type_uint64_t_3
 #define MEMORY_OP atomic_add_op
 #include "PerfTestAtomicsNeigh_Scope.inc"

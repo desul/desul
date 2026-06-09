@@ -45,7 +45,7 @@
 #include "PerfTestAtomics.hpp"
 #define MEMORY_SPACE DefaultExecutionSpace::memory_space
 #define EXECUTION_SPACE DefaultExecutionSpace
-#define SCALAR compound_type<uint32_t,2>
+#define SCALAR compound_type<uint32_t, 2>
 #define SCALAR_NAME compound_type_uint32_t_2
 #define MEMORY_OP atomic_add_op
 #include "PerfTestAtomicsNeigh_Scope.inc"
@@ -83,4 +83,3 @@
 #define MEMORY_OP atomic_fetch_max_op
 #include "PerfTestAtomicsNeigh_Scope.inc"
 #undef MEMORY_OP
-
