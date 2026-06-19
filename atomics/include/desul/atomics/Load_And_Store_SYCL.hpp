@@ -16,17 +16,18 @@ namespace desul {
 namespace Impl {
 
 template <class T, class MemoryOrder, class MemoryScope>
-void 
-device_atomic_store(
-    T* ptr, T val, MemoryOrder, MemoryScope scope) {
-      	if constexpr(sizeof(T) ==4 ) {
-  static_assert(sizeof(unsigned int) == 4,
-                "this function assumes an unsigned int is 32-bit");
-	    	sycl_atomic_ref<unsigned int, MemoryOrder, MemoryScope> ref(reinterpret_cast<unsigned int&>(*ptr));
-    ref.store(reinterpret_cast<unsigned int&>(val)); } else if constexpr(sizeof(T)==8) {
-	      static_assert(sizeof(unsigned long long int) == 8,
-                "this function assumes an unsigned long long is 64-bit");
-  sycl_atomic_ref<unsigned long long, MemoryOrder, MemoryScope> ref(reinterpret_cast<unsigned long long&>(*ptr));
+void device_atomic_store(T* ptr, T val, MemoryOrder, MemoryScope scope) {
+  if constexpr (sizeof(T) == 4) {
+    static_assert(sizeof(unsigned int) == 4,
+                  "this function assumes an unsigned int is 32-bit");
+    sycl_atomic_ref<unsigned int, MemoryOrder, MemoryScope> ref(
+        reinterpret_cast<unsigned int&>(*ptr));
+    ref.store(reinterpret_cast<unsigned int&>(val));
+  } else if constexpr (sizeof(T) == 8) {
+    static_assert(sizeof(unsigned long long int) == 8,
+                  "this function assumes an unsigned long long is 64-bit");
+    sycl_atomic_ref<unsigned long long, MemoryOrder, MemoryScope> ref(
+        reinterpret_cast<unsigned long long&>(*ptr));
     ref.store(reinterpret_cast<unsigned long long&>(val));
   } else {
     // This is a way to avoid deadlock in a subgroup
@@ -57,20 +58,21 @@ device_atomic_store(
 }
 
 template <class T, class MemoryOrder, class MemoryScope>
-T device_atomic_load(const T* ptr,
-                                                                          MemoryOrder,
-                                                                          MemoryScope scope) {
-        if constexpr(sizeof(T) ==4 ) {
-  static_assert(sizeof(unsigned int) == 4,
-                "this function assumes an unsigned int is 32-bit");
-                sycl_atomic_ref<unsigned int, MemoryOrder, MemoryScope> ref(reinterpret_cast<unsigned int&>(const_cast<T&>(*ptr)));
- T sycl_return = ref.load();
-	     	return reinterpret_cast<T&>(sycl_return); } else if constexpr(sizeof(T)==8) {
-              static_assert(sizeof(unsigned long long int) == 8,
-                "this function assumes an unsigned long long is 64-bit");
-  sycl_atomic_ref<unsigned long long, MemoryOrder, MemoryScope> ref(reinterpret_cast<unsigned long long&>(const_cast<T&>(*ptr)));
- T sycl_return = ref.load();
-  return reinterpret_cast<T&>(sycl_return); 
+T device_atomic_load(const T* ptr, MemoryOrder, MemoryScope scope) {
+  if constexpr (sizeof(T) == 4) {
+    static_assert(sizeof(unsigned int) == 4,
+                  "this function assumes an unsigned int is 32-bit");
+    sycl_atomic_ref<unsigned int, MemoryOrder, MemoryScope> ref(
+        reinterpret_cast<unsigned int&>(const_cast<T&>(*ptr)));
+    auto sycl_return = ref.load();
+    return reinterpret_cast<T&>(sycl_return);
+  } else if constexpr (sizeof(T) == 8) {
+    static_assert(sizeof(unsigned long long int) == 8,
+                  "this function assumes an unsigned long long is 64-bit");
+    sycl_atomic_ref<unsigned long long, MemoryOrder, MemoryScope> ref(
+        reinterpret_cast<unsigned long long&>(const_cast<T&>(*ptr)));
+    auto sycl_return = ref.load();
+    return reinterpret_cast<T&>(sycl_return);
   } else {
     // This is a way to avoid deadlock in a subgroup
     T ret;
@@ -105,4 +107,3 @@ T device_atomic_load(const T* ptr,
 }  // namespace desul
 
 #endif
-

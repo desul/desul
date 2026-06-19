@@ -9,9 +9,9 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #ifndef DESUL_ATOMICS_LOAD_AND_STORE_CUDA_HPP_
 #define DESUL_ATOMICS_LOAD_AND_STORE_CUDA_HPP_
 
-#include <desul/atomics/Macros.hpp>
-#include <desul/atomics/Lock_Free_Types_CUDA.hpp>
 #include <desul/atomics/Compare_Exchange_CUDA.hpp>
+#include <desul/atomics/Lock_Free_Types_CUDA.hpp>
+#include <desul/atomics/Macros.hpp>
 
 // Including CUDA ptx based exchange atomics
 // When building with clang we need to include the device functions always
@@ -25,7 +25,7 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 #include <desul/atomics/cuda/CUDA_asm_loadstore.hpp>
 
-// use lock-tables for the sizes that do not have an intrisinc.
+// use lock-tables for the sizes that do not have an intrinsic.
 namespace desul {
 namespace Impl {
 template <class T,
@@ -51,7 +51,7 @@ __device__ T device_atomic_load(T const* ptr,
         done = 1;
       }
     }
-    done_active = __ballot_sync(mask,done);
+    done_active = __ballot_sync(mask, done);
   }
   return ret;
 }
@@ -79,7 +79,7 @@ __device__ void device_atomic_store(T* ptr,
         done = 1;
       }
     }
-    done_active = __ballot_sync(mask,done);
+    done_active = __ballot_sync(mask, done);
   }
 }
 
@@ -87,8 +87,8 @@ __device__ void device_atomic_store(T* ptr,
 }  // namespace desul
 
 #else
-// pre-Volta there was no load and store instructions, so we have to use CAS for legacy support.
-// This is violating C++ semantics, as we potentially do a RMW op on a const.
+// pre-Volta there was no load and store instructions, so we have to use CAS for legacy
+// support. This is violating C++ semantics, as we potentially do a RMW op on a const.
 #include <desul/atomics/Compare_Exchange_CUDA.hpp>
 namespace desul {
 namespace Impl {
@@ -96,6 +96,6 @@ namespace Impl {
 DESUL_IMPL_ATOMIC_LOAD_AND_STORE_WITH_CAS(DESUL_IMPL_DEVICE_FUNCTION, device)
 
 }
-}
+}  // namespace desul
 #endif
 #endif
