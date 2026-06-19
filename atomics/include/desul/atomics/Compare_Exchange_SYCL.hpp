@@ -11,8 +11,8 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 #include <desul/atomics/Adapt_SYCL.hpp>
 #include <desul/atomics/Common.hpp>
-#include <desul/atomics/Lock_Free_Types_SYCL.hpp>
 #include <desul/atomics/Lock_Array_SYCL.hpp>
+#include <desul/atomics/Lock_Free_Types_SYCL.hpp>
 #include <desul/atomics/Thread_Fence_SYCL.hpp>
 
 // FIXME_SYCL SYCL2020 dictates that <sycl/sycl.hpp> is the header to include

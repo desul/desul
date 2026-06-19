@@ -26,6 +26,6 @@ inline constexpr bool host_atomic_always_lock_free<T, void> =
 #endif
     std::is_trivially_copyable<T>::value;
 
-}
-}
+}  // namespace Impl
+}  // namespace desul
 #endif

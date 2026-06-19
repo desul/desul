@@ -10,8 +10,8 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #define DESUL_ATOMICS_COMPARE_EXCHANGE_CUDA_HPP_
 
 #include <desul/atomics/Common.hpp>
-#include <desul/atomics/Lock_Free_Types_CUDA.hpp>
 #include <desul/atomics/Lock_Array_CUDA.hpp>
+#include <desul/atomics/Lock_Free_Types_CUDA.hpp>
 #include <desul/atomics/Thread_Fence_CUDA.hpp>
 #include <type_traits>
 
