@@ -9,9 +9,9 @@ SPDX-License-Identifier: (BSD-3-Clause)
 #ifndef DESUL_ATOMICS_LOAD_AND_STORE_OPENACC_HPP_
 #define DESUL_ATOMICS_LOAD_AND_STORE_OPENACC_HPP_
 
-#include <desul/atomics/Macros.hpp>
-#include <desul/atomics/Lock_Free_Types_OpenACC.hpp>
 #include <desul/atomics/Compare_Exchange_OpenACC.hpp>
+#include <desul/atomics/Lock_Free_Types_OpenACC.hpp>
+#include <desul/atomics/Macros.hpp>
 
 namespace desul {
 namespace Impl {

@@ -22,5 +22,5 @@ inline constexpr bool host_atomic_always_lock_free<T, void> = (sizeof(T) == 1) |
                                                               (sizeof(T) == 16);
 
 }
-}
+}  // namespace desul
 #endif

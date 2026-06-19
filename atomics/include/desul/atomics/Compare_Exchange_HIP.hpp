@@ -11,8 +11,8 @@ SPDX-License-Identifier: (BSD-3-Clause)
 
 #include <desul/atomics/Adapt_HIP.hpp>
 #include <desul/atomics/Common.hpp>
-#include <desul/atomics/Lock_Free_Types_HIP.hpp>
 #include <desul/atomics/Lock_Array_HIP.hpp>
+#include <desul/atomics/Lock_Free_Types_HIP.hpp>
 #include <desul/atomics/Thread_Fence_HIP.hpp>
 #include <type_traits>
 
