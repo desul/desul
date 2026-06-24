@@ -17,7 +17,7 @@ namespace desul {
 namespace Impl {
 
 // MSVC does only provide _InterlockedCompareExchange but no load and store intrinsics.
-// If we can require c++20 we can switch to std::atomic
+// If we can require c++20 we can switch to std::atomic_ref
 
 DESUL_IMPL_ATOMIC_LOAD_AND_STORE_WITH_CAS(DESUL_IMPL_HOST_FUNCTION, host)
 
