@@ -40,8 +40,12 @@ if (CMAKE_CXX_STANDARD LESS 17)
 endif()
 
 add_subdirectory(atomics)
+add_subdirectory(src)
 
 install(FILES
   "${CMAKE_CURRENT_SOURCE_DIR}/cmake/desulConfig.cmake"
   DESTINATION lib/cmake/desul)
 
+if(DESUL_ENABLE_TESTS)
+  add_subdirectory(test)
+endif()
