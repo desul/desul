@@ -14,4 +14,3 @@ set(desul_atomics_ENABLE_SYCL                       @DESUL_ATOMICS_ENABLE_SYCL@)
 set(desul_atomics_ENABLE_SYCL_SEPARABLE_COMPILATION @DESUL_ATOMICS_ENABLE_SYCL_SEPARABLE_COMPILATION@)
 set(desul_atomics_ENABLE_OPENACC                    @DESUL_ATOMICS_ENABLE_OPENACC@)
 set(desul_atomics_ENABLE_OPENMP                     @DESUL_ATOMICS_ENABLE_OPENMP@)
-
