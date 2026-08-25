@@ -83,4 +83,3 @@
 #define MEMORY_OP atomic_fetch_max_op
 #include "PerfTestAtomicsLoc_Scope.inc"
 #undef MEMORY_OP
-
