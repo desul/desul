@@ -33,20 +33,36 @@ jobs:
         run: |
           git submodule init
           git submodule update
+      - name: Install DESUL
+        run: |
+          mkdir -p desul_install_build
+          cd desul_install_build
+          cmake \
+            -DCMAKE_CXX_COMPILER=${{ matrix.cxx }} \
+            -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }} \
+            -DENABLE_OPENMP=ON \
+            -DENABLE_TESTS=OFF \
+            -DCMAKE_INSTALL_PREFIX=/tmp/desul-install \
+            ..
+          make install
       - name: Checkout Kokkos
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: kokkos/kokkos
-          # FIXME Use 4.0.00 or later when released
-          ref: b5bd709fd615a0a5bc78492f171307bdafa2f53a
+          # Earliest Kokkos 4 pre-release with external DESUL plus config fixes through kokkos/kokkos#5764.
+          ref: 8f4f31d61159ab3130efd826573d9ff3ded33755
           path: kokkos_src
       - name: Install Kokkos
         run: |
           cd kokkos_src
           mkdir -p build
           cd build
+          # Kokkos_Core.hpp includes <desul/atomics.hpp>; using this DESUL as
+          # external avoids include-order selecting Kokkos' vendored copy.
           cmake \
             -DKokkos_ENABLE_OPENMP=ON \
+            -DKokkos_ENABLE_DESUL_ATOMICS_EXTERNAL=ON \
+            -Ddesul_ROOT=/tmp/desul-install \
             -DCMAKE_CXX_COMPILER=${{ matrix.cxx }} \
             -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }} \
             -DCMAKE_INSTALL_PREFIX=/tmp/kokkos-install \
@@ -56,11 +72,13 @@ jobs:
         run: |
           mkdir -p build
           cd build
+          # Enable DESUL tests and use the installed Kokkos to drive them.
           cmake \
             -DCMAKE_CXX_COMPILER=${{ matrix.cxx }} \
             -DCMAKE_CXX_COMPILER_FLAGS="-Wall -Wextra -Werror" \
             -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }} \
-            -DCMAKE_PREFIX_PATH=/tmp/kokkos-install \
+            -DCMAKE_PREFIX_PATH="/tmp/kokkos-install;/tmp/desul-install" \
+            -DENABLE_OPENMP=ON \
             -DENABLE_TESTS=ON \
             ..
           make
