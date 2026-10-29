@@ -8,6 +8,7 @@ jobs:
         distro: ['fedora:latest', 'fedora:rawhide', 'ubuntu:latest']
         cxx: ['g++', 'clang++']
         cmake_build_type: ['Release', 'Debug']
+        disable_device_lock_arrays: ['OFF', 'ON']
         include:
           - distro: 'fedora:intel'
             cxx: 'icpc'
@@ -62,6 +63,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }} \
             -DCMAKE_PREFIX_PATH=/tmp/kokkos-install \
             -DENABLE_TESTS=ON \
+            -DDESUL_ATOMICS_DISABLE_DEVICE_LOCK_ARRAYS=${{ matrix.disable_device_lock_arrays || 'OFF' }} \
             ..
           make
       - name: Test DESUL

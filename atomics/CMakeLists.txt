@@ -4,6 +4,11 @@
 cmake_minimum_required(VERSION 3.10)
 find_package(OpenMP)
 
+option(
+  DESUL_ATOMICS_DISABLE_DEVICE_LOCK_ARRAYS
+  "Do not allocate the device lock arrays used for device atomic operations on types that are not lock-free (if ON, such operations fail to compile)"
+  OFF)
+
 if(DESUL_ENABLE_CUDA)
   set(DESUL_ATOMICS_ENABLE_CUDA ON)
   set(DESUL_CUDA_ATOMICS_SOURCES src/Lock_Array_CUDA.cpp)
@@ -29,6 +34,10 @@ if(DESUL_ENABLE_SYCL)
   set(DESUL_ATOMICS_ENABLE_SYCL ON)
   set(DESUL_SYCL_ATOMICS_SOURCES src/Lock_Array_SYCL.cpp)
   set(SOURCES_ARG ${DESUL_SYCL_ATOMICS_SOURCES})
+endif()
+# The device lock arrays are not allocated, so their sources are not needed
+if(DESUL_ATOMICS_DISABLE_DEVICE_LOCK_ARRAYS)
+  unset(SOURCES_ARG)
 endif()
 cmake_dependent_option(
   SYCL_SEPARABLE_COMPILATION "Enable separate compilation of device code" OFF
