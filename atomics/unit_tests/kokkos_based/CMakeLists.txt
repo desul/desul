@@ -17,17 +17,24 @@ if(DESUL_ENABLE_TESTS)
     gtest
     Kokkos::kokkos
     ${DESUL_BACKENDS})
-  foreach(
-    T
-    complexdouble
-    complexfloat
-    double
-    float
-    int
-    longint
-    longlongint
-    unsignedint
-    unsignedlongint)
+  set(DESUL_UNIT_TESTS
+      complexfloat
+      double
+      float
+      int
+      longint
+      longlongint
+      unsignedint
+      unsignedlongint)
+  # Device atomic operations on types that are not lock-free (complex<double>)
+  # require the device lock arrays.
+  if(DESUL_ENABLE_DEVICE_LOCK_ARRAYS
+     OR NOT (DESUL_ENABLE_CUDA
+             OR DESUL_ENABLE_HIP
+             OR DESUL_ENABLE_SYCL))
+    list(APPEND DESUL_UNIT_TESTS complexdouble)
+  endif()
+  foreach(T ${DESUL_UNIT_TESTS})
     blt_add_executable(
       NAME
       ${T}_unit_test
