@@ -11,16 +11,22 @@ if(DESUL_ENABLE_TESTS)
     Kokkos::kokkos
     ${DESUL_BACKENDS})
 
-  foreach(
-    T
-    compound_int32_t_2
-    compound_uint64_t_3
-    double
-    float
-    int32_t
-    int64_t
-    uint32_t
-    uint64_t)
+  set(DESUL_PERF_TESTS
+      double
+      float
+      int32_t
+      int64_t
+      uint32_t
+      uint64_t)
+  # Device atomic operations on types that are not lock-free (compound types)
+  # require the device lock arrays.
+  if(DESUL_ENABLE_DEVICE_LOCK_ARRAYS
+     OR NOT (DESUL_ENABLE_CUDA
+             OR DESUL_ENABLE_HIP
+             OR DESUL_ENABLE_SYCL))
+    list(APPEND DESUL_PERF_TESTS compound_int32_t_2 compound_uint64_t_3)
+  endif()
+  foreach(T ${DESUL_PERF_TESTS})
     blt_add_executable(
       NAME
       ${T}_perf_test
