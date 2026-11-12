@@ -33,7 +33,9 @@ void init_lock_arrays_sycl<int>(sycl::queue q) {
   SYCL_SPACE_ATOMIC_LOCKS_NODE_h =
       sycl::malloc_host<int32_t>(SYCL_SPACE_ATOMIC_MASK + 1, q);
 
+#ifdef DESUL_ATOMICS_ENABLE_SYCL_SEPARABLE_COMPILATION
   copy_sycl_lock_arrays_to_device(q);
+#endif
 
   q.memset(SYCL_SPACE_ATOMIC_LOCKS_DEVICE_h,
            0,
