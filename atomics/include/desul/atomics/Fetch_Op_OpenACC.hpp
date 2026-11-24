@@ -20,7 +20,8 @@ namespace Impl {
 template <class T>
 inline constexpr bool is_openacc_integral_type_v =
     std::is_same_v<T, int> || std::is_same_v<T, unsigned int> ||
-    std::is_same_v<T, unsigned long long>;
+    std::is_same_v<T, long> || std::is_same_v<T, unsigned long> ||
+    std::is_same_v<T, long long> || std::is_same_v<T, unsigned long long>;
 
 template <class T>
 inline constexpr bool is_openacc_arithmetic_type_v = std::is_same_v<T, float> ||
@@ -29,6 +30,26 @@ inline constexpr bool is_openacc_arithmetic_type_v = std::is_same_v<T, float> ||
 #endif
                                                      is_openacc_integral_type_v<T>;
 
+// FIXME_NVHPC the 64-bit integer types are left out of the atomic shifts: nvc++
+// rejects them ("Unsupported type used with atomic shift")
+template <class T>
+inline constexpr bool is_openacc_shift_type_v =
+    std::is_same_v<T, int> || std::is_same_v<T, unsigned int>;
+
+// atomicMin and atomicMax are overloaded for int, unsigned int, unsigned long long,
+// float and double. unsigned long uses the overload for unsigned long long. There is
+// no overload for the signed 64-bit integer types.
+static_assert(sizeof(unsigned long) == sizeof(unsigned long long));
+
+template <class T>
+inline constexpr bool is_openacc_min_max_type_v =
+    is_openacc_arithmetic_type_v<T> && !std::is_same_v<T, long> &&
+    !std::is_same_v<T, long long>;
+
+template <class T>
+using openacc_min_max_t =
+    std::conditional_t<std::is_same_v<T, unsigned long>, unsigned long long, T>;
+
 #else
 
 template <class T>
@@ -36,6 +57,9 @@ inline constexpr bool is_openacc_integral_type_v = std::is_integral_v<T>;
 
 template <class T>
 inline constexpr bool is_openacc_arithmetic_type_v = std::is_arithmetic_v<T>;
+
+template <class T>
+inline constexpr bool is_openacc_shift_type_v = is_openacc_integral_type_v<T>;
 
 #endif
 
@@ -121,7 +145,7 @@ std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_fetch_div(
 
 #pragma acc routine seq
 template <class T>
-std::enable_if_t<is_openacc_integral_type_v<T>, T> device_atomic_fetch_lshift(
+std::enable_if_t<is_openacc_shift_type_v<T>, T> device_atomic_fetch_lshift(
     T* ptr, const unsigned int val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T old;
 #pragma acc atomic capture
@@ -134,7 +158,7 @@ std::enable_if_t<is_openacc_integral_type_v<T>, T> device_atomic_fetch_lshift(
 
 #pragma acc routine seq
 template <class T>
-std::enable_if_t<is_openacc_integral_type_v<T>, T> device_atomic_fetch_rshift(
+std::enable_if_t<is_openacc_shift_type_v<T>, T> device_atomic_fetch_rshift(
     T* ptr, const unsigned int val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T old;
 #pragma acc atomic capture
@@ -148,10 +172,10 @@ std::enable_if_t<is_openacc_integral_type_v<T>, T> device_atomic_fetch_rshift(
 #ifdef __NVCOMPILER
 #pragma acc routine seq
 template <class T>
-std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_fetch_max(
+std::enable_if_t<is_openacc_min_max_type_v<T>, T> device_atomic_fetch_max(
     T* ptr, const T val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T old;
-  old = atomicMax(ptr, val);
+  old = atomicMax(reinterpret_cast<openacc_min_max_t<T>*>(ptr), val);
   return old;
 }
 #endif
@@ -159,10 +183,10 @@ std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_fetch_max(
 #ifdef __NVCOMPILER
 #pragma acc routine seq
 template <class T>
-std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_fetch_min(
+std::enable_if_t<is_openacc_min_max_type_v<T>, T> device_atomic_fetch_min(
     T* ptr, const T val, MemoryOrderRelaxed, MemoryScopeDevice) {
-  int old;
-  old = atomicMin(ptr, val);
+  T old;
+  old = atomicMin(reinterpret_cast<openacc_min_max_t<T>*>(ptr), val);
   return old;
 }
 #endif
@@ -289,7 +313,7 @@ std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_div_fetch(
 
 #pragma acc routine seq
 template <class T>
-std::enable_if_t<is_openacc_integral_type_v<T>, T> device_atomic_lshift_fetch(
+std::enable_if_t<is_openacc_shift_type_v<T>, T> device_atomic_lshift_fetch(
     T* ptr, const unsigned int val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T tmp;
 #pragma acc atomic capture
@@ -302,7 +326,7 @@ std::enable_if_t<is_openacc_integral_type_v<T>, T> device_atomic_lshift_fetch(
 
 #pragma acc routine seq
 template <class T>
-std::enable_if_t<is_openacc_integral_type_v<T>, T> device_atomic_rshift_fetch(
+std::enable_if_t<is_openacc_shift_type_v<T>, T> device_atomic_rshift_fetch(
     T* ptr, const unsigned int val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T tmp;
 #pragma acc atomic capture
@@ -316,10 +340,10 @@ std::enable_if_t<is_openacc_integral_type_v<T>, T> device_atomic_rshift_fetch(
 #ifdef __NVCOMPILER
 #pragma acc routine seq
 template <class T>
-std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_max_fetch(
+std::enable_if_t<is_openacc_min_max_type_v<T>, T> device_atomic_max_fetch(
     T* ptr, const T val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T tmp;
-  tmp = atomicMax(ptr, val);
+  tmp = atomicMax(reinterpret_cast<openacc_min_max_t<T>*>(ptr), val);
   tmp = std::max(tmp, val);
   return tmp;
 }
@@ -328,10 +352,10 @@ std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_max_fetch(
 #ifdef __NVCOMPILER
 #pragma acc routine seq
 template <class T>
-std::enable_if_t<is_openacc_arithmetic_type_v<T>, T> device_atomic_min_fetch(
+std::enable_if_t<is_openacc_min_max_type_v<T>, T> device_atomic_min_fetch(
     T* ptr, const T val, MemoryOrderRelaxed, MemoryScopeDevice) {
   T tmp;
-  tmp = atomicMin(ptr, val);
+  tmp = atomicMin(reinterpret_cast<openacc_min_max_t<T>*>(ptr), val);
   tmp = std::min(tmp, val);
   return tmp;
 }
