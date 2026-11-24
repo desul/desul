@@ -27,7 +27,8 @@ if(DESUL_ENABLE_TESTS)
     longint
     longlongint
     unsignedint
-    unsignedlongint)
+    unsignedlongint
+    unsignedlonglongint)
     blt_add_executable(
       NAME
       ${T}_unit_test

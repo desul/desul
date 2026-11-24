@@ -16,6 +16,22 @@ namespace Impl {
 #define DESUL_IMPL_ATOMIC_CUDA_PTX_PREDICATE
 #endif
 #endif
+
+// The arithmetic operations are implemented for the fixed-width integer types.
+// The other integer types (e.g. long long where int64_t is long) are forwarded to
+// the fixed-width integer type of same size and signedness.
+template <class T>
+using cuda_asm_fixed_width_integer_t =
+    std::conditional_t<std::is_signed_v<T>,
+                       std::conditional_t<sizeof(T) == 4, int32_t, int64_t>,
+                       std::conditional_t<sizeof(T) == 4, uint32_t, uint64_t>>;
+
+template <class T>
+inline constexpr bool cuda_asm_is_forwarded_integer_v =
+    !std::is_same_v<T, cuda_asm_fixed_width_integer_t<T>> &&
+    (std::is_same_v<T, long> || std::is_same_v<T, unsigned long> ||
+     std::is_same_v<T, long long> || std::is_same_v<T, unsigned long long>);
+
 #include <desul/atomics/cuda/cuda_cc7_asm.inc>
 
 }  // namespace Impl
