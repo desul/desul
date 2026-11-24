@@ -161,13 +161,6 @@ inline static
     void
     copy_sycl_lock_arrays_to_device(sycl::queue q) {
   static bool once = [&q]() {
-  // Wait for the copies to complete. If no device image using the device_global
-  // has been built yet, the SYCL runtime may implement the copy as a host task.
-  // Without waiting, kernels submitted afterwards to the (in-order) queue would be
-  // enqueued (and their device images built) from the runtime's host-task worker
-  // thread, concurrently with the submitting thread. That has been observed to
-  // race inside the SYCL runtime, e.g. on the shared device image decompression
-  // context ("Data corruption detected") and "Enqueue process failed" errors.
 #ifdef SYCL_EXT_ONEAPI_DEVICE_GLOBAL
     q.memcpy(SYCL_SPACE_ATOMIC_LOCKS_DEVICE,
              &SYCL_SPACE_ATOMIC_LOCKS_DEVICE_h,
