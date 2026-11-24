@@ -30,12 +30,11 @@ inline constexpr bool is_openacc_arithmetic_type_v = std::is_same_v<T, float> ||
 #endif
                                                      is_openacc_integral_type_v<T>;
 
-// FIXME_NVHPC long, unsigned long and long long are left out of the atomic shifts:
-// nvc++ rejects them for 64-bit integers ("Unsupported type used with atomic shift")
+// FIXME_NVHPC the 64-bit integer types are left out of the atomic shifts: nvc++
+// rejects them ("Unsupported type used with atomic shift")
 template <class T>
 inline constexpr bool is_openacc_shift_type_v =
-    std::is_same_v<T, int> || std::is_same_v<T, unsigned int> ||
-    std::is_same_v<T, unsigned long long>;
+    std::is_same_v<T, int> || std::is_same_v<T, unsigned int>;
 
 // atomicMin and atomicMax are overloaded for int, unsigned int, unsigned long long,
 // float and double. unsigned long uses the overload for unsigned long long. There is
